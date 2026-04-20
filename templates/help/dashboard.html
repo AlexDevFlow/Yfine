@@ -1,0 +1,72 @@
+<h5>Dashboard</h5>
+<p class="yn-help-lead">A snapshot of your finances: net worth, income and expenses for the current month, recent activity, and recurring items that are due soon.</p>
+
+<h6>What you see</h6>
+<ul>
+  <li><strong>Net worth</strong> card at the top, grouped by currency if you use more than one. The eye icon (<i class="bi bi-eye"></i>) hides the numbers for privacy.</li>
+  <li><strong>Income</strong> and <strong>Expenses</strong> cards for the current month. They are clickable and open a detailed modal.</li>
+  <li><strong>Savings</strong> card for what you set aside this month.</li>
+  <li><strong>Recent movements</strong>: the last entries you recorded. Click one to edit it.</li>
+  <li><strong>Upcoming recurring</strong>: items due in the next days, with a badge showing how many days are left.</li>
+  <li><strong>Net worth chart</strong> (12 months) with range buttons for 30 days, 90 days, 1 year, or all data.</li>
+  <li><strong>Income vs expense</strong> monthly bar chart.</li>
+</ul>
+
+<h6>Main actions</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-plus-lg"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">New Movement</span>
+      <span class="yn-help-action-desc">Record an income or expense against a source.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon info"><i class="bi bi-arrow-left-right"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">New Transfer</span>
+      <span class="yn-help-action-desc">Move an amount from one source to another. The two sides are linked.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon success"><i class="bi bi-wallet2"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">New Source</span>
+      <span class="yn-help-action-desc">Create an account (bank, cash, card). Required before recording movements.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon warning"><i class="bi bi-arrow-repeat"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">New Recurring</span>
+      <span class="yn-help-action-desc">Set up a payment that repeats on a schedule.</span>
+    </div>
+  </div>
+</div>
+
+<h6>The month modal</h6>
+<p>Clicking the Income or Expenses card opens a modal listing every movement of that type for the current month. Inside the modal:</p>
+<ul>
+  <li>A row of <strong>source chips</strong> lets you include or exclude specific sources. Green means included, red means hidden.</li>
+  <li>Each movement has an <strong>exclude from stats</strong> toggle. Use it for one-off entries that should not affect your monthly totals (for example, a reimbursement you counted twice).</li>
+</ul>
+
+<h6>Reading the numbers</h6>
+<ul>
+  <li>Each source reports in its own currency. The dashboard groups totals by currency, so you will see separate net worth lines if you track EUR and USD together.</li>
+  <li>Transfers do not count as income or expenses. They move money between sources without changing the total.</li>
+  <li>The small <span class="yn-help-chip">external</span> label means a movement was made without a source (for example, cash received from someone outside your tracked accounts).</li>
+</ul>
+
+<h6>Step by step: first minutes with Yfine</h6>
+<ol class="yn-help-steps">
+  <li>Click <span class="yn-help-chip primary"><i class="bi bi-wallet2"></i> New Source</span>. Give it a name, pick a currency, and enter the current balance.</li>
+  <li>Back on the dashboard, click <span class="yn-help-chip primary"><i class="bi bi-plus-lg"></i> New Movement</span>. Pick the source, choose income or expense, enter the amount.</li>
+  <li>Optional: click <span class="yn-help-chip warning"><i class="bi bi-arrow-repeat"></i> New Recurring</span> for payments that repeat (salary, rent). They will show under "Upcoming" when due.</li>
+  <li>Refresh or return to the dashboard. Net worth, the month's totals, and the charts will reflect what you entered.</li>
+</ol>
+
+<div class="yn-help-tip">
+  <i class="bi bi-info-circle-fill"></i>
+  <div>The net worth hide toggle saves your preference, so your numbers stay hidden on reload if that is how you left it.</div>
+</div>

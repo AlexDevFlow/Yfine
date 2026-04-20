@@ -1,0 +1,69 @@
+<h5>Etiquetas</h5>
+<p class="yn-help-lead">Las etiquetas son marcas de color que asignas a movimientos y ahorros. Úsalas para agrupar entradas por categoría (compra, transporte, suscripciones, regalos) y luego filtrar listas por etiqueta.</p>
+
+<h6>Qué ves</h6>
+<ul>
+  <li>Un formulario arriba para añadir una nueva etiqueta: campo <strong>nombre</strong>, selector de <strong>color</strong> y selector de <strong>emoji</strong>.</li>
+  <li>Una tabla con las etiquetas existentes. Cada fila muestra la etiqueta como se verá, un distintivo con el <strong>número de usos</strong> (movimientos + ahorros) y las acciones por fila.</li>
+  <li>Pulsando una fila se abre la página de movimientos filtrada por esa etiqueta.</li>
+</ul>
+
+<h6>Acciones por fila</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-pencil"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Editar</span>
+      <span class="yn-help-action-desc">Pasa la fila a modo edición. Puedes cambiar nombre, color o emoji.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon success"><i class="bi bi-check-lg"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Guardar</span>
+      <span class="yn-help-action-desc">Solo se ve en modo edición. Confirma los cambios a la etiqueta.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon danger"><i class="bi bi-trash"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Eliminar</span>
+      <span class="yn-help-action-desc">Borra la etiqueta. Los movimientos y ahorros asociados conservan sus otras etiquetas.</span>
+    </div>
+  </div>
+</div>
+
+<h6>Color y emoji</h6>
+<p>El selector de color ofrece una paleta de presets y un campo personalizado en formato hex. El selector de emoji está agrupado por categoría (personas, comida, actividades, objetos) con un buscador.</p>
+<p>Ejemplos:</p>
+<ul>
+  <li><span class="yn-help-chip" style="background:rgba(113,221,55,.15);border-color:rgba(113,221,55,.3);color:#4f9b1f">🛒 compra</span></li>
+  <li><span class="yn-help-chip" style="background:rgba(255,171,0,.15);border-color:rgba(255,171,0,.3);color:#a47200">🚗 transporte</span></li>
+  <li><span class="yn-help-chip" style="background:rgba(3,195,236,.12);border-color:rgba(3,195,236,.3);color:#028cb0">📺 suscripciones</span></li>
+  <li><span class="yn-help-chip" style="background:rgba(255,62,29,.12);border-color:rgba(255,62,29,.3);color:#ff3e1d">🎉 regalos</span></li>
+</ul>
+
+<h6>Paso a paso: crear una etiqueta</h6>
+<ol class="yn-help-steps">
+  <li>Escribe el <strong>nombre</strong> en el campo de la parte de arriba.</li>
+  <li>Pulsa la muestra de color y elige una, o introduce un valor hex.</li>
+  <li>Pulsa el icono de emoji y elige uno (opcional).</li>
+  <li>Pulsa <span class="yn-help-chip primary"><i class="bi bi-plus"></i> Añadir Etiqueta</span>. La etiqueta aparece en la tabla.</li>
+</ol>
+
+<h6>Paso a paso: renombrar o recolorear</h6>
+<ol class="yn-help-steps">
+  <li>Pulsa <span class="yn-help-chip"><i class="bi bi-pencil"></i> Editar</span> en la fila.</li>
+  <li>Cambia nombre, color o emoji.</li>
+  <li>Pulsa <span class="yn-help-chip success"><i class="bi bi-check-lg"></i> Guardar</span>.</li>
+</ol>
+
+<div class="yn-help-tip">
+  <i class="bi bi-info-circle-fill"></i>
+  <div>Pulsa cualquier etiqueta de la tabla (fuera del modo edición) para saltar directamente a los movimientos filtrados por esa etiqueta. Útil para revisar una categoría rápido.</div>
+</div>
+
+<div class="yn-help-tip warn">
+  <i class="bi bi-exclamation-triangle-fill"></i>
+  <div>Eliminar una etiqueta la quita de cada movimiento y ahorro que la usaba. Los movimientos en sí no se borran.</div>
+</div>

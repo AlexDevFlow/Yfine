@@ -1,0 +1,133 @@
+<h5>Рухи</h5>
+<p class="yn-help-lead">Кожен дохід, витрата та переказ, що ви записуєте. Список згруповано за роком, потім місяцем, потім днем, тож можна згортати розділи та читати підсумки на кожному рівні.</p>
+
+<h6>Що ви бачите</h6>
+<ul>
+  <li>Рухи, згруповані за <strong>роком → місяцем → днем</strong>. Кожен заголовок можна натиснути, щоб згорнути або розгорнути розділ.</li>
+  <li>На кожному рівні заголовок показує кількість та підсумки періоду: доходи, витрати та чистий результат.</li>
+  <li>Кожен рядок показує <strong>джерело</strong> (або "джерело → ціль" для переказів), <strong>мітку напрямку</strong>, <strong>суму</strong>, будь-які <strong>теги</strong> та <strong>примітку</strong>.</li>
+  <li>Кольори: зелений для доходів (<span class="yn-help-chip success"><i class="bi bi-arrow-down-circle"></i> надходження</span>), червоний для витрат (<span class="yn-help-chip danger"><i class="bi bi-arrow-up-circle"></i> витрата</span>), синій для переказів (<span class="yn-help-chip info"><i class="bi bi-arrow-left-right"></i></span>).</li>
+  <li>Пагінація з'являється знизу, коли у відфільтрованому вигляді понад 50 рухів.</li>
+</ul>
+
+<h6>Основні дії</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-plus-lg"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Новий рух</span>
+      <span class="yn-help-action-desc">Запишіть дохід або витрату. Оберіть джерело, напрямок, суму, дату, теги, примітку.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon info"><i class="bi bi-arrow-left-right"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Новий переказ</span>
+      <span class="yn-help-action-desc">Перенесіть суму з одного джерела в інше. Створюються два пов'язані записи.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon muted"><i class="bi bi-calendar"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Календар</span>
+      <span class="yn-help-action-desc">Відкриває перегляд місяця з усіма рухами на сітці календаря.</span>
+    </div>
+  </div>
+</div>
+
+<h6>Дії для рядка</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-pencil"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Редагувати</span>
+      <span class="yn-help-action-desc">Змінити будь-яке поле. Натискання на сам рядок також відкриває редагування.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon danger"><i class="bi bi-trash"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Видалити</span>
+      <span class="yn-help-action-desc">Видалити рух. Для переказів видаляються обидві частини разом.</span>
+    </div>
+  </div>
+</div>
+
+<h6>Фільтри</h6>
+<p>Панель фільтрів згори дозволяє звузити список:</p>
+<ul>
+  <li><strong>Діапазон дат</strong>: оберіть дату "від" і "до" в календарі.</li>
+  <li><strong>Сума</strong>: мінімум і максимум.</li>
+  <li><strong>Джерело</strong>: обмежити одним джерелом.</li>
+  <li><strong>Напрямок</strong>: лише доходи, лише витрати або все.</li>
+  <li><strong>Теги</strong>: множинний вибір. Показуються лише рухи принаймні з одним тегом.</li>
+</ul>
+<p>Кнопка <strong>Скинути</strong> з'являється, коли активний хоч один фільтр.</p>
+
+<h6>Перекази</h6>
+<p>Переказ, це одна дія, що створює два пов'язані рухи: <strong>витрата</strong> на джерелі відправника та <strong>надходження</strong> на джерелі отримувача. Перекази не змінюють загальний капітал, вони лише переміщують гроші між джерелами.</p>
+<div class="yn-help-mock">
+  <div class="yn-help-mock-row"><span class="yn-help-mock-label">Основний банк <i class="bi bi-arrow-right"></i> Заощадження</span><span class="yn-help-mock-value">500,00</span></div>
+  <div class="yn-help-mock-row"><span class="yn-help-mock-label">Основний банк (витрата)</span><span class="yn-help-mock-value expense">-500,00</span></div>
+  <div class="yn-help-mock-row"><span class="yn-help-mock-label">Заощадження (надходження)</span><span class="yn-help-mock-value income">+500,00</span></div>
+</div>
+<p>У списку перекази показуються з двома назвами джерел, з'єднаними стрілкою. Редагування або видалення однієї частини оновлює обидві.</p>
+
+<h6>Зовнішні рухи</h6>
+<p>Рух без джерела позначається як <span class="yn-help-chip">зовнішній</span>. Це для доходів або витрат, що відбуваються поза вашими відстежуваними рахунками, наприклад, хтось повернув вам готівку, яку ви одразу витратили, не вносячи її на рахунок.</p>
+
+<h6>Крок за кроком: записати перший рух</h6>
+<ol class="yn-help-steps">
+  <li>Натисніть <span class="yn-help-chip primary"><i class="bi bi-plus-lg"></i> Новий рух</span>.</li>
+  <li>Оберіть <strong>джерело</strong>. Залиште порожнім, щоб записати як зовнішній.</li>
+  <li>Оберіть <strong>Дохід</strong> або <strong>Витрата</strong>.</li>
+  <li>Введіть <strong>суму</strong>. Використовуйте десятковий роздільник вашої мови.</li>
+  <li>Оберіть <strong>дату</strong>. За замовчуванням, сьогодні.</li>
+  <li>Опційно: додайте <strong>примітку</strong> та оберіть один чи більше <strong>тегів</strong>.</li>
+  <li>Збережіть. Рух з'явиться в списку та оновить баланс джерела.</li>
+</ol>
+
+<h6>Крок за кроком: записати переказ</h6>
+<ol class="yn-help-steps">
+  <li>Натисніть <span class="yn-help-chip info"><i class="bi bi-arrow-left-right"></i> Новий переказ</span>.</li>
+  <li>Оберіть <strong>джерело-відправник</strong> і <strong>джерело-отримувач</strong>.</li>
+  <li>Введіть <strong>суму</strong> та <strong>дату</strong>.</li>
+  <li>Збережіть. У списку рухів з'являться два пов'язані записи.</li>
+</ol>
+
+<div class="yn-help-tip">
+  <i class="bi bi-info-circle-fill"></i>
+  <div>Останнє використане джерело запам'ятовується та обирається наступного разу, коли ви відкриваєте форму. Економить клік, коли вводите кілька рухів поспіль.</div>
+</div>
+
+<h6>Вкладення</h6>
+<p>До будь-якого руху можна прикріпити фото чеків, рахунків або PDF — корисно для гарантій, податкових вирахувань або щоб просто запам'ятати, про що була ця операція.</p>
+<ul>
+  <li>Підтримувані формати: <strong>PNG, JPEG, WebP, HEIC, PDF</strong>.</li>
+  <li>До <strong>5 файлів</strong> на рух, максимум <strong>10 МБ</strong> кожен.</li>
+  <li>Файли зберігаються локально поряд із базою даних — ніколи нікуди не завантажуються.</li>
+  <li>Вони включаються до повного експорту <code>.yfine</code>, тож ваші резервні копії самодостатні.</li>
+</ul>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-paperclip"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Додати вкладення</span>
+      <span class="yn-help-action-desc">У формі руху перетягніть файли на блок "Вкладення" або клацніть, щоб обрати. При редагуванні завантаження починається одразу; при створенні нового руху файли ставляться в чергу та надсилаються після натискання Зберегти.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon muted"><i class="bi bi-eye"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Переглянути вкладення</span>
+      <span class="yn-help-action-desc">Рядки з вкладеннями показують чіп <span class="yn-help-chip"><i class="bi bi-paperclip"></i> кількість</span>. Клацніть його, щоб відкрити галерею з попередніми переглядами зображень та швидкими посиланнями на PDF.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon danger"><i class="bi bi-x"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Видалити вкладення</span>
+      <span class="yn-help-action-desc">Натисніть <i class="bi bi-x"></i> на чіпі файлу у формі руху. При видаленні руху також видаляються всі його вкладення.</span>
+    </div>
+  </div>
+</div>

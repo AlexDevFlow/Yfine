@@ -1,0 +1,63 @@
+<h5>Notificaciones</h5>
+<p class="yn-help-lead">Yfine genera notificaciones cuando tiene algo que decirte: un recurrente vence, un saldo no llega para cubrir un pago programado, una tarea en segundo plano ha terminado. Esta página es el archivo completo. Las no leídas recientes también aparecen bajo el icono de la campana en la barra superior.</p>
+
+<h6>Qué ves</h6>
+<ul>
+  <li>Una lista de notificaciones. Cada una tiene un icono coloreado según el tipo: <span class="yn-help-chip danger"><i class="bi bi-exclamation-octagon-fill"></i> alerta</span>, <span class="yn-help-chip warning"><i class="bi bi-exclamation-triangle-fill"></i> aviso</span>, <span class="yn-help-chip info"><i class="bi bi-info-circle-fill"></i> info</span>.</li>
+  <li>Cada notificación tiene un <strong>título</strong>, un <strong>cuerpo</strong> y una <strong>marca de tiempo</strong> en formato relativo ("hace 5 minutos", "ayer").</li>
+  <li>Las no leídas tienen fondo destacado y título en negrita.</li>
+  <li>Pestañas arriba para filtrar por tipo: <strong>Todas</strong>, <strong>No leídas</strong>, <strong>Alerta</strong>, <strong>Info</strong>, <strong>Aviso</strong>.</li>
+  <li>Aparece paginación al final cuando hay más de 20 resultados en el filtro.</li>
+</ul>
+
+<h6>Acciones principales</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon success"><i class="bi bi-check-all"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Marcar todas como leídas</span>
+      <span class="yn-help-action-desc">Limpia el distintivo de no leídas marcando como leídas todas las notificaciones actuales.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon danger"><i class="bi bi-trash"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Eliminar las leídas</span>
+      <span class="yn-help-action-desc">Limpia el archivo. Solo se borran las notificaciones ya leídas.</span>
+    </div>
+  </div>
+</div>
+
+<h6>Acciones por notificación</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon success"><i class="bi bi-check-lg"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Marcar como leída</span>
+      <span class="yn-help-action-desc">Aparece en las notificaciones no leídas. Quita el destacado pero conserva la entrada en el archivo.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon danger"><i class="bi bi-trash"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Eliminar</span>
+      <span class="yn-help-action-desc">Borra una notificación.</span>
+    </div>
+  </div>
+</div>
+
+<h6>Qué dispara una notificación</h6>
+<ul>
+  <li><strong>Recurrente próximo a vencer</strong>: cuando la fecha de un recurrente entra en la ventana de aviso configurada.</li>
+  <li><strong>Fondos insuficientes</strong>: cuando un pago recurrente programado dejaría la fuente por debajo de cero y has activado el aviso de fondos insuficientes en esa entrada.</li>
+  <li><strong>Recurrente aplicado automáticamente</strong>: confirmación de que Yfine ha creado un movimiento para un recurrente en modo Automático.</li>
+  <li><strong>Resultados de tareas en segundo plano</strong>: importación completada, exportación lista, plugin analizado y similares.</li>
+</ul>
+
+<h6>El icono de la campana</h6>
+<p>La campana de la barra superior muestra un contador rojo cuando hay notificaciones no leídas. Al pulsarla se abre un desplegable con las cinco no leídas más recientes y un acceso directo a esta página. Cada entrada del desplegable tiene sus propias acciones para descartar y marcar como leída.</p>
+
+<div class="yn-help-tip">
+  <i class="bi bi-info-circle-fill"></i>
+  <div>Las notificaciones no leídas también aparecen como toasts emergentes al llegar. El toast tiene un enlace "Marcar como leída" si quieres descartarla en ese momento.</div>
+</div>

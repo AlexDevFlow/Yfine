@@ -1,0 +1,105 @@
+<h5>Ricorrenti</h5>
+<p class="yn-help-lead">Gli elementi ricorrenti sono pagamenti o entrate che si ripetono a scadenza: stipendio, affitto, abbonamenti, bollette. Li configuri una volta e Yfine tiene traccia di quando sono dovuti.</p>
+
+<h6>Cosa vedi</h6>
+<ul>
+  <li>Una griglia di schede, una per ogni elemento ricorrente. Ogni scheda ha una striscia colorata in alto: verde per le entrate, rosso per le uscite.</li>
+  <li>Ogni scheda mostra <strong>nome</strong>, <strong>importo</strong> nella sua valuta, <strong>frequenza</strong>, <strong>modalità di applicazione</strong> e <strong>fonte</strong>.</li>
+  <li>Una <strong>prossima scadenza</strong> con un badge colorato: rosso se dovuto oggi, giallo se entro tre giorni, grigio altrimenti.</li>
+  <li>Una piccola riga informativa: "in ritardo", "oggi", "domani" o "tra N giorni".</li>
+  <li>Pulsanti per scheda: Applica Ora, Modifica, Elimina.</li>
+</ul>
+
+<h6>Azioni principali</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-plus-lg"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Nuovo Ricorrente</span>
+      <span class="yn-help-action-desc">Crea un elemento ricorrente. Compila nome, importo, frequenza, data di inizio.</span>
+    </div>
+  </div>
+</div>
+
+<h6>Azioni per scheda</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon success"><i class="bi bi-check-lg"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Applica Ora</span>
+      <span class="yn-help-action-desc">Apre una finestra per confermare l'importo e creare un movimento reale per questo ciclo.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-pencil"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Modifica</span>
+      <span class="yn-help-action-desc">Cambia qualsiasi campo. Le modifiche valgono per i cicli futuri.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon danger"><i class="bi bi-trash"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Elimina</span>
+      <span class="yn-help-action-desc">Rimuove l'elemento ricorrente. I movimenti passati che ha generato restano.</span>
+    </div>
+  </div>
+</div>
+
+<h6>Come funzionano i ricorrenti</h6>
+<p>Un elemento ricorrente è un modello, non un movimento. Descrive quando e quanto. Ogni volta che è dovuto, Yfine crea un movimento in automatico oppure ti chiede di confermare, a seconda della <strong>modalità di applicazione</strong>.</p>
+
+<h6>Frequenza</h6>
+<ul>
+  <li><strong>Giornaliera</strong>: si ripete ogni giorno.</li>
+  <li><strong>Settimanale</strong>: ogni sette giorni, a partire dalla data di inizio.</li>
+  <li><strong>Mensile</strong>: lo stesso giorno di ogni mese. Se il giorno di inizio non esiste in un mese più corto (il 31 in febbraio), viene usato l'ultimo giorno del mese.</li>
+  <li><strong>Annuale</strong>: stessa data ogni anno.</li>
+</ul>
+
+<h6>Modalità di applicazione</h6>
+<ul>
+  <li><strong>Automatica</strong>: quando la scadenza passa, Yfine crea il movimento da solo.</li>
+  <li><strong>Conferma manuale</strong>: Yfine ti avvisa quando è dovuto. Controlli l'importo, lo regoli se serve, e clicchi Applica Ora per creare il movimento.</li>
+</ul>
+<p>Usa la conferma manuale per voci con importo variabile (bollette elettriche, abbonamenti a consumo). Usa l'automatica per voci fisse (affitto, abbonamenti a prezzo fisso, stipendio).</p>
+
+<h6>Avvisi</h6>
+<p>Nel form puoi impostare:</p>
+<ul>
+  <li><strong>Avvisa N giorni prima</strong>: quanti giorni di anticipo vuoi per il promemoria. Compare una notifica e finisce sotto l'icona della campanella.</li>
+  <li><strong>Avvisa se fondi insufficienti</strong>: se attivo, Yfine confronta l'importo con il saldo attuale della fonte e ti avverte se il saldo non basta.</li>
+</ul>
+
+<h6>Filtri</h6>
+<ul>
+  <li><strong>Frequenza</strong>: restringi a giornaliera, settimanale, mensile o annuale.</li>
+  <li><strong>Direzione</strong>: mostra solo entrate o solo uscite.</li>
+</ul>
+
+<h6>Passo passo: configurare un abbonamento</h6>
+<ol class="yn-help-steps">
+  <li>Clicca <span class="yn-help-chip primary"><i class="bi bi-plus-lg"></i> Nuovo Ricorrente</span>.</li>
+  <li>Inserisci il <strong>nome</strong> (per esempio "Netflix").</li>
+  <li>Inserisci l'<strong>importo</strong> e scegli la <strong>valuta</strong>.</li>
+  <li>Scegli <strong>Uscita</strong>.</li>
+  <li>Scegli <strong>Mensile</strong> come frequenza.</li>
+  <li>Imposta la <strong>data di inizio</strong> alla prossima fatturazione. Lascia <strong>data di fine</strong> vuota.</li>
+  <li>Scegli la <strong>fonte</strong> da cui esce il pagamento.</li>
+  <li>Scegli <strong>Automatica</strong> se l'importo non cambia mai.</li>
+  <li>Salva. La scheda compare in questa pagina e sul pannello sotto "In scadenza".</li>
+</ol>
+
+<h6>Passo passo: applicare manualmente un elemento in scadenza</h6>
+<ol class="yn-help-steps">
+  <li>Individua la scheda con il badge rosso o giallo.</li>
+  <li>Clicca <span class="yn-help-chip success"><i class="bi bi-check-lg"></i> Applica Ora</span>.</li>
+  <li>Conferma l'importo nella finestra. Correggilo se la bolletta è diversa questo mese.</li>
+  <li>Opzionale: aggiungi una nota.</li>
+  <li>Conferma. Viene creato un movimento, il saldo della fonte si aggiorna e la prossima scadenza avanza.</li>
+</ol>
+
+<div class="yn-help-tip">
+  <i class="bi bi-info-circle-fill"></i>
+  <div>Se salti l'applicazione di un ricorrente per più cicli, Applica Ora ti chiede se recuperare tutti i cicli persi o applicare solo l'ultimo.</div>
+</div>

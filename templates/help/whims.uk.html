@@ -1,0 +1,107 @@
+<h5>Бажання</h5>
+<p class="yn-help-lead">Бажання, це те, що ви хочете купити, але ще не купили. Подумайте про цю сторінку як про список бажаного з пріоритетами. Коли ви вирішуєте купити (або відмовитись), то прибираєте елемент зі списку.</p>
+
+<h6>Що ви бачите</h6>
+<ul>
+  <li>Дві вкладки: <strong>Очікують</strong> (бажання в списку) та <strong>Здійснені</strong> (те, що ви купили).</li>
+  <li>Кожне бажання в списку, це картка з <strong>назвою</strong>, <strong>сумою</strong>, <strong>міткою пріоритету</strong>, необов'язковою іконкою <strong>посилання</strong>, якщо ви додали URL, та <strong>приміткою</strong>.</li>
+  <li>Знизу згортається розділ <strong>відкинуті</strong>, що містить бажання, від яких ви відмовились, з закресленими назвами.</li>
+  <li>Вкладка "Здійснені", це таблиця: іконка, назва, дата покупки, сума.</li>
+</ul>
+
+<h6>Пріоритети</h6>
+<p>Пріоритети допомагають вирішити, що варто купити раніше:</p>
+<ul>
+  <li><span class="yn-help-chip danger">Високий</span>: те, що ви дійсно хочете, або що помітно покращить щось, чим ви користуєтесь щодня.</li>
+  <li><span class="yn-help-chip warning">Середній</span>: приємно мати, але не терміново. За замовчуванням.</li>
+  <li><span class="yn-help-chip info">Низький</span>: було б цікаво, але не впевнені. Корисно тримати їх у списку без зобов'язань.</li>
+</ul>
+
+<h6>Основні дії</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-plus-lg"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Нове бажання</span>
+      <span class="yn-help-action-desc">Додайте елемент до списку. Заповніть назву, суму, пріоритет, необов'язкові URL і примітку.</span>
+    </div>
+  </div>
+</div>
+
+<h6>Дії для бажання</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon success"><i class="bi bi-cart"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Купити</span>
+      <span class="yn-help-action-desc">Відкриває вікно покупки. Оберіть джерело оплати та підтвердьте. Створюється рух витрати, бажання переходить у "Здійснені".</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon muted"><i class="bi bi-x-lg"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Відхилити</span>
+      <span class="yn-help-action-desc">Переміщує бажання в розділ відкинутих. Рух не створюється. Елемент залишається видимим з закресленою назвою.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-pencil"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Редагувати</span>
+      <span class="yn-help-action-desc">Змінити назву, суму, пріоритет, URL або примітку.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon danger"><i class="bi bi-trash"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Видалити</span>
+      <span class="yn-help-action-desc">Видалити бажання остаточно. Використовуйте, коли хочете забути про елемент цілком.</span>
+    </div>
+  </div>
+</div>
+
+<h6>Купити vs Відхилити vs Видалити</h6>
+<p>Три способи прибрати бажання зі списку роблять різне:</p>
+<ul>
+  <li><strong>Купити</strong>: ви справді купили. Записується витрата, бажання зберігається як історія.</li>
+  <li><strong>Відхилити</strong>: ви передумали. Витрата не записується. Зберігається внизу для майбутньої довідки.</li>
+  <li><strong>Видалити</strong>: повністю видалити запис із бази. Без історії.</li>
+</ul>
+
+<h6>Фільтри та сортування</h6>
+<ul>
+  <li><strong>Пріоритет</strong>: показати лише високий, середній або низький.</li>
+  <li><strong>Сортування</strong>: сума за зростанням чи спаданням, новіші чи старіші, за назвою.</li>
+  <li><strong>Скинути</strong> очищає фільтри.</li>
+</ul>
+
+<h6>Крок за кроком: додати бажання</h6>
+<ol class="yn-help-steps">
+  <li>Натисніть <span class="yn-help-chip primary"><i class="bi bi-plus-lg"></i> Нове бажання</span>.</li>
+  <li>Введіть <strong>назву</strong> (наприклад, "Навушники з шумопоглинанням").</li>
+  <li>Введіть <strong>суму</strong> та <strong>валюту</strong>.</li>
+  <li>Оберіть <strong>пріоритет</strong>. Середній, за замовчуванням.</li>
+  <li>Опційно: оберіть <strong>джерело</strong> (з якого плануєте купити), вставте <strong>URL</strong> на сторінку товару та напишіть <strong>примітку</strong>.</li>
+  <li>Збережіть. Картка з'явиться в розділі "Очікують".</li>
+</ol>
+
+<h6>Крок за кроком: купити бажання</h6>
+<ol class="yn-help-steps">
+  <li>Знайдіть картку та натисніть <span class="yn-help-chip success"><i class="bi bi-cart"></i> Купити</span>.</li>
+  <li>Оберіть джерело, з якого ви заплатили.</li>
+  <li>Підтвердьте. Yfine створює рух витрати та переміщує бажання у вкладку "Здійснені".</li>
+</ol>
+
+<h6>Накопичити на бажання</h6>
+<p>На кожному бажанні у списку є кнопка <span class="yn-help-chip"><i class="bi bi-piggy-bank"></i> Накопичувати</span>: створює <strong>ціль накопичення</strong>, пов'язану з бажанням — та сама назва, та сама сума. Під час розподілу грошей на картці бажання показується смуга прогресу.</p>
+<ul>
+  <li>Ціль з'являється на вкладці <strong>Цілі</strong> сторінки Заощадження, де можна розподіляти гроші з будь-якого рахунку.</li>
+  <li>При натисканні <span class="yn-help-chip success"><i class="bi bi-cart"></i> Купити</span>, Yfine <strong>автоматично закриває</strong> ціль: накопичені гроші йдуть на рахунок, обраний для купівлі, після чого створюється рух витрат.</li>
+  <li>Видалення бажання залишає пов'язану ціль (можна продовжити накопичувати).</li>
+  <li>Видалення цілі відв'язує бажання, яке потім можна купити як звичайне.</li>
+</ul>
+
+<div class="yn-help-tip">
+  <i class="bi bi-info-circle-fill"></i>
+  <div>Додавання URL дозволяє повернутися на сторінку товару пізніше. На картці з'являється невелика іконка посилання.</div>
+</div>

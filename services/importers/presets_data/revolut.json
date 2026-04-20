@@ -1,0 +1,23 @@
+{
+  "id": "revolut",
+  "display_name": "Revolut",
+  "bank": "Revolut",
+  "format": "csv",
+  "currency_hint": "EUR",
+  "source_hint": "Revolut",
+  "detect": {
+    "headers": ["type", "started date", "completed date", "description", "amount", "currency", "state"]
+  },
+  "options": {
+    "encoding": "utf-8",
+    "delimiter": ",",
+    "decimal_separator": ".",
+    "date_format": "%Y-%m-%d %H:%M:%S",
+    "column_map": {
+      "date": "Completed Date",
+      "amount": "Amount",
+      "note": "Description",
+      "currency": "Currency"
+    }
+  }
+}

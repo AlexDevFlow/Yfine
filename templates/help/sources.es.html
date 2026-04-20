@@ -1,0 +1,99 @@
+<h5>Fuentes</h5>
+<p class="yn-help-lead">Las fuentes son tus cuentas: una cuenta bancaria, un monedero de efectivo, una tarjeta, una app de pago. Cada movimiento, transferencia, recurrente y cartera se conecta a una fuente.</p>
+
+<h6>Qué ves</h6>
+<ul>
+  <li>Fuentes agrupadas por moneda. Si tienes EUR y USD, cada una ocupa su propia sección.</li>
+  <li>Por cada fuente: <strong>nombre</strong>, <strong>saldo actual</strong>, <strong>saldo inicial</strong>, <strong>número de movimientos</strong> y un pequeño <strong>gráfico de saldo de 30 días</strong>.</li>
+  <li>Si la fuente tiene carteras enlazadas, la tarjeta se divide en <strong>Efectivo</strong> e <strong>Inversiones</strong>, con un total combinado arriba.</li>
+  <li>Los valores de carteras en otras monedas aparecen como distintivos (no se suman al efectivo para no mezclar monedas).</li>
+</ul>
+
+<h6>Acciones principales</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-plus-lg"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Nueva Fuente</span>
+      <span class="yn-help-action-desc">Crea una cuenta nueva. Introduce nombre, moneda y saldo inicial.</span>
+    </div>
+  </div>
+</div>
+
+<h6>Acciones por fuente</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon info"><i class="bi bi-eye"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Ver</span>
+      <span class="yn-help-action-desc">Abre la página de detalle con historial completo y gráfico de saldo.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon success"><i class="bi bi-plus"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Nuevo movimiento</span>
+      <span class="yn-help-action-desc">Registra un movimiento con esta fuente ya seleccionada.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-pencil"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Editar</span>
+      <span class="yn-help-action-desc">Cambia nombre, moneda o saldo inicial.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon warning"><i class="bi bi-arrows-collapse"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Fusionar</span>
+      <span class="yn-help-action-desc">Combina esta fuente con otra. Solo se ofrecen fuentes con la misma moneda como destino.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon danger"><i class="bi bi-trash"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Eliminar</span>
+      <span class="yn-help-action-desc">Borra la fuente. La ventana ofrece tres opciones (ver más abajo).</span>
+    </div>
+  </div>
+</div>
+
+<h6>Saldo inicial</h6>
+<p>El saldo inicial es la cantidad que hay en la cuenta cuando la añades a Yfine. Sirve de ancla para el saldo corriente. Cada movimiento que registras lo ajusta hacia arriba o hacia abajo.</p>
+<div class="yn-help-mock">
+  <div class="yn-help-mock-row"><span class="yn-help-mock-label">Saldo inicial</span><span class="yn-help-mock-value">1.500,00</span></div>
+  <div class="yn-help-mock-row"><span class="yn-help-mock-label">+ Nómina (ingreso)</span><span class="yn-help-mock-value income">+2.000,00</span></div>
+  <div class="yn-help-mock-row"><span class="yn-help-mock-label">- Alquiler (gasto)</span><span class="yn-help-mock-value expense">-800,00</span></div>
+  <div class="yn-help-mock-row"><span class="yn-help-mock-label"><strong>Saldo actual</strong></span><span class="yn-help-mock-value">2.700,00</span></div>
+</div>
+
+<h6>Eliminar una fuente</h6>
+<p>Al eliminar una fuente, la ventana te pregunta qué hacer con sus datos. Las tres opciones:</p>
+<ul>
+  <li><strong>Eliminar todo</strong>: la fuente y todos sus movimientos, transferencias y recurrentes se borran.</li>
+  <li><strong>Mover datos a otra fuente</strong>: todos los movimientos y recurrentes se reasignan a una fuente elegida. Solo se ofrecen destinos con la misma moneda.</li>
+  <li><strong>Marcar como externos</strong>: los movimientos permanecen en la base de datos pero pierden el enlace a la fuente. Aparecerán como "externo" en los listados.</li>
+</ul>
+
+<h6>Fusionar fuentes</h6>
+<p>Fusionar conserva todos los datos: cada movimiento de la fuente fusionada pasa a la fuente de destino y los dos saldos de efectivo se suman. Útil cuando dejas de usar una cuenta y quieres integrarla en otra activa.</p>
+
+<h6>Paso a paso: primera fuente</h6>
+<ol class="yn-help-steps">
+  <li>Pulsa <span class="yn-help-chip primary"><i class="bi bi-plus-lg"></i> Nueva Fuente</span>.</li>
+  <li>Introduce un <strong>nombre</strong> (por ejemplo "Banco principal" o "Efectivo").</li>
+  <li>Elige la <strong>moneda</strong> del menú desplegable. Aparecen banderas al lado de cada opción.</li>
+  <li>Introduce el <strong>saldo inicial</strong>: la cantidad actualmente en la cuenta.</li>
+  <li>Guarda. La fuente aparece en esta página y queda disponible en las demás secciones.</li>
+</ol>
+
+<div class="yn-help-tip">
+  <i class="bi bi-info-circle-fill"></i>
+  <div>Puedes cambiar la moneda más tarde, pero los movimientos ya registrados mantendrán su importe original. Cambia la moneda antes de registrar muchas entradas.</div>
+</div>
+
+<div class="yn-help-tip warn">
+  <i class="bi bi-exclamation-triangle-fill"></i>
+  <div>Eliminar una fuente con "Eliminar todo" es permanente. Exporta tus datos en Configuración antes si tienes dudas.</div>
+</div>

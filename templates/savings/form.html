@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% set active_page = "savings" %}
+
+{% block title %}{% if item %}{{ _('edit_saving') }}{% else %}{{ _('new_saving') }}{% endif %}{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="/static/vendor/flatpickr/flatpickr.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title mb-0">{% if item %}{{ _('edit_saving') }}{% else %}{{ _('new_saving') }}{% endif %}</h5>
+      </div>
+      <div class="card-body">
+        <form id="saving-form">
+          <div class="mb-3">
+            <label for="from_source_id" class="form-label">{{ _('from_source') }}</label>
+            <select class="form-select" id="from_source_id" required>
+              <option value="">{{ _('select_source') }}</option>
+              {% for s in sources %}
+              <option value="{{ s.id }}" data-currency="{{ s.currency }}"
+                {% if item and item.from_source_id == s.id %}selected{% endif %}>
+                {{ s.name }} ({{ s.currency }})
+              </option>
+              {% endfor %}
+            </select>
+            <small class="text-muted">{{ _('saving_from_source_hint') }}</small>
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="amount" class="form-label">{{ _('amount') }}</label>
+              <input type="number" step="0.01" min="0.01" inputmode="decimal" class="form-control" id="amount" value="{{ item.amount if item else '' }}" required>
+            </div>
+            <div class="col-md-6">
+              <label for="date" class="form-label">{{ _('date') }}</label>
+              <input type="text" class="form-control" id="date" value="{{ item.date if item else '' }}" required>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="description" class="form-label">{{ _('saving_description') }} ({{ _('optional') }})</label>
+            <input type="text" class="form-control" id="description" value="{{ item.description if item and item.description else '' }}" placeholder="{{ _('saving_description_placeholder') }}">
+          </div>
+          {% if all_tags %}
+          <div class="mb-3">
+            <label class="form-label">{{ _('tags') }} ({{ _('optional') }})</label>
+            <div class="d-flex flex-wrap gap-2">
+              {% for t in all_tags %}
+              <div class="form-check">
+                <input class="form-check-input tag-checkbox" type="checkbox" value="{{ t.id }}" id="tag-{{ t.id }}" {% if t.id in saving_tag_ids %}checked{% endif %}>
+                <label class="form-check-label" for="tag-{{ t.id }}">
+                  {% if t.color %}<span class="badge" style="background-color:{{ t.color }};color:#fff">{{ t.name }}</span>
+                  {% else %}<span class="badge bg-label-secondary">{{ t.name }}</span>{% endif %}
+                </label>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">{{ _('save') }}</button>
+            <a href="/savings" class="btn btn-outline-secondary">{{ _('cancel') }}</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block page_js %}
+<script src="/static/vendor/flatpickr/flatpickr.min.js"></script>
+<script>
+  flatpickr('#date', {
+    dateFormat: 'Y-m-d',
+    altInput: true,
+    altFormat: _fpAltFormat,
+    defaultDate: '{{ item.date if item else "" }}' || 'today'
+  });
+
+  document.getElementById('saving-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    var sourceSel = document.getElementById('from_source_id');
+    var tagIds = Array.from(document.querySelectorAll('.tag-checkbox:checked')).map(function(cb) { return parseInt(cb.value); });
+    var data = {
+      from_source_id: parseInt(sourceSel.value),
+      amount: parseFloat(document.getElementById('amount').value),
+      currency: sourceSel.selectedOptions[0] ? sourceSel.selectedOptions[0].dataset.currency : null,
+      date: document.getElementById('date').value,
+      description: document.getElementById('description').value || null,
+      tag_ids: tagIds,
+    };
+
+    {% if item %}
+    var resp = await fetch('/api/savings/{{ item.id }}', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    {% else %}
+    var resp = await fetch('/api/savings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    {% endif %}
+
+    if (resp.ok) {
+      setTimeout(function() { window.location.assign('/savings'); }, 100);
+    } else {
+      await handleApiError(resp);
+    }
+  });
+</script>
+{% endblock %}

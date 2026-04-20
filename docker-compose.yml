@@ -1,0 +1,11 @@
+services:
+  yfine:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - yfine-data:/data
+    restart: unless-stopped
+
+volumes:
+  yfine-data:

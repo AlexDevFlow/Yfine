@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% set active_page = "portfolios" %}
+
+{% block title %}{% if portfolio %}{{ _('edit_portfolio') }}{% else %}{{ _('new_portfolio') }}{% endif %}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title mb-0">{% if portfolio %}{{ _('edit_portfolio') }}{% else %}{{ _('new_portfolio') }}{% endif %}</h5>
+      </div>
+      <div class="card-body">
+        {% if not sources %}
+        <div class="alert alert-warning">
+          {{ _('portfolio_needs_source') }}
+          <a href="/sources/new" class="alert-link">{{ _('create_source_first') }}</a>
+        </div>
+        {% endif %}
+        <form id="portfolio-form" {% if not sources %}style="display:none"{% endif %}>
+          <div class="mb-3">
+            <label for="name" class="form-label">{{ _('name') }}</label>
+            <input type="text" class="form-control" id="name" name="name" value="{{ portfolio.name if portfolio else '' }}" required>
+          </div>
+          <div class="mb-3">
+            <label for="kind" class="form-label">{{ _('portfolio_kind') }}</label>
+            <select class="form-select" id="kind" name="kind">
+              <option value="mixed" {% if portfolio and portfolio.kind == 'mixed' %}selected{% endif %}>{{ _('portfolio_kind_mixed') }}</option>
+              <option value="crypto" {% if portfolio and portfolio.kind == 'crypto' %}selected{% endif %}>{{ _('portfolio_kind_crypto') }}</option>
+              <option value="stocks" {% if portfolio and portfolio.kind == 'stocks' %}selected{% endif %}>{{ _('portfolio_kind_stocks') }}</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="base_currency" class="form-label">{{ _('base_currency') }}</label>
+            <select class="form-select" id="base_currency" name="base_currency" required>
+              {% set currencies = ['EUR', 'USD', 'GBP', 'CHF', 'JPY', 'CAD', 'AUD', 'CNY', 'BTC', 'ETH'] %}
+              {% for c in currencies %}
+              <option value="{{ c }}" {% if portfolio and portfolio.base_currency == c %}selected{% elif not portfolio and c == 'EUR' %}selected{% endif %}>{{ flag(c) }} {{ c }}</option>
+              {% endfor %}
+            </select>
+            <small class="form-text text-muted">{{ _('portfolio_base_currency_hint') }}</small>
+          </div>
+          <div class="mb-3">
+            <label for="source_id" class="form-label">{{ _('linked_source') }}</label>
+            <select class="form-select" id="source_id" name="source_id" required>
+              {% for s in sources %}
+              <option value="{{ s.id }}"
+                {% if portfolio and portfolio.source_id == s.id %}selected
+                {% elif not portfolio and preselect_source_id and preselect_source_id == s.id %}selected
+                {% endif %}>{{ s.name }} ({{ s.currency }})</option>
+              {% endfor %}
+            </select>
+            <small class="form-text text-muted">{{ _('linked_source_hint') }}</small>
+          </div>
+          <div class="mb-3">
+            <label for="note" class="form-label">{{ _('note') }}</label>
+            <textarea class="form-control" id="note" name="note" rows="2">{{ portfolio.note if portfolio and portfolio.note else '' }}</textarea>
+          </div>
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">{{ _('save') }}</button>
+            <a href="/portfolios" class="btn btn-outline-secondary">{{ _('cancel') }}</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block page_js %}
+<script>
+  document.getElementById('portfolio-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const sourceVal = document.getElementById('source_id').value;
+    const data = {
+      name: document.getElementById('name').value,
+      kind: document.getElementById('kind').value,
+      base_currency: document.getElementById('base_currency').value,
+      source_id: parseInt(sourceVal, 10),
+      note: document.getElementById('note').value || null,
+    };
+    {% if portfolio %}
+    const resp = await fetch('/api/portfolios/{{ portfolio.id }}', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    {% else %}
+    const resp = await fetch('/api/portfolios', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    {% endif %}
+    if (resp.ok) {
+      {% if portfolio %}
+      setTimeout(() => window.location.assign('/portfolios/{{ portfolio.id }}'), 100);
+      {% else %}
+      var created = await resp.json();
+      setTimeout(() => window.location.assign('/portfolios/' + created.id), 100);
+      {% endif %}
+    } else {
+      await handleApiError(resp);
+    }
+  });
+</script>
+{% endblock %}

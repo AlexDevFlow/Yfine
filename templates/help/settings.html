@@ -1,0 +1,115 @@
+<h5>Settings</h5>
+<p class="yn-help-lead">All of Yfine's preferences live here, split into tabs. The left sidebar is the tab navigator on desktop, and a scrollable row on mobile.</p>
+
+<h6>Tabs overview</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-palette"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Theme</span>
+      <span class="yn-help-action-desc">Light, dark, or system (follows your operating system). Also the mobile navigation style.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon info"><i class="bi bi-translate"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Language</span>
+      <span class="yn-help-action-desc">Interface language, date format, and base currency for totals.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon success"><i class="bi bi-briefcase"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Portfolios</span>
+      <span class="yn-help-action-desc">Turn live price fetching on or off.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon warning"><i class="bi bi-wifi"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Network</span>
+      <span class="yn-help-action-desc">Enable LAN access so other devices on your home network can open Yfine. Change the server port.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon danger"><i class="bi bi-shield-lock"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Security</span>
+      <span class="yn-help-action-desc">Set or change the password that encrypts your database.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon info"><i class="bi bi-download"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Data</span>
+      <span class="yn-help-action-desc">Export your data, import a backup, download or clear logs, reset all data.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon muted"><i class="bi bi-file-earmark-arrow-up"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Imports</span>
+      <span class="yn-help-action-desc">Import movements from bank statements and other finance apps. Presets for common formats.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-puzzle"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Plugins</span>
+      <span class="yn-help-action-desc">Upload custom plugins. A scan report flags anything that looks unsafe.</span>
+    </div>
+  </div>
+</div>
+
+<h6>Theme</h6>
+<p>Three buttons at the top: <span class="yn-help-chip"><i class="bi bi-sun"></i> Light</span>, <span class="yn-help-chip"><i class="bi bi-moon"></i> Dark</span>, <span class="yn-help-chip"><i class="bi bi-laptop"></i> System</span>. "System" follows the operating system setting and switches automatically when it changes.</p>
+<p>Below: the <strong>mobile navigation</strong> style. Pick "Sidebar" to keep the left drawer on phones, or "Bottom" for a native-looking bottom bar.</p>
+
+<h6>Language</h6>
+<ul>
+  <li><strong>Language</strong>: English, Italian, Spanish, Ukrainian. Interface reloads in the new language on save.</li>
+  <li><strong>Date format</strong>: dd/mm/yyyy, mm/dd/yyyy, or yyyy-mm-dd. Affects every displayed date across the app.</li>
+  <li><strong>Base currency</strong>: the default used when creating a source or a saving without one selected.</li>
+</ul>
+
+<h6>Network</h6>
+<p>Yfine only listens on localhost by default. Turning on <strong>LAN access</strong> makes it reachable from other devices on your home network (useful for opening the app on a phone while your computer is running). Yfine shows the URL to type on the other device.</p>
+<p>The <strong>server port</strong> can be changed if the default is already in use. A "restart required" note appears after you save.</p>
+
+<h6>Security</h6>
+<p>Setting a password enables <strong>AES-256-GCM</strong> encryption of the database file. The key is derived from your password and is never stored.</p>
+<ul>
+  <li>With a password: the app asks for it on startup. The database is decrypted in memory and re-encrypted on shutdown.</li>
+  <li>Without a password: the database is a normal SQLite file.</li>
+</ul>
+
+<h6>Data: export, import, reset</h6>
+<ul>
+  <li><strong>Export</strong>: download a JSON copy (core data only) or a full <code>.yfine</code> archive (core + plugins + settings).</li>
+  <li><strong>Export Excel / PDF</strong>: formatted for printing or sharing.</li>
+  <li><strong>Import</strong>: pick an exported file. A preview dialog shows what will be imported before you confirm.</li>
+  <li><strong>Logs</strong>: download or clear the application log.</li>
+  <li><strong>Reset all data</strong>: wipes every source, movement, portfolio, tag, recurring item, saving, whim, and notification. Does not touch settings.</li>
+</ul>
+
+<h6>Imports tab</h6>
+<p>The Imports tab is a step-by-step wizard. Pick the destination source, pick a format preset (for example, "Bank statement CSV"), upload the file, map columns if needed, and review the list of movements to be created. Duplicate detection runs during the review step.</p>
+
+<h6>Plugins</h6>
+<p>Plugins extend Yfine with new pages, menu items, or logic. To install one:</p>
+<ol class="yn-help-steps">
+  <li>Click the upload button and pick the plugin archive.</li>
+  <li>Yfine runs a static code scan. Critical findings block the install. Warnings let you continue at your own discretion.</li>
+  <li>After the scan, confirm to install.</li>
+  <li>Restart the app. The plugin's menu item appears in the sidebar.</li>
+</ol>
+
+<div class="yn-help-tip">
+  <i class="bi bi-info-circle-fill"></i>
+  <div>Export your data before any "Reset all data" or risky plugin installation. The <code>.yfine</code> archive holds everything needed to restore the app to the current state.</div>
+</div>
+
+<div class="yn-help-tip warn">
+  <i class="bi bi-exclamation-triangle-fill"></i>
+  <div>Plugins run with the same permissions as Yfine itself. The scanner flags obvious issues, but it cannot catch everything. Only install plugins from sources you trust.</div>
+</div>

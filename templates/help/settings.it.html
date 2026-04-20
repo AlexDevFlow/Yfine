@@ -1,0 +1,115 @@
+<h5>Impostazioni</h5>
+<p class="yn-help-lead">Tutte le preferenze di Yfine sono qui, divise in schede. La barra laterale sinistra è il navigatore delle schede su desktop, e una riga scorrevole su mobile.</p>
+
+<h6>Panoramica delle schede</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-palette"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Tema</span>
+      <span class="yn-help-action-desc">Chiaro, scuro o automatico (segue il sistema operativo). Inoltre lo stile di navigazione su mobile.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon info"><i class="bi bi-translate"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Lingua</span>
+      <span class="yn-help-action-desc">Lingua dell'interfaccia, formato data e valuta base per i totali.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon success"><i class="bi bi-briefcase"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Portafogli</span>
+      <span class="yn-help-action-desc">Attiva o disattiva il recupero dei prezzi live.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon warning"><i class="bi bi-wifi"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Rete</span>
+      <span class="yn-help-action-desc">Abilita l'accesso dalla rete locale per aprire Yfine da altri dispositivi di casa. Cambia la porta del server.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon danger"><i class="bi bi-shield-lock"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Sicurezza</span>
+      <span class="yn-help-action-desc">Imposta o cambia la password che cifra il database.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon info"><i class="bi bi-download"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Dati</span>
+      <span class="yn-help-action-desc">Esporta i dati, importa un backup, scarica o svuota i log, ripristina tutti i dati.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon muted"><i class="bi bi-file-earmark-arrow-up"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Importazioni</span>
+      <span class="yn-help-action-desc">Importa movimenti da estratti conto bancari e altre app di finanza. Preset per i formati più comuni.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-puzzle"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Plugin</span>
+      <span class="yn-help-action-desc">Carica plugin personalizzati. Un report di scansione segnala codice potenzialmente non sicuro.</span>
+    </div>
+  </div>
+</div>
+
+<h6>Tema</h6>
+<p>Tre pulsanti in alto: <span class="yn-help-chip"><i class="bi bi-sun"></i> Chiaro</span>, <span class="yn-help-chip"><i class="bi bi-moon"></i> Scuro</span>, <span class="yn-help-chip"><i class="bi bi-laptop"></i> Automatico</span>. "Automatico" segue le impostazioni del sistema operativo e cambia quando cambia il sistema.</p>
+<p>Sotto: lo stile di <strong>navigazione mobile</strong>. Scegli "Barra laterale" per mantenere il menu a sinistra sui telefoni, oppure "In basso" per una barra inferiore simile alle app native.</p>
+
+<h6>Lingua</h6>
+<ul>
+  <li><strong>Lingua</strong>: italiano, inglese, spagnolo, ucraino. Al salvataggio l'interfaccia si ricarica nella nuova lingua.</li>
+  <li><strong>Formato data</strong>: gg/mm/aaaa, mm/gg/aaaa o aaaa-mm-gg. Influisce su ogni data mostrata nell'app.</li>
+  <li><strong>Valuta base</strong>: quella predefinita usata creando una fonte o un risparmio senza valuta selezionata.</li>
+</ul>
+
+<h6>Rete</h6>
+<p>Yfine ascolta solo su localhost di default. Attivando l'<strong>accesso rete locale</strong> diventa raggiungibile da altri dispositivi della tua rete di casa (utile per aprire l'app sul telefono mentre il computer è acceso). Yfine mostra l'URL da digitare sull'altro dispositivo.</p>
+<p>La <strong>porta del server</strong> può essere cambiata se quella predefinita è già occupata. Dopo il salvataggio compare un avviso "richiesto riavvio".</p>
+
+<h6>Sicurezza</h6>
+<p>Impostare una password abilita la cifratura <strong>AES-256-GCM</strong> del file del database. La chiave è derivata dalla password e non viene mai memorizzata.</p>
+<ul>
+  <li>Con password: l'app la chiede all'avvio. Il database viene decifrato in memoria e ricifrato alla chiusura.</li>
+  <li>Senza password: il database è un normale file SQLite.</li>
+</ul>
+
+<h6>Dati: esporta, importa, ripristina</h6>
+<ul>
+  <li><strong>Esporta</strong>: scarica una copia JSON (solo dati principali) o un archivio completo <code>.yfine</code> (dati principali + plugin + impostazioni).</li>
+  <li><strong>Esporta Excel / PDF</strong>: formati per stampa o condivisione.</li>
+  <li><strong>Importa</strong>: scegli un file esportato. Una finestra di anteprima mostra cosa verrà importato prima di confermare.</li>
+  <li><strong>Log</strong>: scarica o svuota il registro applicazione.</li>
+  <li><strong>Ripristina tutti i dati</strong>: cancella ogni fonte, movimento, portafoglio, etichetta, ricorrente, risparmio, sfizio e notifica. Le impostazioni restano.</li>
+</ul>
+
+<h6>Scheda Importazioni</h6>
+<p>La scheda Importazioni è una procedura guidata passo-passo. Scegli la fonte di destinazione, seleziona un preset di formato (per esempio "CSV estratto conto"), carica il file, mappa le colonne se serve e rivedi la lista dei movimenti da creare. Il riconoscimento dei duplicati avviene nel passo di revisione.</p>
+
+<h6>Plugin</h6>
+<p>I plugin estendono Yfine con nuove pagine, voci di menu o logiche. Per installarne uno:</p>
+<ol class="yn-help-steps">
+  <li>Clicca il pulsante di caricamento e scegli l'archivio del plugin.</li>
+  <li>Yfine esegue una scansione statica del codice. Le segnalazioni critiche bloccano l'installazione. Gli avvisi permettono di proseguire a tua discrezione.</li>
+  <li>Dopo la scansione, conferma per installare.</li>
+  <li>Riavvia l'app. La voce del plugin compare nella barra laterale.</li>
+</ol>
+
+<div class="yn-help-tip">
+  <i class="bi bi-info-circle-fill"></i>
+  <div>Esporta i dati prima di qualsiasi "Ripristina tutti i dati" o installazione di plugin rischiosa. L'archivio <code>.yfine</code> contiene tutto il necessario per riportare l'app allo stato attuale.</div>
+</div>
+
+<div class="yn-help-tip warn">
+  <i class="bi bi-exclamation-triangle-fill"></i>
+  <div>I plugin girano con gli stessi permessi di Yfine. Lo scanner segnala i problemi evidenti, ma non può catturare tutto. Installa solo plugin da fonti che consideri affidabili.</div>
+</div>

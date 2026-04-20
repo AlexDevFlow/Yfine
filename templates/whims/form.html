@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% set active_page = "whims" %}
+
+{% block title %}{% if item %}{{ _('edit_whim') }}{% else %}{{ _('new_whim') }}{% endif %}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title mb-0">{% if item %}{{ _('edit_whim') }}{% else %}{{ _('new_whim') }}{% endif %}</h5>
+      </div>
+      <div class="card-body">
+        <form id="whim-form">
+          <div class="mb-3">
+            <label for="name" class="form-label">{{ _('name') }}</label>
+            <input type="text" class="form-control" id="name" value="{{ item.name if item else '' }}" required>
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="amount" class="form-label">{{ _('amount') }}</label>
+              <input type="number" step="0.01" min="0.01" inputmode="decimal" class="form-control" id="amount" value="{{ item.amount if item else '' }}" required>
+            </div>
+            <div class="col-md-6">
+              <label for="currency" class="form-label">{{ _('currency') }}</label>
+              <select class="form-select" id="currency" required>
+                {% set currencies = ['EUR', 'USD', 'GBP', 'CHF', 'JPY', 'CAD', 'AUD', 'CNY', 'INR', 'BRL'] %}
+                {% for c in currencies %}
+                <option value="{{ c }}" {% if item and item.currency == c %}selected{% endif %}>{{ flag(c) }} {{ c }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">{{ _('whim_priority') }}</label>
+            <div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="priority" id="priority-low" value="low" {% if item and item.priority == 'low' %}checked{% endif %}>
+                <label class="form-check-label text-info" for="priority-low">{{ _('priority_low') }}</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="priority" id="priority-medium" value="medium" {% if not item or item.priority == 'medium' %}checked{% endif %}>
+                <label class="form-check-label text-warning" for="priority-medium">{{ _('priority_medium') }}</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="priority" id="priority-high" value="high" {% if item and item.priority == 'high' %}checked{% endif %}>
+                <label class="form-check-label text-danger" for="priority-high">{{ _('priority_high') }}</label>
+              </div>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="source_id" class="form-label">{{ _('source') }} ({{ _('optional') }})</label>
+            <select class="form-select" id="source_id">
+              <option value="">-</option>
+              {% for s in sources %}
+              <option value="{{ s.id }}" {% if item and item.source_id == s.id %}selected{% endif %}>{{ s.name }} ({{ s.currency }})</option>
+              {% endfor %}
+            </select>
+            <small class="text-muted">{{ _('whim_source_hint') }}</small>
+          </div>
+          <div class="mb-3">
+            <label for="url" class="form-label">{{ _('whim_link') }} ({{ _('optional') }})</label>
+            <input type="url" class="form-control" id="url" value="{{ item.url if item and item.url else '' }}" placeholder="https://...">
+          </div>
+          <div class="mb-3">
+            <label for="note" class="form-label">{{ _('note') }} ({{ _('optional') }})</label>
+            <textarea class="form-control" id="note" rows="2">{{ item.note if item and item.note else '' }}</textarea>
+          </div>
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">{{ _('save') }}</button>
+            <a href="/whims" class="btn btn-outline-secondary">{{ _('cancel') }}</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block page_js %}
+<script>
+  document.getElementById('whim-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const sourceVal = document.getElementById('source_id').value;
+    const data = {
+      name: document.getElementById('name').value,
+      amount: parseFloat(document.getElementById('amount').value),
+      currency: document.getElementById('currency').value,
+      priority: document.querySelector('input[name="priority"]:checked').value,
+      source_id: sourceVal ? parseInt(sourceVal) : null,
+      url: document.getElementById('url').value || null,
+      note: document.getElementById('note').value || null,
+    };
+
+    {% if item %}
+    const resp = await fetch('/api/whims/{{ item.id }}', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    {% else %}
+    const resp = await fetch('/api/whims', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    {% endif %}
+
+    if (resp.ok) {
+      setTimeout(function() { window.location.assign('/whims'); }, 100);
+    } else {
+      await handleApiError(resp);
+    }
+  });
+</script>
+{% endblock %}

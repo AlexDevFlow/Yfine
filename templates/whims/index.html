@@ -1,0 +1,437 @@
+{% extends "base.html" %}
+{% set active_page = "whims" %}
+
+{% block title %}{{ _('whims') }}{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="/static/vendor/flatpickr/flatpickr.min.css" />
+<style>
+  .whim-card {
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .whim-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0,0,0,.08);
+  }
+  .achieved-item {
+    opacity: .85;
+  }
+  .achieved-item .whim-name {
+    text-decoration: line-through;
+    text-decoration-color: var(--bs-success);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h5 class="mb-0">{{ _('whims') }}</h5>
+  <a href="/whims/new" class="btn btn-primary">
+    <i class="bi bi-plus me-1"></i>{{ _('new_whim') }}
+  </a>
+</div>
+
+<!-- Tabs -->
+<ul class="nav nav-tabs mb-4 justify-content-center" role="tablist">
+  <li class="nav-item">
+    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-to-achieve" type="button" role="tab">
+      <i class="bi bi-star me-1"></i>{{ _('whim_to_achieve') }}
+      {% if pending %}<span class="badge bg-label-primary ms-1">{{ pending|length }}</span>{% endif %}
+    </button>
+  </li>
+  <li class="nav-item">
+    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-achieved" type="button" role="tab">
+      <i class="bi bi-check-circle me-1"></i>{{ _('whim_achieved') }}
+      {% if achieved %}<span class="badge bg-label-success ms-1">{{ achieved|length }}</span>{% endif %}
+    </button>
+  </li>
+</ul>
+
+<div class="tab-content">
+  <!-- ===== TO ACHIEVE TAB ===== -->
+  <div class="tab-pane fade show active" id="tab-to-achieve" role="tabpanel">
+    <!-- Filters -->
+    <div class="row g-3 mb-4">
+      <div class="col-auto">
+        <select class="form-select form-select-sm" id="filter-priority">
+          <option value="">{{ _('all') }} {{ _('whim_priority') }}</option>
+          <option value="high" {% if filter_priority == 'high' %}selected{% endif %}>{{ _('priority_high') }}</option>
+          <option value="medium" {% if filter_priority == 'medium' %}selected{% endif %}>{{ _('priority_medium') }}</option>
+          <option value="low" {% if filter_priority == 'low' %}selected{% endif %}>{{ _('priority_low') }}</option>
+        </select>
+      </div>
+      <div class="col-auto">
+        <select class="form-select form-select-sm" id="filter-sort">
+          <option value="">{{ _('sort_by') }}</option>
+          <option value="amount_asc" {% if filter_sort == 'amount_asc' %}selected{% endif %}>{{ _('sort_amount_asc') }}</option>
+          <option value="amount_desc" {% if filter_sort == 'amount_desc' %}selected{% endif %}>{{ _('sort_amount_desc') }}</option>
+          <option value="newest" {% if filter_sort == 'newest' %}selected{% endif %}>{{ _('sort_newest') }}</option>
+          <option value="oldest" {% if filter_sort == 'oldest' %}selected{% endif %}>{{ _('sort_oldest') }}</option>
+          <option value="name" {% if filter_sort == 'name' %}selected{% endif %}>{{ _('sort_name') }}</option>
+        </select>
+      </div>
+      {% if filter_priority or filter_sort %}
+      <div class="col-auto">
+        <a href="/whims" class="btn btn-sm btn-outline-secondary">
+          <i class="bi bi-arrow-counterclockwise me-1"></i>{{ _('reset_filters') }}
+        </a>
+      </div>
+      {% endif %}
+    </div>
+
+    {% if pending %}
+    <div class="row g-3">
+      {% for w in pending %}
+      <div class="col-md-6 col-xl-4" id="whim-card-{{ w.id }}">
+        <div class="card whim-card h-100 border">
+          <div class="card-body pb-2">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <div class="flex-grow-1 me-2">
+                <h6 class="mb-1 whim-name">{{ w.name }}</h6>
+                {% if w.note %}<p class="text-muted small mb-1">{{ w.note }}</p>{% endif %}
+                {% if w.url %}<a href="{{ w.url }}" target="_blank" rel="noopener" onclick="return yfOpenExternal(this.href)" class="small text-primary"><i class="bi bi-box-arrow-up-right me-1"></i>{{ _('whim_link') }}</a>{% endif %}
+              </div>
+              <span class="badge bg-label-{% if w.priority == 'high' %}danger{% elif w.priority == 'medium' %}warning{% else %}info{% endif %} flex-shrink-0">
+                {{ _('priority_' + w.priority) }}
+              </span>
+            </div>
+            <div class="mt-3">
+              <div class="fs-5 fw-bold mb-2">{{ "%.2f"|format(w.amount) }} {{ w.currency }}</div>
+
+              {% if w.linked_goal_id %}
+              {% set allocated = w.linked_goal_allocated or 0 %}
+              {% set pct = (allocated / w.amount * 100) if w.amount else 0 %}
+              <div class="mb-2">
+                <div class="d-flex justify-content-between small text-muted mb-1">
+                  <span><i class="bi bi-trophy me-1"></i>{{ _('saving_up') }}: {{ "%.2f"|format(allocated) }} / {{ "%.2f"|format(w.amount) }}</span>
+                  <a href="/savings#tab-goals" class="text-decoration-none">{{ "%.0f"|format(pct) }}%</a>
+                </div>
+                <div class="progress" style="height:6px">
+                  <div class="progress-bar {% if pct >= 100 %}bg-success{% endif %}" style="width: {% if pct < 100 %}{{ pct }}{% else %}100{% endif %}%"></div>
+                </div>
+              </div>
+              {% endif %}
+
+              <div class="d-flex gap-1 flex-wrap">
+                <button class="btn btn-sm btn-success text-nowrap" onclick="openPurchaseModal({{ w.id }}, '{{ w.name|e }}', {{ w.amount }}, '{{ w.currency }}', {{ w.source_id or 'null' }}, {{ w.linked_goal_id or 'null' }}, {{ w.linked_goal_allocated or 'null' }})" title="{{ _('whim_buy') }}">
+                  <i class="bi bi-cart me-1"></i>{{ _('whim_buy') }}
+                </button>
+                {% if not w.linked_goal_id %}
+                <button class="btn btn-sm btn-outline-primary" onclick="startSavingForWhim({{ w.id }})" title="{{ _('whim_save_for_this') }}">
+                  <i class="bi bi-piggy-bank me-1"></i>{{ _('whim_save_for_this_short') }}
+                </button>
+                {% endif %}
+                <button class="btn btn-sm btn-outline-secondary" onclick="dismissWhim({{ w.id }})" title="{{ _('whim_dismiss') }}">
+                  <i class="bi bi-x-lg"></i>
+                </button>
+                <a href="/whims/{{ w.id }}/edit" class="btn btn-sm btn-outline-warning" title="{{ _('edit') }}">
+                  <i class="bi bi-pencil"></i>
+                </a>
+                <button class="btn btn-sm btn-outline-danger" onclick="deleteWhim({{ w.id }})" title="{{ _('delete') }}">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+      <i class="bi bi-star text-muted mb-2" style="font-size:2.5rem"></i>
+      <p class="text-muted mb-3">{{ _('no_whims') }}</p>
+      <a href="/whims/new" class="btn btn-sm btn-primary"><i class="bi bi-plus me-1"></i>{{ _('new_whim') }}</a>
+    </div>
+    {% endif %}
+
+    <!-- Dismissed (collapsible, inside To Achieve tab) -->
+    {% if dismissed %}
+    <div class="mt-4 pt-3 border-top">
+      <button class="btn btn-sm btn-outline-secondary mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#dismissed-section">
+        <i class="bi bi-x-circle me-1"></i>{{ _('whim_dismissed') }} ({{ dismissed|length }})
+        <i class="bi bi-chevron-down ms-1"></i>
+      </button>
+      <div class="collapse" id="dismissed-section">
+        <div class="card">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <tbody>
+                {% for w in dismissed %}
+                <tr id="whim-row-{{ w.id }}">
+                  <td class="text-muted"><s>{{ w.name }}</s></td>
+                  <td class="text-muted">{{ "%.2f"|format(w.amount) }} {{ w.currency }}</td>
+                  <td class="text-end">
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteWhim({{ w.id }})"><i class="bi bi-trash"></i></button>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- ===== ACHIEVED TAB ===== -->
+  <div class="tab-pane fade" id="tab-achieved" role="tabpanel">
+    {% if achieved %}
+    <div class="card">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr>
+              <th>{{ _('name') }}</th>
+              <th>{{ _('amount') }}</th>
+              <th>{{ _('date') }}</th>
+              <th class="text-end">{{ _('actions') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for w in achieved %}
+            <tr id="whim-row-{{ w.id }}" class="achieved-item">
+              <td>
+                <i class="bi bi-check-circle text-success me-2"></i>
+                <span class="whim-name">{{ w.name }}</span>
+                {% if w.note %}<br><small class="text-muted ms-4">{{ w.note }}</small>{% endif %}
+              </td>
+              <td class="fw-bold text-success">{{ "%.2f"|format(w.amount) }} {{ w.currency }}</td>
+              <td class="text-muted small">{{ w.purchased_at.strftime('%d/%m/%Y') if w.purchased_at else '—' }}</td>
+              <td class="text-end">
+                <button class="btn btn-sm btn-outline-danger" onclick="deleteWhim({{ w.id }})"><i class="bi bi-trash"></i></button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Bottom motivational text -->
+    <div class="text-center py-5 mt-3">
+      <i class="bi bi-trophy text-warning mb-2" style="font-size:2rem;opacity:.5"></i>
+      <p class="text-muted small fst-italic mb-0" style="max-width:360px;margin:0 auto">
+        {{ _('whim_achieved_footer') }}
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PURCHASE MODAL ===== -->
+<div class="modal fade" id="purchaseModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-cart me-2 text-success"></i>{{ _('whim_purchase_title') }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-light d-flex align-items-center mb-4 border" id="purchase-summary">
+          <div class="flex-grow-1">
+            <strong id="purchase-name"></strong>
+            <div class="fs-5 fw-bold mt-1" id="purchase-amount"></div>
+          </div>
+        </div>
+        <input type="hidden" id="purchase-whim-id">
+        <div class="mb-3">
+          <label class="form-label" for="purchase-source">{{ _('source') }} <span class="text-danger">*</span></label>
+          <select class="form-select" id="purchase-source" required>
+            <option value="">{{ _('select_source') }}</option>
+            {% for s in sources %}
+            <option value="{{ s.id }}">{{ s.name }} ({{ s.currency }})</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="mb-3" id="purchase-date-wrap" style="position:relative">
+          <label class="form-label" for="purchase-date">{{ _('date') }} <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" id="purchase-date" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="purchase-note">{{ _('note') }}</label>
+          <input type="text" class="form-control" id="purchase-note" placeholder="{{ _('optional') }}">
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="purchase-tags">{{ _('select_tags') }}</label>
+          <select class="form-select" id="purchase-tags" multiple>
+            {% for t in all_tags %}
+            <option value="{{ t.id }}">{{ t.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ _('cancel') }}</button>
+        <button type="button" class="btn btn-success" onclick="confirmPurchase()">
+          <i class="bi bi-check-lg me-1"></i>{{ _('whim_confirm_buy') }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block page_js %}
+<script src="/static/vendor/flatpickr/flatpickr.min.js"></script>
+<script>
+  var _purchaseModal;
+  var _purchasePicker;
+  var _modalEl = document.getElementById('purchaseModal');
+
+  document.addEventListener('DOMContentLoaded', function() {
+    _purchaseModal = new bootstrap.Modal(_modalEl);
+
+    // Init flatpickr on first modal show
+    _modalEl.addEventListener('shown.bs.modal', function() {
+      if (!_purchasePicker) {
+        _purchasePicker = flatpickr('#purchase-date', {
+          dateFormat: 'Y-m-d',
+          altInput: true,
+          altFormat: _fpAltFormat,
+          defaultDate: 'today',
+          appendTo: document.getElementById('purchase-date-wrap')
+        });
+      }
+    }, { once: true });
+
+    // Filters
+    ['filter-priority', 'filter-sort'].forEach(id => {
+      document.getElementById(id).addEventListener('change', applyFilters);
+    });
+
+    // Restore active tab from hash
+    var hash = window.location.hash;
+    if (hash === '#achieved') {
+      var tab = document.querySelector('[data-bs-target="#tab-achieved"]');
+      if (tab) new bootstrap.Tab(tab).show();
+    }
+
+    // Save active tab to hash
+    document.querySelectorAll('[data-bs-toggle="tab"]').forEach(function(t) {
+      t.addEventListener('shown.bs.tab', function(e) {
+        var id = e.target.getAttribute('data-bs-target');
+        history.replaceState(null, '', id === '#tab-achieved' ? '#achieved' : '#goals');
+      });
+    });
+  });
+
+  function applyFilters() {
+    var params = new URLSearchParams();
+    var priority = document.getElementById('filter-priority').value;
+    var sort = document.getElementById('filter-sort').value;
+    if (priority) params.set('priority', priority);
+    if (sort) params.set('sort', sort);
+    var url = '/whims';
+    if (params.toString()) url += '?' + params.toString();
+    window.location.href = url;
+  }
+
+  function openPurchaseModal(id, name, amount, currency, sourceId, linkedGoalId, linkedGoalAllocated) {
+    document.getElementById('purchase-whim-id').value = id;
+    document.getElementById('purchase-name').textContent = name;
+    document.getElementById('purchase-amount').textContent = amount.toFixed(2) + ' ' + currency;
+    document.getElementById('purchase-note').value = name;
+    document.getElementById('purchase-source').value = sourceId || '';
+    document.getElementById('purchase-tags').selectedIndex = -1;
+    if (_purchasePicker) _purchasePicker.setDate('today', true);
+    // Surface the linked-goal preview so the user understands what happens.
+    var existing = document.getElementById('purchase-goal-note');
+    if (existing) existing.remove();
+    if (linkedGoalId) {
+      var msg = '{{ _("whim_purchase_goal_notice") }}'
+        .replace('{allocated}', (linkedGoalAllocated || 0).toFixed(2))
+        .replace('{currency}', currency);
+      var note = document.createElement('div');
+      note.id = 'purchase-goal-note';
+      note.className = 'alert alert-info small';
+      note.innerHTML = '<i class="bi bi-info-circle me-1"></i>' + msg;
+      document.querySelector('#purchaseModal .modal-body').insertBefore(note, document.getElementById('purchase-summary').nextSibling);
+    }
+    _purchaseModal.show();
+  }
+
+  async function startSavingForWhim(id) {
+    var r = await fetch('/api/whims/' + id + '/save-for', { method: 'POST' });
+    if (r.ok) {
+      showToast('{{ _("whim_save_started") }}', 'success');
+      setTimeout(function() { window.location.href = '/savings#tab-goals'; }, 600);
+    } else {
+      await handleApiError(r);
+    }
+  }
+
+  async function confirmPurchase() {
+    var whimId = document.getElementById('purchase-whim-id').value;
+    var sourceId = document.getElementById('purchase-source').value;
+    var date = document.getElementById('purchase-date').value;
+    var note = document.getElementById('purchase-note').value;
+    var tagSelect = document.getElementById('purchase-tags');
+    var tagIds = Array.from(tagSelect.selectedOptions).map(o => parseInt(o.value));
+
+    if (!sourceId) {
+      showToast('{{ _("select_source") }}', 'error');
+      return;
+    }
+    if (!date) {
+      showToast('{{ _("date") }}', 'error');
+      return;
+    }
+
+    var resp = await fetch('/api/whims/' + whimId + '/purchase', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        source_id: parseInt(sourceId),
+        date: date,
+        note: note || null,
+        tag_ids: tagIds
+      })
+    });
+
+    if (resp.ok) {
+      _purchaseModal.hide();
+      showCelebration();
+    } else {
+      await handleApiError(resp);
+    }
+  }
+
+  function showCelebration() {
+    // Swal modals don't render under pywebview; a toast + redirect is the
+    // reliable equivalent across browser and desktop.
+    showToast('{{ _("whim_congrats_title") }}', 'success');
+    setTimeout(function() {
+      window.location.href = '/whims#achieved';
+      location.reload();
+    }, 1500);
+  }
+
+  async function dismissWhim(id) {
+    if (!(await confirmDialog('{{ _("whim_confirm_dismiss") }}', {icon: 'question', confirmText: '{{ _("whim_dismiss") }}'}))) return;
+    var resp = await fetch('/api/whims/' + id + '/dismiss', { method: 'POST' });
+    if (resp.ok) {
+      showToast('{{ _("success") }}', 'success');
+      location.reload();
+    } else {
+      await handleApiError(resp);
+    }
+  }
+
+  async function deleteWhim(id) {
+    if (!(await confirmDialog('{{ _("delete") }}?', {icon: 'warning', confirmColor: 'danger', confirmText: '{{ _("delete") }}'}))) return;
+    var resp = await fetch('/api/whims/' + id, { method: 'DELETE' });
+    if (resp.ok) {
+      var card = document.getElementById('whim-card-' + id);
+      var row = document.getElementById('whim-row-' + id);
+      if (card) card.remove();
+      if (row) row.remove();
+      showToast('{{ _("deleted_successfully") }}', 'success');
+    } else {
+      await handleApiError(resp);
+    }
+  }
+</script>
+{% endblock %}

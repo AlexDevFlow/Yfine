@@ -1,0 +1,327 @@
+{% extends "base.html" %}
+{% set active_page = "sources" %}
+
+{% block title %}{{ source.name }}{% endblock %}
+
+{% block content %}
+<!-- Source Header -->
+<div class="row">
+  <div class="col-12 mb-4">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h4 class="mb-1">{{ source.name }}</h4>
+            <span class="badge bg-label-primary">{{ source.currency }}</span>
+          </div>
+          <div class="text-end">
+            {% set has_pf = portfolios_value_same_ccy or portfolios_value_other_ccy %}
+            <small class="text-muted d-block text-uppercase" style="font-size:.7rem;letter-spacing:.05em">
+              {{ _('total_with_portfolios') if has_pf else _('current_balance') }}
+            </small>
+            <h3 class="mb-0">
+              {{ "%.2f"|format(total_with_portfolios if has_pf else balance) }}
+              <small class="fs-6 text-muted">{{ source.currency }}</small>
+            </h3>
+            {% if has_pf %}
+            <div class="d-flex justify-content-end gap-2 mt-2 flex-wrap">
+              <span class="badge bg-label-secondary"><i class="bi bi-cash-stack me-1"></i>{{ _('cash') }}: {{ "%.2f"|format(balance) }} {{ source.currency }}</span>
+              {% if portfolios_value_same_ccy %}
+              <span class="badge bg-label-info"><i class="bi bi-graph-up me-1"></i>{{ _('investments') }}: {{ "%.2f"|format(portfolios_value_same_ccy) }} {{ source.currency }}</span>
+              {% endif %}
+              {% for o in portfolios_value_other_ccy %}
+              <span class="badge bg-label-info"><i class="bi bi-graph-up me-1"></i>{{ "%.2f"|format(o.total_value) }} {{ o.currency }}</span>
+              {% endfor %}
+            </div>
+            {% endif %}
+          </div>
+        </div>
+        <div class="mt-3">
+          <a href="/sources/{{ source.id }}/edit" class="btn btn-warning btn-sm me-1">
+            <i class="bi bi-pencil me-1"></i>{{ _('edit') }}
+          </a>
+          <button class="btn btn-danger btn-sm" onclick="deleteSource()">
+            <i class="bi bi-trash me-1"></i>{{ _('delete') }}
+          </button>
+          <a href="/movements/new?source_id={{ source.id }}" class="btn btn-primary btn-sm ms-2">
+            <i class="bi bi-plus me-1"></i>{{ _('new_movement') }}
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Portfolios in this source -->
+<div class="row">
+  <div class="col-12 mb-4">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0"><i class="bi bi-briefcase me-1"></i>{{ _('portfolios_in_source') }}</h5>
+        <a href="/portfolios/new?source_id={{ source.id }}" class="btn btn-sm btn-outline-primary">
+          <i class="bi bi-plus me-1"></i>{{ _('new_portfolio') }}
+        </a>
+      </div>
+      <div class="card-body">
+        {% if portfolios %}
+        <div class="row g-3">
+          {% for p in portfolios %}
+          <div class="col-md-6 col-lg-4">
+            <a href="/portfolios/{{ p.id }}" class="text-decoration-none">
+              <div class="card border h-100">
+                <div class="card-body py-2 px-3">
+                  <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="mb-0 text-truncate">{{ p.name }}</h6>
+                    <span class="badge
+                      {% if p.kind == 'crypto' %}bg-label-warning
+                      {% elif p.kind == 'stocks' %}bg-label-info
+                      {% else %}bg-label-secondary{% endif %}">{{ _('portfolio_kind_' ~ p.kind) }}</span>
+                  </div>
+                  <div class="small text-muted">{{ p.holdings_count }} {{ _('holdings') }}</div>
+                  <div class="d-flex justify-content-between align-items-center mt-1">
+                    <strong>{{ "%.2f"|format(p.total_value) }} {{ p.base_currency }}</strong>
+                    <small class="{% if p.total_pnl >= 0 %}text-success{% else %}text-danger{% endif %} fw-bold">
+                      {% if p.total_pnl >= 0 %}+{% endif %}{{ "%.2f"|format(p.total_pnl_pct) }}%
+                    </small>
+                  </div>
+                </div>
+              </div>
+            </a>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-muted mb-0 small">{{ _('no_portfolios_in_source') }}</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Balance History Chart -->
+<div class="row">
+  <div class="col-12 mb-4">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">{{ _('balance') }} {{ _('history') }}</h5>
+        <div class="btn-group btn-group-sm" role="group">
+          <button type="button" class="btn btn-outline-primary range-btn" onclick="loadChart('7d')">{{ _('7d') }}</button>
+          <button type="button" class="btn btn-outline-primary range-btn" onclick="loadChart('30d')">{{ _('30d') }}</button>
+          <button type="button" class="btn btn-outline-primary range-btn" onclick="loadChart('90d')">{{ _('90d') }}</button>
+          <button type="button" class="btn btn-outline-primary range-btn" onclick="loadChart('1y')">{{ _('1y') }}</button>
+          <button type="button" class="btn btn-outline-primary range-btn active" onclick="loadChart('all')">{{ _('all') }}</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div style="position:relative; height:300px;">
+          <canvas id="balanceChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Movements -->
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">{{ _('movements') }}</h5>
+      </div>
+
+      {% for year_group in grouped_movements %}
+      <div class="card-header border-top py-0 px-3" style="cursor:pointer" onclick="toggleGroup('yr-{{ year_group.year }}', this)">
+        <div class="d-flex justify-content-between align-items-center py-3">
+          <div class="d-flex align-items-center">
+            <i class="bi bi-chevron-down me-2 group-chevron fs-5"></i>
+            <h6 class="mb-0 fw-bold">{{ year_group.year }}</h6>
+            <span class="badge bg-label-secondary ms-2">{{ year_group.count }}</span>
+          </div>
+          <div class="d-flex gap-2 align-items-center">
+            {% if year_group.total_in %}<span class="badge bg-success">+{{ "%.2f"|format(year_group.total_in) }}</span>{% endif %}
+            {% if year_group.total_out %}<span class="badge bg-danger">-{{ "%.2f"|format(year_group.total_out) }}</span>{% endif %}
+            {% set year_net = year_group.total_in - year_group.total_out %}
+            <span class="badge bg-{% if year_net >= 0 %}info{% else %}warning{% endif %}">
+              <i class="bi bi-{% if year_net >= 0 %}graph-up-arrow{% else %}graph-down-arrow{% endif %} me-1"></i>{{ "%+.2f"|format(year_net) }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {% for month in year_group.months %}
+      <div class="card-header border-top bg-light py-0 px-3 ps-4 yr-{{ year_group.year }}-child" style="cursor:pointer" onclick="toggleGroup('mo-{{ month.year_month }}', this)">
+        <div class="d-flex justify-content-between align-items-center py-2">
+          <div class="d-flex align-items-center">
+            <i class="bi bi-chevron-down me-2 group-chevron"></i>
+            <span class="fw-bold month-label" data-month="{{ month.year_month }}">{{ month.year_month }}</span>
+            <span class="badge bg-label-secondary ms-2">{{ month.count }}</span>
+          </div>
+          <div class="d-flex gap-2 align-items-center">
+            {% if month.total_in %}<span class="badge bg-label-success">+{{ "%.2f"|format(month.total_in) }}</span>{% endif %}
+            {% if month.total_out %}<span class="badge bg-label-danger">-{{ "%.2f"|format(month.total_out) }}</span>{% endif %}
+            {% set month_net = month.total_in - month.total_out %}
+            <span class="badge bg-label-{% if month_net >= 0 %}info{% else %}warning{% endif %}">
+              <i class="bi bi-{% if month_net >= 0 %}graph-up-arrow{% else %}graph-down-arrow{% endif %} me-1"></i>{{ "%+.2f"|format(month_net) }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {% for day in month.days %}
+      <div class="card-header border-top py-0 px-3 ps-5 yr-{{ year_group.year }}-child mo-{{ month.year_month }}-child" style="cursor:pointer" onclick="toggleGroup('dy-{{ day.date }}', this)">
+        <div class="d-flex justify-content-between align-items-center py-2">
+          <div class="d-flex align-items-center">
+            <i class="bi bi-chevron-down me-2 group-chevron" style="font-size:.85rem"></i>
+            <small class="fw-semibold">{{ day.date|fdate }}</small>
+            <span class="badge bg-label-secondary ms-2" style="font-size:.65rem">{{ day.movements|length }}</span>
+          </div>
+          <div class="d-flex gap-1">
+            {% if day.total_in %}<small class="text-success fw-bold">+{{ "%.2f"|format(day.total_in) }}</small>{% endif %}
+            {% if day.total_out %}<small class="text-danger fw-bold ms-2">-{{ "%.2f"|format(day.total_out) }}</small>{% endif %}
+          </div>
+        </div>
+      </div>
+      <div class="table-responsive yr-{{ year_group.year }}-child mo-{{ month.year_month }}-child dy-{{ day.date }}-child">
+        <table class="table table-hover mb-0">
+          <tbody>
+            {% for m in day.movements %}
+            <tr>
+              <td style="padding-left:3.5rem">
+                <span class="badge bg-label-{% if m.direction == 'in' %}success{% else %}danger{% endif %}">
+                  {{ _('in') if m.direction == 'in' else _('out') }}
+                </span>
+                {% if m.transfer_pair_id %}<span class="badge bg-label-info ms-1">{{ _('transfer') }}</span>{% endif %}
+              </td>
+              <td class="{% if m.direction == 'in' %}text-success{% else %}text-danger{% endif %} fw-bold">
+                {% if m.direction == 'in' %}+{% else %}-{% endif %}{{ "%.2f"|format(m.amount) }}
+              </td>
+              <td><small class="text-muted">{{ m.note or '' }}</small></td>
+              <td class="text-end" style="white-space:nowrap">
+                <a href="/movements/{{ m.id }}/edit" class="btn btn-sm btn-outline-warning me-1"><i class="bi bi-pencil"></i></a>
+                <button class="btn btn-sm btn-outline-danger" onclick="deleteMovement({{ m.id }})"><i class="bi bi-trash"></i></button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endfor %}
+      {% endfor %}
+      {% else %}
+      <div class="card-body text-center py-5">
+        <i class="bi bi-receipt text-muted mb-2" style="font-size:2.5rem"></i>
+        <p class="text-muted mb-3">{{ _('no_movements') }}</p>
+        <a href="/movements/new?source_id={{ source.id }}" class="btn btn-sm btn-primary"><i class="bi bi-plus me-1"></i>{{ _('new_movement') }}</a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block page_js %}
+<script src="/static/vendor/chartjs/chart.umd.min.js"></script>
+<script>
+// Shim for chartjs-plugin-zoom UMD compatibility with Chart.js bundle
+if (window.Chart) {
+  if (!window.Chart.Chart) window.Chart.Chart = window.Chart;
+  if (!window.Chart.helpers) {
+    window.Chart.helpers = {
+      callback: function(fn, args, thisArg) { if (fn && typeof fn.call === 'function') return fn.apply(thisArg, args); },
+      each: function(loopable, fn, thisArg) { if (Array.isArray(loopable)) { for (var i = 0; i < loopable.length; i++) fn.call(thisArg, loopable[i], i); } else if (loopable) { Object.keys(loopable).forEach(function(k) { fn.call(thisArg, loopable[k], k); }); } },
+      valueOrDefault: function(value, def) { return typeof value === 'undefined' ? def : value; },
+      sign: Math.sign,
+      almostEquals: function(x, y, epsilon) { return Math.abs(x - y) < (epsilon || 1e-6); },
+      getRelativePosition: function(e, chart) { var rect = chart.canvas.getBoundingClientRect(); return { x: e.clientX - rect.left, y: e.clientY - rect.top }; },
+      _isPointInArea: function(point, area, margin) { margin = margin || 0; return point.x >= area.left - margin && point.x <= area.right + margin && point.y >= area.top - margin && point.y <= area.bottom + margin; }
+    };
+  }
+}
+</script>
+<script src="/static/vendor/chartjs-plugin-zoom/chartjs-plugin-zoom.min.js"></script>
+<script>
+  // --- Hierarchical collapsible groups ---
+  function toggleGroup(prefix, headerRow) {
+    var children = document.querySelectorAll('.' + prefix + '-child');
+    var chevron = headerRow.querySelector('.group-chevron');
+    var hidden = children.length > 0 && children[0].style.display === 'none';
+    children.forEach(function(r) { r.style.display = hidden ? '' : 'none'; });
+    chevron.classList.toggle('bi-chevron-down', hidden);
+    chevron.classList.toggle('bi-chevron-right', !hidden);
+  }
+
+  // Localize month labels
+  var _monthNames = {
+    en: ['January','February','March','April','May','June','July','August','September','October','November','December'],
+    it: ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre']
+  };
+  var _locale = '{{ get_locale() }}';
+  var _mNames = _monthNames[_locale] || _monthNames['en'];
+  document.querySelectorAll('.month-label').forEach(function(el) {
+    var parts = el.dataset.month.split('-');
+    el.textContent = _mNames[parseInt(parts[1], 10) - 1];
+  });
+
+  let balanceChart = null;
+
+  async function loadChart(range) {
+    const resp = await fetch(`/api/sources/{{ source.id }}/history?range=${range}`);
+    const data = await resp.json();
+    const ctx = document.getElementById('balanceChart').getContext('2d');
+
+    if (balanceChart) balanceChart.destroy();
+
+    balanceChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: data.map(p => fmtDate(p.date)),
+        datasets: [{
+          label: '{{ _("balance") }}',
+          data: data.map(p => p.balance),
+          borderColor: '#696cff',
+          backgroundColor: '#696cff20',
+          fill: true,
+          tension: 0.4,
+          pointRadius: 3
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        resizeDelay: 200,
+        interaction: { intersect: false, mode: 'index' },
+        scales: {
+          y: { title: { display: true, text: '{{ source.currency }}' } }
+        },
+        plugins: {
+          zoom: {
+            zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' },
+            pan: { enabled: true, mode: 'x' }
+          }
+        }
+      }
+    });
+
+    document.querySelectorAll('.range-btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+  }
+
+  loadChart('all');
+
+  async function deleteSource() {
+    // Redirect to sources page where the full delete modal is available
+    window.location.href = '/sources';
+  }
+
+  async function deleteMovement(id) {
+    if (!(await confirmDialog('{{ _("delete") }}?', {icon: 'warning', confirmColor: 'danger', confirmText: '{{ _("delete") }}'}))) return;
+    const resp = await fetch(`/api/movements/${id}`, { method: 'DELETE' });
+    if (resp.ok) {
+      showToast('{{ _("deleted_successfully") }}', 'success');
+      location.reload();
+    } else {
+      showToast('{{ _("error") }}', 'error');
+    }
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,137 @@
+<h5>Portfolios</h5>
+<p class="yn-help-lead">Portfolios track investments: crypto, stocks, ETFs, or a mix. Each portfolio is linked to a source and contains one or more holdings. Prices can be fetched live from the internet or kept manual.</p>
+
+<h6>How portfolios and sources fit together</h6>
+<p>A portfolio is <strong>not</strong> a separate account. It is an extra ledger attached to an existing source.</p>
+<p>Think of a source as a single account at a bank or broker. That account can hold <strong>cash</strong> (euros, dollars, whatever the source's currency is) and <strong>investments</strong> (shares, tokens, funds). Yfine tracks those two sides separately:</p>
+<ul>
+  <li>The <strong>source balance</strong> (cash) changes when you record movements: incomes, expenses, transfers.</li>
+  <li>The <strong>portfolio value</strong> (investments) changes when you add, edit, or remove holdings, and when prices move.</li>
+</ul>
+<p>On the Sources page, a source with a linked portfolio shows both in the same card:</p>
+<div class="yn-help-mock">
+  <div class="yn-help-mock-row"><span class="yn-help-mock-label">Main bank · EUR</span><span class="yn-help-mock-value">12,700.00</span></div>
+  <div class="yn-help-mock-row"><span class="yn-help-mock-label">&nbsp;&nbsp;Cash</span><span class="yn-help-mock-value">2,700.00</span></div>
+  <div class="yn-help-mock-row"><span class="yn-help-mock-label">&nbsp;&nbsp;Investments</span><span class="yn-help-mock-value">10,000.00</span></div>
+</div>
+<p>The top number is the combined total. It only adds portfolios that are in the same currency as the source. Investments in a different currency appear as a separate badge, because mixing currencies in a single sum would be misleading.</p>
+
+<div class="yn-help-tip warn">
+  <i class="bi bi-exclamation-triangle-fill"></i>
+  <div>Adding a holding does <strong>not</strong> reduce your source's cash balance. The two ledgers are independent. If you buy shares with money from your bank account and want your cash balance to reflect the purchase, record an expense movement for that amount on the same source.</div>
+</div>
+
+<h6>A typical buy, step by step</h6>
+<ol class="yn-help-steps">
+  <li>You buy 0.5 BTC for 15,000 EUR, paying from your "Main bank" source.</li>
+  <li>Open <strong>Movements</strong>. Record an <strong>expense</strong> of 15,000 EUR on Main bank, with a note like "Bought 0.5 BTC". This reduces the source's cash balance.</li>
+  <li>Open the portfolio linked to Main bank. Click <span class="yn-help-chip primary"><i class="bi bi-plus"></i> Add Holding</span>.</li>
+  <li>Enter symbol BTC, quantity 0.5, average cost 30,000 EUR. Save.</li>
+  <li>The source's card now shows cash <strong>minus 15,000</strong> and investments <strong>plus the BTC market value</strong>. Your total wealth on that source is unchanged, but the composition reflects the swap from cash to crypto.</li>
+</ol>
+<p>Doing it this way keeps the math honest: cash spent is cash gone, and the investment's market value is tracked separately and updated with prices.</p>
+
+<h6>What you see</h6>
+<ul>
+  <li>A <strong>Live Prices</strong> toggle at the top. When on, prices refresh automatically every 30 minutes. When off, Yfine only shows cost basis.</li>
+  <li>A <strong>Refresh</strong> button to force a price update right now (disabled when Live Prices is off).</li>
+  <li>Portfolios grouped by their linked <strong>source</strong>, with each source showing a total investment value.</li>
+  <li>Each portfolio card: name, <strong>kind badge</strong> (crypto, stocks, mixed), total value, invested cost, <strong>profit or loss</strong> with percentage, number of holdings, and a 30-day sparkline.</li>
+</ul>
+
+<h6>Main actions</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-plus-lg"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">New Portfolio</span>
+      <span class="yn-help-action-desc">Create a portfolio. Pick a name, kind, base currency, and the source it belongs to.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon info"><i class="bi bi-toggle-on"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Live Prices toggle</span>
+      <span class="yn-help-action-desc">Turn on to fetch prices from the internet every 30 minutes. Off keeps everything manual.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-arrow-clockwise"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Refresh Prices</span>
+      <span class="yn-help-action-desc">Force an immediate refresh. Only active when Live Prices is on.</span>
+    </div>
+  </div>
+</div>
+
+<h6>Per-portfolio actions</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon info"><i class="bi bi-eye"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">View</span>
+      <span class="yn-help-action-desc">Open the portfolio detail page with the list of holdings.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-pencil"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Edit</span>
+      <span class="yn-help-action-desc">Change the portfolio's name, kind, base currency, source, or note.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon danger"><i class="bi bi-trash"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Delete</span>
+      <span class="yn-help-action-desc">Remove the portfolio and all its holdings.</span>
+    </div>
+  </div>
+</div>
+
+<h6>Portfolio kind</h6>
+<ul>
+  <li><strong>Crypto</strong>: holdings are tokens. Quantity is called "number of tokens".</li>
+  <li><strong>Stocks</strong>: holdings are shares. Quantity is called "number of shares".</li>
+  <li><strong>Mixed</strong>: each holding picks its own asset class. Use this for a single portfolio that holds both stocks and crypto.</li>
+</ul>
+
+<h6>Base currency</h6>
+<p>The base currency is the one the portfolio reports totals in. Individual holdings can be priced in any currency, and Yfine converts them to the base. The source's currency is the natural choice, but you can pick any.</p>
+
+<h6>Live prices and privacy</h6>
+<p>Live prices fetch data from public APIs. Keeping it off means no network calls happen for portfolios, and you enter every price by hand. A warning banner reminds you when prices are off, because the totals you see are cost basis, not market value.</p>
+
+<h6>Step by step: create a portfolio with one holding</h6>
+<ol class="yn-help-steps">
+  <li>Make sure you have a source (create one in Sources first if not).</li>
+  <li>On this page, click <span class="yn-help-chip primary"><i class="bi bi-plus-lg"></i> New Portfolio</span>.</li>
+  <li>Enter a <strong>name</strong> (for example "Crypto long-term").</li>
+  <li>Pick the <strong>kind</strong> (crypto, stocks, or mixed).</li>
+  <li>Pick the <strong>base currency</strong> (usually the source's currency).</li>
+  <li>Pick the <strong>source</strong> the portfolio is linked to.</li>
+  <li>Save. You land on the portfolio detail page.</li>
+  <li>Click <span class="yn-help-chip primary"><i class="bi bi-plus"></i> Add Holding</span>.</li>
+  <li>Enter the <strong>symbol</strong> (BTC, ETH, AAPL). For mixed portfolios, pick the asset class first.</li>
+  <li>Enter the <strong>quantity</strong>, the <strong>average cost</strong>, and the <strong>currency</strong>.</li>
+  <li>Optional: toggle <strong>manual price</strong> if you do not want Yfine to fetch it.</li>
+  <li>Save. The holding appears in the table and the portfolio totals update.</li>
+</ol>
+
+<h6>Profit and loss</h6>
+<p>Yfine compares what each holding is worth now (quantity × current price) to what you paid (quantity × average cost). The difference is the unrealized profit or loss:</p>
+<div class="yn-help-mock">
+  <div class="yn-help-mock-row"><span class="yn-help-mock-label">BTC · 0.5 × 30,000 cost</span><span class="yn-help-mock-value">15,000.00</span></div>
+  <div class="yn-help-mock-row"><span class="yn-help-mock-label">BTC · 0.5 × 40,000 now</span><span class="yn-help-mock-value">20,000.00</span></div>
+  <div class="yn-help-mock-row"><span class="yn-help-mock-label"><strong>Unrealized P&amp;L</strong></span><span class="yn-help-mock-value income">+5,000.00 (+33%)</span></div>
+</div>
+
+<div class="yn-help-tip">
+  <i class="bi bi-info-circle-fill"></i>
+  <div>The invested cost is the weighted average of what you paid. If you add more units later at a different price, update the average cost to reflect the new blended value.</div>
+</div>
+
+<div class="yn-help-tip warn">
+  <i class="bi bi-exclamation-triangle-fill"></i>
+  <div>Live prices depend on external services. They can be rate-limited, delayed, or temporarily wrong. For critical decisions, confirm prices elsewhere.</div>
+</div>

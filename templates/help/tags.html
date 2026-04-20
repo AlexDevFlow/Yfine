@@ -1,0 +1,69 @@
+<h5>Tags</h5>
+<p class="yn-help-lead">Tags are colored labels you attach to movements and savings. Use them to group entries by category (groceries, transport, subscriptions, gifts) and then filter lists by tag.</p>
+
+<h6>What you see</h6>
+<ul>
+  <li>A form at the top to add a new tag: <strong>name</strong> input, <strong>color</strong> picker, and <strong>emoji</strong> picker.</li>
+  <li>A table of existing tags. Each row shows the tag as it will appear, a <strong>usage count</strong> badge (movements + savings), and per-row actions.</li>
+  <li>Clicking a tag row opens the movements page filtered by that tag.</li>
+</ul>
+
+<h6>Per-row actions</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-pencil"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Edit</span>
+      <span class="yn-help-action-desc">Switch the row to edit mode. Change the name, color, or emoji.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon success"><i class="bi bi-check-lg"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Save</span>
+      <span class="yn-help-action-desc">Appears only in edit mode. Commits the changes to the tag.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon danger"><i class="bi bi-trash"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Delete</span>
+      <span class="yn-help-action-desc">Remove the tag. Attached movements and savings keep their other tags.</span>
+    </div>
+  </div>
+</div>
+
+<h6>Color and emoji</h6>
+<p>The color picker has a palette of presets and a custom hex input. The emoji picker is grouped by category (people, food, activities, objects) with a search box.</p>
+<p>Examples:</p>
+<ul>
+  <li><span class="yn-help-chip" style="background:rgba(113,221,55,.15);border-color:rgba(113,221,55,.3);color:#4f9b1f">🛒 groceries</span></li>
+  <li><span class="yn-help-chip" style="background:rgba(255,171,0,.15);border-color:rgba(255,171,0,.3);color:#a47200">🚗 transport</span></li>
+  <li><span class="yn-help-chip" style="background:rgba(3,195,236,.12);border-color:rgba(3,195,236,.3);color:#028cb0">📺 subscriptions</span></li>
+  <li><span class="yn-help-chip" style="background:rgba(255,62,29,.12);border-color:rgba(255,62,29,.3);color:#ff3e1d">🎉 gifts</span></li>
+</ul>
+
+<h6>Step by step: create a tag</h6>
+<ol class="yn-help-steps">
+  <li>Type the <strong>name</strong> in the input at the top of the page.</li>
+  <li>Click the color swatch and pick a color, or enter a hex value.</li>
+  <li>Click the emoji icon and pick one (optional).</li>
+  <li>Click <span class="yn-help-chip primary"><i class="bi bi-plus"></i> Add Tag</span>. The tag appears in the table.</li>
+</ol>
+
+<h6>Step by step: rename or recolor</h6>
+<ol class="yn-help-steps">
+  <li>Click <span class="yn-help-chip"><i class="bi bi-pencil"></i> Edit</span> on the row.</li>
+  <li>Change the name, color, or emoji.</li>
+  <li>Click <span class="yn-help-chip success"><i class="bi bi-check-lg"></i> Save</span>.</li>
+</ol>
+
+<div class="yn-help-tip">
+  <i class="bi bi-info-circle-fill"></i>
+  <div>Click any tag in the table (outside edit mode) to jump straight to movements filtered by that tag. Useful for quick category reviews.</div>
+</div>
+
+<div class="yn-help-tip warn">
+  <i class="bi bi-exclamation-triangle-fill"></i>
+  <div>Deleting a tag removes it from every movement and saving that used it. The movements themselves are not deleted.</div>
+</div>

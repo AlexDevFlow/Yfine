@@ -1,0 +1,137 @@
+<h5>Портфелі</h5>
+<p class="yn-help-lead">Портфелі стежать за інвестиціями: крипто, акції, ETF або змішано. Кожен портфель прив'язаний до джерела та містить одну чи більше позицій. Ціни можна отримувати в реальному часі з інтернету або вести вручну.</p>
+
+<h6>Як портфелі та джерела пов'язані</h6>
+<p>Портфель <strong>не</strong> є окремим рахунком. Це додатковий реєстр, прив'язаний до існуючого джерела.</p>
+<p>Уявіть джерело як окремий рахунок у банку чи брокера. Цей рахунок може містити <strong>готівку</strong> (євро, долари, будь-що у валюті джерела) та <strong>інвестиції</strong> (акції, токени, фонди). Yfine веде обидві сторони окремо:</p>
+<ul>
+  <li><strong>Баланс джерела</strong> (готівка) змінюється, коли ви записуєте рухи: доходи, витрати, перекази.</li>
+  <li><strong>Вартість портфеля</strong> (інвестиції) змінюється, коли ви додаєте, редагуєте чи видаляєте позиції, а також коли рухаються ціни.</li>
+</ul>
+<p>На сторінці "Джерела" картка джерела з прив'язаним портфелем показує обидва разом:</p>
+<div class="yn-help-mock">
+  <div class="yn-help-mock-row"><span class="yn-help-mock-label">Основний банк · EUR</span><span class="yn-help-mock-value">12 700,00</span></div>
+  <div class="yn-help-mock-row"><span class="yn-help-mock-label">&nbsp;&nbsp;Готівка</span><span class="yn-help-mock-value">2 700,00</span></div>
+  <div class="yn-help-mock-row"><span class="yn-help-mock-label">&nbsp;&nbsp;Інвестиції</span><span class="yn-help-mock-value">10 000,00</span></div>
+</div>
+<p>Верхнє число, це сукупний підсумок. Він додає лише портфелі в тій самій валюті, що й джерело. Інвестиції в іншій валюті з'являються як окрема мітка, бо змішування валют в одній сумі вводило б в оману.</p>
+
+<div class="yn-help-tip warn">
+  <i class="bi bi-exclamation-triangle-fill"></i>
+  <div>Додавання позиції <strong>не</strong> зменшує готівковий баланс джерела. Два реєстри незалежні. Якщо купуєте акції за гроші з банківського рахунку і хочете, щоб баланс відобразив покупку, запишіть рух витрати на ту ж суму на тому ж джерелі.</div>
+</div>
+
+<h6>Типова покупка, крок за кроком</h6>
+<ol class="yn-help-steps">
+  <li>Ви купуєте 0,5 BTC за 15 000 EUR, платячи з джерела "Основний банк".</li>
+  <li>Відкрийте <strong>Рухи</strong>. Запишіть <strong>витрату</strong> 15 000 EUR на Основний банк з приміткою типу "Куплено 0,5 BTC". Це зменшує готівковий баланс джерела.</li>
+  <li>Відкрийте портфель, прив'язаний до Основного банку. Натисніть <span class="yn-help-chip primary"><i class="bi bi-plus"></i> Додати позицію</span>.</li>
+  <li>Введіть символ BTC, кількість 0,5, середня ціна 30 000 EUR. Збережіть.</li>
+  <li>Картка джерела тепер показує готівку <strong>мінус 15 000</strong> та інвестиції <strong>плюс ринкову вартість BTC</strong>. Загальний капітал на цьому джерелі не змінюється, але склад відображає перехід з готівки в крипто.</li>
+</ol>
+<p>Так арифметика залишається чесною: витрачена готівка, це витрачена готівка, а ринкова вартість інвестиції ведеться окремо та оновлюється з цінами.</p>
+
+<h6>Що ви бачите</h6>
+<ul>
+  <li>Перемикач <strong>Ціни в реальному часі</strong> згори. Коли увімкнено, ціни оновлюються автоматично кожні 30 хвилин. Коли вимкнено, Yfine показує лише вартість придбання.</li>
+  <li>Кнопка <strong>Оновити</strong>, щоб одразу примусово оновити ціни (недоступна, коли ціни вимкнено).</li>
+  <li>Портфелі згруповані за прив'язаним <strong>джерелом</strong>, з підсумком інвестицій для кожного джерела.</li>
+  <li>Кожна картка портфеля: назва, <strong>мітка типу</strong> (крипто, акції, змішано), загальна вартість, інвестована вартість, <strong>прибуток чи збиток</strong> з відсотком, кількість позицій і невеликий графік за 30 днів.</li>
+</ul>
+
+<h6>Основні дії</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-plus-lg"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Новий портфель</span>
+      <span class="yn-help-action-desc">Створити портфель. Оберіть назву, тип, базову валюту та джерело, до якого він належить.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon info"><i class="bi bi-toggle-on"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Перемикач "Ціни в реальному часі"</span>
+      <span class="yn-help-action-desc">Увімкніть, щоб отримувати ціни з інтернету кожні 30 хвилин. Вимкнено, усе вручну.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-arrow-clockwise"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Оновити ціни</span>
+      <span class="yn-help-action-desc">Примусово оновити. Активне лише при увімкнених цінах у реальному часі.</span>
+    </div>
+  </div>
+</div>
+
+<h6>Дії для портфеля</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon info"><i class="bi bi-eye"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Переглянути</span>
+      <span class="yn-help-action-desc">Відкрити сторінку деталей портфеля зі списком позицій.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-pencil"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Редагувати</span>
+      <span class="yn-help-action-desc">Змінити назву, тип, базову валюту, джерело або примітку портфеля.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon danger"><i class="bi bi-trash"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Видалити</span>
+      <span class="yn-help-action-desc">Видалити портфель і всі його позиції.</span>
+    </div>
+  </div>
+</div>
+
+<h6>Тип портфеля</h6>
+<ul>
+  <li><strong>Крипто</strong>: позиції, токени. Кількість називається "кількість токенів".</li>
+  <li><strong>Акції</strong>: позиції, акції. Кількість називається "кількість акцій".</li>
+  <li><strong>Змішаний</strong>: кожна позиція обирає свій клас активу. Зручно для одного портфеля з акціями та крипто одночасно.</li>
+</ul>
+
+<h6>Базова валюта</h6>
+<p>Базова валюта, це та, в якій портфель звітує підсумки. Окремі позиції можуть мати ціну в будь-якій валюті, і Yfine переводить їх у базову. Валюта джерела, природний вибір, але можна обрати будь-яку.</p>
+
+<h6>Ціни в реальному часі та приватність</h6>
+<p>Ціни в реальному часі отримують дані з публічних API. Якщо тримати вимкненими, для портфелів не робиться жодного мережевого запиту, і ви вводите кожну ціну вручну. Банер нагадує, коли ціни вимкнено, бо показані підсумки, це вартість придбання, а не ринкова вартість.</p>
+
+<h6>Крок за кроком: створити портфель з однією позицією</h6>
+<ol class="yn-help-steps">
+  <li>Переконайтесь, що є джерело (створіть у розділі "Джерела", якщо ні).</li>
+  <li>На цій сторінці натисніть <span class="yn-help-chip primary"><i class="bi bi-plus-lg"></i> Новий портфель</span>.</li>
+  <li>Введіть <strong>назву</strong> (наприклад, "Крипто на довгий строк").</li>
+  <li>Оберіть <strong>тип</strong> (крипто, акції або змішаний).</li>
+  <li>Оберіть <strong>базову валюту</strong> (зазвичай, валюта джерела).</li>
+  <li>Оберіть <strong>джерело</strong>, до якого прив'язується портфель.</li>
+  <li>Збережіть. Ви потрапляєте на сторінку деталей портфеля.</li>
+  <li>Натисніть <span class="yn-help-chip primary"><i class="bi bi-plus"></i> Додати позицію</span>.</li>
+  <li>Введіть <strong>символ</strong> (BTC, ETH, AAPL). Для змішаних портфелів спочатку оберіть клас активу.</li>
+  <li>Введіть <strong>кількість</strong>, <strong>середню ціну</strong> та <strong>валюту</strong>.</li>
+  <li>Опційно: увімкніть <strong>ручна ціна</strong>, якщо не хочете, щоб Yfine її отримував.</li>
+  <li>Збережіть. Позиція з'явиться в таблиці, підсумки портфеля оновляться.</li>
+</ol>
+
+<h6>Прибуток і збиток</h6>
+<p>Yfine порівнює поточну вартість кожної позиції (кількість × поточна ціна) з тим, що ви заплатили (кількість × середня ціна). Різниця, нереалізований прибуток або збиток:</p>
+<div class="yn-help-mock">
+  <div class="yn-help-mock-row"><span class="yn-help-mock-label">BTC · 0,5 × 30 000 ціна</span><span class="yn-help-mock-value">15 000,00</span></div>
+  <div class="yn-help-mock-row"><span class="yn-help-mock-label">BTC · 0,5 × 40 000 зараз</span><span class="yn-help-mock-value">20 000,00</span></div>
+  <div class="yn-help-mock-row"><span class="yn-help-mock-label"><strong>Нереалізований P/L</strong></span><span class="yn-help-mock-value income">+5 000,00 (+33%)</span></div>
+</div>
+
+<div class="yn-help-tip">
+  <i class="bi bi-info-circle-fill"></i>
+  <div>Інвестована вартість, це зважена середня того, що ви заплатили. Якщо пізніше додасте ще одиниці за іншою ціною, оновіть середню ціну, щоб відобразити нову сукупну вартість.</div>
+</div>
+
+<div class="yn-help-tip warn">
+  <i class="bi bi-exclamation-triangle-fill"></i>
+  <div>Ціни в реальному часі залежать від зовнішніх сервісів. Вони можуть бути обмежені, затримані або тимчасово помилкові. Для важливих рішень перевіряйте ціни в іншому місці.</div>
+</div>

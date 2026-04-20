@@ -1,0 +1,105 @@
+<h5>Recurring</h5>
+<p class="yn-help-lead">Recurring items are payments or incomes that repeat on a schedule: salary, rent, subscriptions, utility bills. You set them up once and Yfine keeps track of when they are due.</p>
+
+<h6>What you see</h6>
+<ul>
+  <li>A grid of cards, one per recurring item. Each card has a colored top stripe: green for income, red for expense.</li>
+  <li>Each card shows the <strong>name</strong>, the <strong>amount</strong> in its currency, the <strong>frequency</strong>, the <strong>apply mode</strong>, and the <strong>source</strong>.</li>
+  <li>A <strong>next due date</strong> with a colored badge: red if due today, yellow if due within three days, gray otherwise.</li>
+  <li>A small info line: "overdue", "due today", "due tomorrow", or "in N days".</li>
+  <li>Per-card action buttons: Apply Now, Edit, Delete.</li>
+</ul>
+
+<h6>Main actions</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-plus-lg"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">New Recurring</span>
+      <span class="yn-help-action-desc">Create a recurring item. Fill in name, amount, frequency, start date.</span>
+    </div>
+  </div>
+</div>
+
+<h6>Per-card actions</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon success"><i class="bi bi-check-lg"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Apply Now</span>
+      <span class="yn-help-action-desc">Open a dialog to confirm the amount and create a real movement for this cycle.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-pencil"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Edit</span>
+      <span class="yn-help-action-desc">Change any field. Adjusts future cycles.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon danger"><i class="bi bi-trash"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Delete</span>
+      <span class="yn-help-action-desc">Remove the recurring item. Past movements it created are kept.</span>
+    </div>
+  </div>
+</div>
+
+<h6>How recurring works</h6>
+<p>A recurring item is a template, not a movement. It describes when and how much. Each time it is due, Yfine either creates a movement automatically or asks you to confirm, depending on its <strong>apply mode</strong>.</p>
+
+<h6>Frequency</h6>
+<ul>
+  <li><strong>Daily</strong>: repeats every day.</li>
+  <li><strong>Weekly</strong>: every seven days, starting from the start date.</li>
+  <li><strong>Monthly</strong>: on the same day of each month. If the start day does not exist in a shorter month (the 31st in February), the last day of the month is used.</li>
+  <li><strong>Yearly</strong>: same date every year.</li>
+</ul>
+
+<h6>Apply mode</h6>
+<ul>
+  <li><strong>Automatic</strong>: when the due date passes, Yfine creates the movement on its own.</li>
+  <li><strong>Manual confirmation</strong>: Yfine notifies you when it is due. You review the amount, adjust if needed, and click Apply Now to create the movement.</li>
+</ul>
+<p>Use manual confirmation for items where the amount varies (electric bills, variable subscriptions). Use automatic for fixed items (rent, fixed-price subscriptions, salary).</p>
+
+<h6>Alerts</h6>
+<p>On the form you can set:</p>
+<ul>
+  <li><strong>Alert days before</strong>: how many days ahead you want to be reminded. A notification appears and shows up in the bell icon.</li>
+  <li><strong>Alert if insufficient funds</strong>: when checked, Yfine compares the amount to the source's current balance and warns you if the balance is too low.</li>
+</ul>
+
+<h6>Filters</h6>
+<ul>
+  <li><strong>Frequency</strong>: narrow by daily, weekly, monthly, yearly.</li>
+  <li><strong>Direction</strong>: show only incomes or only expenses.</li>
+</ul>
+
+<h6>Step by step: set up a subscription</h6>
+<ol class="yn-help-steps">
+  <li>Click <span class="yn-help-chip primary"><i class="bi bi-plus-lg"></i> New Recurring</span>.</li>
+  <li>Enter the <strong>name</strong> (for example, "Netflix").</li>
+  <li>Enter the <strong>amount</strong> and pick the <strong>currency</strong>.</li>
+  <li>Choose <strong>Expense</strong>.</li>
+  <li>Pick <strong>Monthly</strong> as the frequency.</li>
+  <li>Set the <strong>start date</strong> to the next billing date. Leave <strong>end date</strong> empty.</li>
+  <li>Pick the <strong>source</strong> the payment comes from.</li>
+  <li>Pick <strong>Automatic</strong> if the amount never changes.</li>
+  <li>Save. The card appears on this page and on the dashboard under "Upcoming".</li>
+</ol>
+
+<h6>Step by step: apply a due item manually</h6>
+<ol class="yn-help-steps">
+  <li>Find the card with the red or yellow due badge.</li>
+  <li>Click <span class="yn-help-chip success"><i class="bi bi-check-lg"></i> Apply Now</span>.</li>
+  <li>Confirm the amount in the dialog. Adjust if the bill is different this month.</li>
+  <li>Optional: add a note.</li>
+  <li>Click confirm. A movement is created, the source balance updates, and the next due date advances.</li>
+</ol>
+
+<div class="yn-help-tip">
+  <i class="bi bi-info-circle-fill"></i>
+  <div>If you miss applying a recurring item for several cycles, Apply Now asks whether to catch up all missed cycles or just apply the most recent one.</div>
+</div>

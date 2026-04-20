@@ -1,0 +1,133 @@
+<h5>Movimenti</h5>
+<p class="yn-help-lead">Ogni entrata, uscita e trasferimento che registri. La lista è raggruppata per anno, poi mese, poi giorno, così puoi collassare le sezioni e leggere i totali a ogni livello.</p>
+
+<h6>Cosa vedi</h6>
+<ul>
+  <li>Movimenti raggruppati per <strong>anno → mese → giorno</strong>. Ogni intestazione è cliccabile per collassare o espandere quella sezione.</li>
+  <li>A ogni livello l'intestazione mostra il conteggio e i totali del periodo: entrate, uscite e saldo netto.</li>
+  <li>Ogni riga mostra la <strong>fonte</strong> (o "fonte → destinazione" per i trasferimenti), il <strong>badge della direzione</strong>, l'<strong>importo</strong>, le <strong>etichette</strong> e la <strong>nota</strong>.</li>
+  <li>Colori: verde per le entrate (<span class="yn-help-chip success"><i class="bi bi-arrow-down-circle"></i> entrata</span>), rosso per le uscite (<span class="yn-help-chip danger"><i class="bi bi-arrow-up-circle"></i> uscita</span>), blu per i trasferimenti (<span class="yn-help-chip info"><i class="bi bi-arrow-left-right"></i></span>).</li>
+  <li>La paginazione appare in fondo quando ci sono più di 50 movimenti nella vista filtrata.</li>
+</ul>
+
+<h6>Azioni principali</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-plus-lg"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Nuovo Movimento</span>
+      <span class="yn-help-action-desc">Registra un'entrata o un'uscita. Scegli fonte, direzione, importo, data, etichette, nota.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon info"><i class="bi bi-arrow-left-right"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Nuovo Trasferimento</span>
+      <span class="yn-help-action-desc">Sposta una somma da una fonte a un'altra. Vengono create due voci collegate.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon muted"><i class="bi bi-calendar"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Calendario</span>
+      <span class="yn-help-action-desc">Apre una vista mensile con tutti i movimenti su una griglia calendario.</span>
+    </div>
+  </div>
+</div>
+
+<h6>Azioni per riga</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-pencil"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Modifica</span>
+      <span class="yn-help-action-desc">Cambia qualsiasi campo. Cliccando direttamente sulla riga si apre anche la modifica.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon danger"><i class="bi bi-trash"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Elimina</span>
+      <span class="yn-help-action-desc">Rimuove il movimento. Per i trasferimenti, entrambe le parti vengono rimosse insieme.</span>
+    </div>
+  </div>
+</div>
+
+<h6>Filtri</h6>
+<p>La barra dei filtri in alto permette di restringere la lista:</p>
+<ul>
+  <li><strong>Intervallo date</strong>: seleziona una data di inizio e una di fine sul calendario.</li>
+  <li><strong>Importo</strong>: minimo e massimo.</li>
+  <li><strong>Fonte</strong>: limita a una sola fonte.</li>
+  <li><strong>Direzione</strong>: solo entrate, solo uscite o tutto.</li>
+  <li><strong>Etichette</strong>: selezione multipla. Vengono mostrati solo i movimenti con almeno un'etichetta corrispondente.</li>
+</ul>
+<p>Un pulsante <strong>Reset</strong> compare quando almeno un filtro è attivo.</p>
+
+<h6>Trasferimenti</h6>
+<p>Un trasferimento è un'unica azione che crea due movimenti collegati: un'<strong>uscita</strong> sulla fonte di partenza e un'<strong>entrata</strong> sulla fonte di destinazione. I trasferimenti non modificano il patrimonio totale, spostano solo denaro tra fonti.</p>
+<div class="yn-help-mock">
+  <div class="yn-help-mock-row"><span class="yn-help-mock-label">Conto principale <i class="bi bi-arrow-right"></i> Risparmi</span><span class="yn-help-mock-value">500,00</span></div>
+  <div class="yn-help-mock-row"><span class="yn-help-mock-label">Conto principale (uscita)</span><span class="yn-help-mock-value expense">-500,00</span></div>
+  <div class="yn-help-mock-row"><span class="yn-help-mock-label">Risparmi (entrata)</span><span class="yn-help-mock-value income">+500,00</span></div>
+</div>
+<p>Nella lista i trasferimenti appaiono con i due nomi di fonte uniti da una freccia. Modificando o eliminando una parte si aggiorna anche l'altra.</p>
+
+<h6>Movimenti esterni</h6>
+<p>Un movimento senza fonte viene marcato come <span class="yn-help-chip">esterno</span>. Serve per entrate o uscite che avvengono fuori dai tuoi conti tracciati, per esempio denaro che qualcuno ti ha restituito in contanti e che hai speso subito senza depositarlo.</p>
+
+<h6>Passo passo: registrare un primo movimento</h6>
+<ol class="yn-help-steps">
+  <li>Clicca <span class="yn-help-chip primary"><i class="bi bi-plus-lg"></i> Nuovo Movimento</span>.</li>
+  <li>Scegli la <strong>fonte</strong>. Lascia vuoto per registrarlo come esterno.</li>
+  <li>Scegli <strong>Entrata</strong> o <strong>Uscita</strong>.</li>
+  <li>Inserisci l'<strong>importo</strong>. Usa il separatore decimale previsto dalla tua lingua.</li>
+  <li>Scegli la <strong>data</strong>. Il predefinito è oggi.</li>
+  <li>Opzionale: aggiungi una <strong>nota</strong> e seleziona una o più <strong>etichette</strong>.</li>
+  <li>Salva. Il movimento compare nella lista e aggiorna il saldo della fonte.</li>
+</ol>
+
+<h6>Passo passo: registrare un trasferimento</h6>
+<ol class="yn-help-steps">
+  <li>Clicca <span class="yn-help-chip info"><i class="bi bi-arrow-left-right"></i> Nuovo Trasferimento</span>.</li>
+  <li>Scegli la <strong>fonte di partenza</strong> e la <strong>fonte di destinazione</strong>.</li>
+  <li>Inserisci <strong>importo</strong> e <strong>data</strong>.</li>
+  <li>Salva. Nella lista movimenti appariranno due voci collegate.</li>
+</ol>
+
+<div class="yn-help-tip">
+  <i class="bi bi-info-circle-fill"></i>
+  <div>L'ultima fonte usata viene ricordata e riproposta la prossima volta che apri il form. Risparmia un click quando inserisci diversi movimenti di fila.</div>
+</div>
+
+<h6>Allegati</h6>
+<p>Puoi allegare foto di scontrini, fatture o PDF a qualsiasi movimento — utile per garanzie, deduzioni fiscali o semplicemente per ricordarti di cosa si trattava.</p>
+<ul>
+  <li>Formati supportati: <strong>PNG, JPEG, WebP, HEIC, PDF</strong>.</li>
+  <li>Fino a <strong>5 file</strong> per movimento, max <strong>10 MB</strong> ciascuno.</li>
+  <li>I file sono salvati localmente accanto al database — non vengono mai caricati da nessuna parte.</li>
+  <li>Sono inclusi nell'export completo <code>.yfine</code>, quindi i tuoi backup sono autocontenuti.</li>
+</ul>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-paperclip"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Aggiungi allegati</span>
+      <span class="yn-help-action-desc">Nel form del movimento, trascina i file sul riquadro "Allegati" oppure cliccalo per sfogliare. In modifica l'upload parte subito; per un nuovo movimento i file restano in coda e vengono inviati dopo il Salva.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon muted"><i class="bi bi-eye"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Visualizza allegati</span>
+      <span class="yn-help-action-desc">Le righe con allegati mostrano un chip <span class="yn-help-chip"><i class="bi bi-paperclip"></i> conteggio</span>. Cliccalo per aprire una galleria con anteprime delle immagini e link rapidi ai PDF.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon danger"><i class="bi bi-x"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Rimuovi un allegato</span>
+      <span class="yn-help-action-desc">Premi la <i class="bi bi-x"></i> sul chip del file nel form del movimento. Eliminando un movimento vengono rimossi anche i suoi allegati.</span>
+    </div>
+  </div>
+</div>

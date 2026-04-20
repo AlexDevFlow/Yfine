@@ -1,0 +1,107 @@
+<h5>Caprichos</h5>
+<p class="yn-help-lead">Un capricho es algo que quieres comprar pero que aún no has comprado. Piensa en esta página como una lista de deseos con prioridades. Cuando decides comprarlo (o dejarlo), lo retiras de la lista.</p>
+
+<h6>Qué ves</h6>
+<ul>
+  <li>Dos pestañas: <strong>Por cumplir</strong> (caprichos pendientes) y <strong>Cumplidos</strong> (los que ya has comprado).</li>
+  <li>Cada capricho pendiente es una tarjeta con <strong>nombre</strong>, <strong>importe</strong>, <strong>distintivo de prioridad</strong>, un icono de <strong>enlace</strong> opcional si has añadido una URL y cualquier <strong>nota</strong>.</li>
+  <li>Al final, una sección plegable de <strong>descartados</strong> contiene los caprichos que has decidido no comprar, con el nombre tachado.</li>
+  <li>La pestaña Cumplidos es una tabla: icono, nombre, fecha de compra, importe.</li>
+</ul>
+
+<h6>Prioridades</h6>
+<p>Las prioridades ayudan a decidir qué vale la pena comprar primero:</p>
+<ul>
+  <li><span class="yn-help-chip danger">Alta</span>: cosas que quieres de verdad, o que mejorarían mucho algo que usas a diario.</li>
+  <li><span class="yn-help-chip warning">Media</span>: agradables de tener pero no urgentes. La predeterminada.</li>
+  <li><span class="yn-help-chip info">Baja</span>: sería divertido, pero no estás seguro. Útil para mantenerlos en la lista sin comprometerte.</li>
+</ul>
+
+<h6>Acciones principales</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-plus-lg"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Nuevo Capricho</span>
+      <span class="yn-help-action-desc">Añade un elemento a la lista. Rellena nombre, importe, prioridad, URL opcional y nota.</span>
+    </div>
+  </div>
+</div>
+
+<h6>Acciones por capricho</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon success"><i class="bi bi-cart"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Comprar</span>
+      <span class="yn-help-action-desc">Abre el diálogo de compra. Elige la fuente con la que pagar y confirma. Se crea un movimiento de gasto y el capricho pasa a Cumplidos.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon muted"><i class="bi bi-x-lg"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Descartar</span>
+      <span class="yn-help-action-desc">Pasa el capricho a la sección descartados. No se crea ningún movimiento. Sigue visible con el nombre tachado.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-pencil"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Editar</span>
+      <span class="yn-help-action-desc">Cambia nombre, importe, prioridad, URL o nota.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon danger"><i class="bi bi-trash"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Eliminar</span>
+      <span class="yn-help-action-desc">Borra el capricho de forma permanente. Úsalo cuando quieras olvidarte del elemento por completo.</span>
+    </div>
+  </div>
+</div>
+
+<h6>Comprar vs Descartar vs Eliminar</h6>
+<p>Las tres formas de retirar un capricho de la lista hacen cosas distintas:</p>
+<ul>
+  <li><strong>Comprar</strong>: lo has comprado de verdad. Registra un gasto y conserva el capricho en el historial.</li>
+  <li><strong>Descartar</strong>: has cambiado de idea. No se registra ningún gasto. Queda al final como referencia.</li>
+  <li><strong>Eliminar</strong>: borra la entrada entera de la base de datos. Sin historial.</li>
+</ul>
+
+<h6>Filtros y orden</h6>
+<ul>
+  <li><strong>Prioridad</strong>: muestra solo alta, media o baja.</li>
+  <li><strong>Orden</strong>: importe ascendente o descendente, más recientes o más antiguos, por nombre.</li>
+  <li><strong>Restablecer</strong> limpia los filtros.</li>
+</ul>
+
+<h6>Paso a paso: añadir un capricho</h6>
+<ol class="yn-help-steps">
+  <li>Pulsa <span class="yn-help-chip primary"><i class="bi bi-plus-lg"></i> Nuevo Capricho</span>.</li>
+  <li>Introduce el <strong>nombre</strong> (por ejemplo, "Auriculares con cancelación de ruido").</li>
+  <li>Introduce el <strong>importe</strong> y la <strong>moneda</strong>.</li>
+  <li>Elige una <strong>prioridad</strong>. Media es la predeterminada.</li>
+  <li>Opcional: elige una <strong>fuente</strong> (con la que piensas comprar), pega una <strong>URL</strong> al producto y escribe una <strong>nota</strong>.</li>
+  <li>Guarda. La tarjeta aparece bajo "Por cumplir".</li>
+</ol>
+
+<h6>Paso a paso: comprar un capricho</h6>
+<ol class="yn-help-steps">
+  <li>Encuentra la tarjeta y pulsa <span class="yn-help-chip success"><i class="bi bi-cart"></i> Comprar</span>.</li>
+  <li>Elige la fuente con la que has pagado.</li>
+  <li>Confirma. Yfine crea un movimiento de gasto y pasa el capricho a la pestaña Cumplidos.</li>
+</ol>
+
+<h6>Ahorrar para un deseo</h6>
+<p>Cada deseo pendiente tiene un botón <span class="yn-help-chip"><i class="bi bi-piggy-bank"></i> Ahorrar</span>: crea un <strong>objetivo de ahorro</strong> vinculado al deseo, con mismo nombre e importe. Mientras asignas dinero, aparece una barra de progreso en la tarjeta del deseo.</p>
+<ul>
+  <li>El objetivo aparece en la pestaña <strong>Objetivos</strong> de Ahorros, donde puedes asignar dinero desde cualquier cuenta.</li>
+  <li>Al pulsar <span class="yn-help-chip success"><i class="bi bi-cart"></i> Comprar</span>, Yfine <strong>cierra automáticamente</strong> el objetivo: el dinero ahorrado va a la cuenta elegida para la compra, luego se crea el movimiento de salida.</li>
+  <li>Si eliminas el deseo, el objetivo vinculado se mantiene.</li>
+  <li>Si eliminas el objetivo, el deseo vuelve a ser "no vinculado" y se puede comprar normalmente.</li>
+</ul>
+
+<div class="yn-help-tip">
+  <i class="bi bi-info-circle-fill"></i>
+  <div>Añadir una URL te permite volver a la página del producto más tarde. Aparece un pequeño icono de enlace en la tarjeta.</div>
+</div>

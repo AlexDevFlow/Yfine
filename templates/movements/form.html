@@ -1,0 +1,430 @@
+{% extends "base.html" %}
+{% set active_page = "movements" %}
+
+{% block title %}{% if is_transfer and movement %}{{ _('edit_transfer') }}{% elif movement %}{{ _('edit_movement') }}{% elif is_transfer %}{{ _('new_transfer') }}{% else %}{{ _('new_movement') }}{% endif %}{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="/static/vendor/flatpickr/flatpickr.min.css" />
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title mb-0">{% if is_transfer and movement %}{{ _('edit_transfer') }}{% elif movement %}{{ _('edit_movement') }}{% elif is_transfer %}{{ _('new_transfer') }}{% else %}{{ _('new_movement') }}{% endif %}</h5>
+      </div>
+      <div class="card-body">
+        <form id="movement-form">
+          {% if is_transfer %}
+          <!-- Transfer mode (new and edit) -->
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="from_source_id" class="form-label">{{ _('from') }} {{ _('source') }}</label>
+              <select class="form-select" id="from_source_id" required>
+                <option value="">{{ _('select_source') }}</option>
+                {% for s in sources %}
+                <option value="{{ s.id }}" {% if (transfer_from_source_id and transfer_from_source_id == s.id) or (preselect_source_id and preselect_source_id == s.id) %}selected{% endif %}>{{ s.name }} ({{ s.currency }})</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label for="to_source_id" class="form-label">{{ _('to') }} {{ _('source') }}</label>
+              <select class="form-select" id="to_source_id" required>
+                <option value="">{{ _('select_source') }}</option>
+                {% for s in sources %}
+                <option value="{{ s.id }}" {% if transfer_to_source_id and transfer_to_source_id == s.id %}selected{% endif %}>{{ s.name }} ({{ s.currency }})</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          {% else %}
+          <!-- Normal movement mode -->
+          <div class="mb-3">
+            <label for="source_id" class="form-label">{{ _('source') }}</label>
+            <select class="form-select" id="source_id">
+              <option value="">{{ _('external') }} — {{ _('external_expense_hint') }}</option>
+              {% for s in sources %}
+              <option value="{{ s.id }}" {% if (movement and movement.source_id == s.id) or (preselect_source_id and preselect_source_id == s.id) %}selected{% endif %}>{{ s.name }} ({{ s.currency }})</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">{{ _('direction') }}</label>
+            <div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="direction" id="dir-in" value="in" {% if not movement or movement.direction == 'in' %}checked{% endif %}>
+                <label class="form-check-label text-success" for="dir-in">{{ _('income') }}</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="direction" id="dir-out" value="out" {% if movement and movement.direction == 'out' %}checked{% endif %}>
+                <label class="form-check-label text-danger" for="dir-out">{{ _('expense') }}</label>
+              </div>
+            </div>
+          </div>
+          {% endif %}
+
+          <div class="mb-3">
+            <label for="amount" class="form-label">{{ _('amount') }}</label>
+            <input type="number" step="0.01" min="0.01" inputmode="decimal" class="form-control" id="amount" value="{{ movement.amount if movement else '' }}" required>
+          </div>
+          <div class="mb-3">
+            <label for="date" class="form-label">{{ _('date') }}</label>
+            <input type="text" class="form-control" id="date" value="{{ movement.date if movement else '' }}" required>
+          </div>
+          <div class="mb-3">
+            <label for="note" class="form-label">{{ _('note') }} ({{ _('optional') }})</label>
+            <textarea class="form-control" id="note" rows="2">{{ movement.note if movement and movement.note else '' }}</textarea>
+          </div>
+          {% if tags %}
+          <div class="mb-3">
+            <label class="form-label">{{ _('tags') }} ({{ _('optional') }})</label>
+            <div class="d-flex flex-wrap gap-2">
+              {% for t in tags %}
+              <div class="form-check">
+                <input class="form-check-input tag-checkbox" type="checkbox" value="{{ t.id }}" id="tag-{{ t.id }}" {% if movement and t.id in movement_tag_ids %}checked{% endif %}>
+                <label class="form-check-label" for="tag-{{ t.id }}">
+                  {% if t.color %}<span class="badge" style="background-color:{{ t.color }};color:#fff">{{ t.name }}</span>
+                  {% else %}<span class="badge bg-label-secondary">{{ t.name }}</span>{% endif %}
+                </label>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+
+          {% if not is_transfer %}
+          <div class="mb-3">
+            <label class="form-label d-flex align-items-center gap-2">
+              <i class="bi bi-paperclip"></i>{{ _('attachments') }}
+              <small class="text-muted">({{ _('attachments_hint') }})</small>
+            </label>
+            <div class="yn-attach-drop" id="attach-drop">
+              <input type="file" id="attach-input" class="d-none" accept="image/png,image/jpeg,image/webp,image/heic,application/pdf" multiple>
+              <div class="yn-attach-drop-label text-muted">
+                <i class="bi bi-cloud-arrow-up"></i>
+                <span>{{ _('attachments_drop') }}</span>
+              </div>
+            </div>
+            <div id="attach-list" class="d-flex flex-wrap gap-2 mt-2"></div>
+          </div>
+          {% endif %}
+
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">{{ _('save') }}</button>
+            <a href="/movements" class="btn btn-outline-secondary">{{ _('cancel') }}</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block page_js %}
+<script src="/static/vendor/flatpickr/flatpickr.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    flatpickr('#date', { dateFormat: 'Y-m-d', altInput: true, altFormat: _fpAltFormat, defaultDate: '{{ movement.date if movement else "today" }}' });
+
+    // Restore last used source for new movements (not edits)
+    {% if not movement and not is_transfer %}
+    const sourceSelect = document.getElementById('source_id');
+    const lastSource = '{{ get_last_source_id() or "" }}';
+    if (lastSource && !sourceSelect.value) {
+      const opt = sourceSelect.querySelector(`option[value="${lastSource}"]`);
+      if (opt) sourceSelect.value = lastSource;
+    }
+    {% endif %}
+
+    {% if not is_transfer %}
+    initAttachments({% if movement %}{{ movement.id }}{% else %}null{% endif %});
+    {% endif %}
+  });
+
+  // --- Attachments ---
+  var ATT_MAX_SIZE = 10 * 1024 * 1024;
+  var ATT_MAX_COUNT = 5;
+  var ATT_ALLOWED = ['image/png','image/jpeg','image/webp','image/heic','application/pdf'];
+  var ATT_ALLOWED_EXT = /\.(png|jpe?g|webp|heic|pdf)$/i;
+  var _attMovementId = null;
+  var _pendingFiles = []; // for new movements, before the POST succeeds
+  var _uploadedCount = 0;
+
+  function initAttachments(movementId) {
+    _attMovementId = movementId;
+    var drop = document.getElementById('attach-drop');
+    var input = document.getElementById('attach-input');
+    if (!drop || !input) return;
+
+    drop.addEventListener('click', function() { input.click(); });
+    drop.addEventListener('dragover', function(e) { e.preventDefault(); drop.classList.add('is-dragover'); });
+    drop.addEventListener('dragleave', function() { drop.classList.remove('is-dragover'); });
+    drop.addEventListener('drop', function(e) {
+      e.preventDefault();
+      drop.classList.remove('is-dragover');
+      if (e.dataTransfer && e.dataTransfer.files) handleFiles(e.dataTransfer.files);
+    });
+    input.addEventListener('change', function() { if (input.files) handleFiles(input.files); input.value = ''; });
+
+    if (_attMovementId) loadExistingAttachments();
+  }
+
+  function _attTotal() {
+    return _uploadedCount + _pendingFiles.length;
+  }
+
+  function _isAllowed(file) {
+    if (file.size > ATT_MAX_SIZE) return false;
+    if (file.type && ATT_ALLOWED.indexOf(file.type) >= 0) return true;
+    return ATT_ALLOWED_EXT.test(file.name);
+  }
+
+  function handleFiles(fileList) {
+    var files = Array.from(fileList);
+    for (var i = 0; i < files.length; i++) {
+      var f = files[i];
+      if (_attTotal() >= ATT_MAX_COUNT) {
+        showToast('{{ _("attachments_limit_reached") }}', 'warning');
+        break;
+      }
+      if (f.size > ATT_MAX_SIZE) {
+        showToast('{{ _("attachments_too_large") }}: ' + f.name, 'error');
+        continue;
+      }
+      if (!_isAllowed(f)) {
+        showToast('{{ _("attachments_unsupported") }}: ' + f.name, 'error');
+        continue;
+      }
+      if (_attMovementId) {
+        uploadOne(_attMovementId, f);
+      } else {
+        var localId = 'pending-' + Date.now() + '-' + i;
+        _pendingFiles.push({ id: localId, file: f });
+        renderPendingChip(localId, f);
+      }
+    }
+  }
+
+  async function uploadOne(movementId, file) {
+    var tempId = 'tmp-' + Math.random().toString(36).slice(2);
+    renderPendingChip(tempId, file, true);
+    try {
+      var fd = new FormData();
+      fd.append('file', file);
+      var resp = await fetch('/api/movements/' + movementId + '/attachments', {
+        method: 'POST', body: fd,
+      });
+      if (!resp.ok) {
+        removeChip(tempId);
+        await handleApiError(resp);
+        return;
+      }
+      var att = await resp.json();
+      removeChip(tempId);
+      renderUploadedChip(att);
+      _uploadedCount++;
+    } catch (e) {
+      removeChip(tempId);
+      showToast('{{ _("error") }}', 'error');
+    }
+  }
+
+  async function loadExistingAttachments() {
+    try {
+      var resp = await fetch('/api/movements/' + _attMovementId + '/attachments');
+      if (!resp.ok) return;
+      var items = await resp.json();
+      _uploadedCount = items.length;
+      items.forEach(renderUploadedChip);
+    } catch (e) {}
+  }
+
+  function _humanSize(n) {
+    if (n < 1024) return n + ' B';
+    if (n < 1024 * 1024) return (n / 1024).toFixed(1) + ' KB';
+    return (n / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+
+  function _chipIcon(mime, filename) {
+    if (mime && mime.indexOf('image/') === 0) return 'bi-image';
+    if (mime === 'application/pdf' || /\.pdf$/i.test(filename || '')) return 'bi-file-earmark-pdf';
+    return 'bi-paperclip';
+  }
+
+  function renderPendingChip(id, file, uploading) {
+    var list = document.getElementById('attach-list');
+    if (!list) return;
+    var div = document.createElement('div');
+    div.className = 'yn-attach-chip' + (uploading ? ' is-uploading' : '');
+    div.id = 'att-chip-' + id;
+    div.innerHTML =
+      '<i class="bi ' + _chipIcon(file.type, file.name) + '"></i>' +
+      '<span class="yn-attach-chip-name" title="' + escAtt(file.name) + '">' + escAtt(file.name) + '</span>' +
+      '<span class="yn-attach-chip-size">' + _humanSize(file.size) + '</span>' +
+      (uploading ? '<span class="yn-attach-chip-spinner"></span>' :
+        '<button type="button" class="yn-attach-chip-remove" title="{{ _("remove") }}"><i class="bi bi-x"></i></button>');
+    list.appendChild(div);
+    if (!uploading) {
+      div.querySelector('.yn-attach-chip-remove').addEventListener('click', function() {
+        _pendingFiles = _pendingFiles.filter(function(p) { return p.id !== id; });
+        div.remove();
+      });
+    }
+  }
+
+  function renderUploadedChip(att) {
+    var list = document.getElementById('attach-list');
+    if (!list) return;
+    var div = document.createElement('div');
+    div.className = 'yn-attach-chip is-uploaded';
+    div.id = 'att-chip-uploaded-' + att.id;
+    var icon = _chipIcon(att.mime_type, att.filename);
+    div.innerHTML =
+      '<a class="yn-attach-chip-link" href="/api/movements/attachments/' + att.id + '" target="_blank" rel="noopener" onclick="return yfOpenExternal(this.href)">' +
+        '<i class="bi ' + icon + '"></i>' +
+        '<span class="yn-attach-chip-name" title="' + escAtt(att.filename) + '">' + escAtt(att.filename) + '</span>' +
+        '<span class="yn-attach-chip-size">' + _humanSize(att.size_bytes) + '</span>' +
+      '</a>' +
+      '<button type="button" class="yn-attach-chip-remove" title="{{ _("remove") }}"><i class="bi bi-x"></i></button>';
+    list.appendChild(div);
+    div.querySelector('.yn-attach-chip-remove').addEventListener('click', async function() {
+      if (!(await confirmDialog('{{ _("attachments_confirm_delete") }}', { icon: 'warning', confirmColor: 'danger', confirmText: '{{ _("delete") }}' }))) return;
+      var r = await fetch('/api/movements/attachments/' + att.id, { method: 'DELETE' });
+      if (r.ok) {
+        div.remove();
+        _uploadedCount = Math.max(0, _uploadedCount - 1);
+        showToast('{{ _("deleted_successfully") }}', 'success');
+      } else {
+        await handleApiError(r);
+      }
+    });
+  }
+
+  function removeChip(id) {
+    var el = document.getElementById('att-chip-' + id);
+    if (el) el.remove();
+  }
+
+  function escAtt(s) { var d = document.createElement('div'); d.textContent = String(s); return d.innerHTML; }
+
+  async function uploadPendingFor(movementId) {
+    if (!_pendingFiles.length) return;
+    for (var i = 0; i < _pendingFiles.length; i++) {
+      var p = _pendingFiles[i];
+      try {
+        var fd = new FormData();
+        fd.append('file', p.file);
+        await fetch('/api/movements/' + movementId + '/attachments', { method: 'POST', body: fd });
+      } catch (e) {}
+    }
+    _pendingFiles = [];
+  }
+
+  document.getElementById('movement-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const tagIds = Array.from(document.querySelectorAll('.tag-checkbox:checked')).map(cb => parseInt(cb.value));
+
+    {% if is_transfer and movement %}
+    // Edit transfer
+    const data = {
+      from_source_id: parseInt(document.getElementById('from_source_id').value),
+      to_source_id: parseInt(document.getElementById('to_source_id').value),
+      amount: parseFloat(document.getElementById('amount').value),
+      date: document.getElementById('date').value,
+      note: document.getElementById('note').value || null,
+      tag_ids: tagIds
+    };
+    const resp = await fetch('/api/movements/transfer/{{ transfer_out_id }}', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    {% elif is_transfer %}
+    // New transfer
+    const data = {
+      from_source_id: parseInt(document.getElementById('from_source_id').value),
+      to_source_id: parseInt(document.getElementById('to_source_id').value),
+      amount: parseFloat(document.getElementById('amount').value),
+      date: document.getElementById('date').value,
+      note: document.getElementById('note').value || null,
+      tag_ids: tagIds
+    };
+    const resp = await fetch('/api/movements/transfer', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    {% elif movement %}
+    // Edit movement
+    const sourceEditVal = document.getElementById('source_id').value;
+    const data = {
+      source_id: sourceEditVal ? parseInt(sourceEditVal) : null,
+      amount: parseFloat(document.getElementById('amount').value),
+      direction: document.querySelector('input[name="direction"]:checked').value,
+      date: document.getElementById('date').value,
+      note: document.getElementById('note').value || null,
+      tag_ids: tagIds
+    };
+    const resp = await fetch('/api/movements/{{ movement.id }}', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    {% else %}
+    // Create
+    const sourceVal = document.getElementById('source_id').value;
+    const data = {
+      source_id: sourceVal ? parseInt(sourceVal) : null,
+      amount: parseFloat(document.getElementById('amount').value),
+      direction: document.querySelector('input[name="direction"]:checked').value,
+      date: document.getElementById('date').value,
+      note: document.getElementById('note').value || null,
+      tag_ids: tagIds
+    };
+    const resp = await fetch('/api/movements', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    {% endif %}
+
+    if (resp.ok) {
+      // Remember last used source for next time
+      {% if not is_transfer %}
+      const lastSrc = document.getElementById('source_id').value;
+      {% elif is_transfer %}
+      const lastSrc = document.getElementById('from_source_id').value;
+      {% endif %}
+      if (lastSrc) {
+        fetch('/api/settings', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ last_source_id: parseInt(lastSrc) })
+        });
+      }
+
+      {% if not is_transfer %}
+      // Upload any pending attachments against the new/updated movement id
+      if (_pendingFiles.length) {
+        try {
+          var saved = await resp.json();
+          var targetId = saved && saved.id ? saved.id : _attMovementId;
+          if (targetId) await uploadPendingFor(targetId);
+        } catch (e) {}
+      }
+      {% endif %}
+
+      // Navigate back — use link click for pywebview compatibility
+      var a = document.createElement('a');
+      a.href = '/movements';
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+    } else {
+      await handleApiError(resp);
+    }
+  });
+</script>
+{% endblock %}

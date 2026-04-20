@@ -1,0 +1,22 @@
+{
+  "id": "n26",
+  "display_name": "N26",
+  "bank": "N26",
+  "format": "csv",
+  "currency_hint": "EUR",
+  "source_hint": "N26",
+  "detect": {
+    "headers": ["booking date", "value date", "partner name", "type", "payment reference", "amount (eur)"]
+  },
+  "options": {
+    "encoding": "utf-8",
+    "delimiter": ",",
+    "decimal_separator": ".",
+    "date_format": "%Y-%m-%d",
+    "column_map": {
+      "date": "Booking Date",
+      "amount": "Amount (EUR)",
+      "note": "Partner Name"
+    }
+  }
+}

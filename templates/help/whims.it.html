@@ -1,0 +1,107 @@
+<h5>Sfizi</h5>
+<p class="yn-help-lead">Uno sfizio è qualcosa che vuoi comprare ma non hai ancora comprato. Pensa a questa pagina come a una lista dei desideri con priorità. Quando decidi di acquistare (o di lasciar perdere), lo sposti fuori dalla lista.</p>
+
+<h6>Cosa vedi</h6>
+<ul>
+  <li>Due schede: <strong>Da realizzare</strong> (sfizi in attesa) e <strong>Realizzati</strong> (voci che hai comprato).</li>
+  <li>Ogni sfizio in attesa è una scheda con <strong>nome</strong>, <strong>importo</strong>, <strong>badge priorità</strong>, un'icona di <strong>link</strong> se hai inserito un URL e un'eventuale <strong>nota</strong>.</li>
+  <li>In fondo, una sezione collassabile <strong>scartati</strong> raccoglie gli sfizi che hai deciso di non acquistare, con il nome barrato.</li>
+  <li>La scheda Realizzati è una tabella: icona, nome, data di acquisto, importo.</li>
+</ul>
+
+<h6>Priorità</h6>
+<p>Le priorità aiutano a decidere cosa vale la pena comprare prima:</p>
+<ul>
+  <li><span class="yn-help-chip danger">Alta</span>: cose che vuoi davvero, o che migliorerebbero qualcosa che usi ogni giorno.</li>
+  <li><span class="yn-help-chip warning">Media</span>: piacevoli da avere ma non urgenti. Il predefinito.</li>
+  <li><span class="yn-help-chip info">Bassa</span>: sarebbe divertente, ma non ne sei sicuro. Utile per tenerli in lista senza impegno.</li>
+</ul>
+
+<h6>Azioni principali</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-plus-lg"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Nuovo Sfizio</span>
+      <span class="yn-help-action-desc">Aggiungi una voce alla lista. Inserisci nome, importo, priorità, URL opzionale e nota.</span>
+    </div>
+  </div>
+</div>
+
+<h6>Azioni per sfizio</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon success"><i class="bi bi-cart"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Compra</span>
+      <span class="yn-help-action-desc">Apre la finestra di acquisto. Scegli la fonte di pagamento e conferma. Viene creato un movimento di uscita e lo sfizio passa in Realizzati.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon muted"><i class="bi bi-x-lg"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Scarta</span>
+      <span class="yn-help-action-desc">Sposta lo sfizio nella sezione scartati. Non viene creato alcun movimento. Resta visibile con il nome barrato.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-pencil"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Modifica</span>
+      <span class="yn-help-action-desc">Cambia nome, importo, priorità, URL o nota.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon danger"><i class="bi bi-trash"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Elimina</span>
+      <span class="yn-help-action-desc">Rimuove lo sfizio in modo permanente. Usala quando vuoi dimenticartene del tutto.</span>
+    </div>
+  </div>
+</div>
+
+<h6>Compra, Scarta o Elimina</h6>
+<p>I tre modi per rimuovere uno sfizio dalla lista hanno effetti diversi:</p>
+<ul>
+  <li><strong>Compra</strong>: lo hai effettivamente preso. Viene registrata un'uscita e lo sfizio resta come storico.</li>
+  <li><strong>Scarta</strong>: hai cambiato idea. Nessuna uscita registrata. Rimane in fondo come riferimento.</li>
+  <li><strong>Elimina</strong>: rimuovi la voce completamente dal database. Nessuno storico.</li>
+</ul>
+
+<h6>Filtri e ordinamento</h6>
+<ul>
+  <li><strong>Priorità</strong>: mostra solo alta, media o bassa.</li>
+  <li><strong>Ordina</strong>: importo crescente o decrescente, più recenti o meno recenti, per nome.</li>
+  <li><strong>Reset</strong> azzera i filtri.</li>
+</ul>
+
+<h6>Passo passo: aggiungere uno sfizio</h6>
+<ol class="yn-help-steps">
+  <li>Clicca <span class="yn-help-chip primary"><i class="bi bi-plus-lg"></i> Nuovo Sfizio</span>.</li>
+  <li>Inserisci il <strong>nome</strong> (per esempio "Cuffie noise-cancelling").</li>
+  <li>Inserisci <strong>importo</strong> e <strong>valuta</strong>.</li>
+  <li>Scegli una <strong>priorità</strong>. Media è il predefinito.</li>
+  <li>Opzionale: scegli una <strong>fonte</strong> (da cui prevedi di pagare), incolla un <strong>URL</strong> alla pagina del prodotto e scrivi una <strong>nota</strong>.</li>
+  <li>Salva. La scheda compare sotto "Da realizzare".</li>
+</ol>
+
+<h6>Passo passo: comprare uno sfizio</h6>
+<ol class="yn-help-steps">
+  <li>Individua la scheda e clicca <span class="yn-help-chip success"><i class="bi bi-cart"></i> Compra</span>.</li>
+  <li>Scegli la fonte da cui hai pagato.</li>
+  <li>Conferma. Yfine crea un movimento di uscita e sposta lo sfizio nella scheda Realizzati.</li>
+</ol>
+
+<h6>Risparmia per uno sfizio</h6>
+<p>Ogni sfizio in attesa ha un bottone <span class="yn-help-chip"><i class="bi bi-piggy-bank"></i> Risparmia</span>: crea un <strong>obiettivo di risparmio</strong> agganciato a quello sfizio, con nome e importo uguali. Mentre alloci soldi, sulla card dello sfizio compare una barra di progresso.</p>
+<ul>
+  <li>L'obiettivo appare nel tab <strong>Obiettivi</strong> della pagina Risparmi, dove puoi allocare denaro da qualsiasi conto nel tempo.</li>
+  <li>Quando fai clic su <span class="yn-help-chip success"><i class="bi bi-cart"></i> Compra</span>, Yfine <strong>chiude automaticamente</strong> l'obiettivo: sposta i soldi accumulati sul conto che scegli per l'acquisto, poi crea il movimento di uscita.</li>
+  <li>Se elimini lo sfizio, il goal collegato resta (si può finire comunque di risparmiare).</li>
+  <li>Se elimini il goal, lo sfizio torna "scollegato" e può essere comprato normalmente.</li>
+</ul>
+
+<div class="yn-help-tip">
+  <i class="bi bi-info-circle-fill"></i>
+  <div>Aggiungere un URL ti permette di tornare facilmente alla pagina del prodotto in un secondo momento. Compare una piccola icona di link sulla scheda.</div>
+</div>

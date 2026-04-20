@@ -1,0 +1,63 @@
+<h5>Notifiche</h5>
+<p class="yn-help-lead">Yfine genera notifiche quando ha qualcosa da dirti: un ricorrente è in scadenza, un saldo non basta a coprire un pagamento programmato, un'operazione in background è terminata. Questa pagina è l'archivio completo. Le più recenti non lette appaiono anche sotto l'icona della campanella nella barra in alto.</p>
+
+<h6>Cosa vedi</h6>
+<ul>
+  <li>Una lista di notifiche. Ognuna ha un'icona colorata in base al tipo: <span class="yn-help-chip danger"><i class="bi bi-exclamation-octagon-fill"></i> allarme</span>, <span class="yn-help-chip warning"><i class="bi bi-exclamation-triangle-fill"></i> avviso</span>, <span class="yn-help-chip info"><i class="bi bi-info-circle-fill"></i> info</span>.</li>
+  <li>Ogni notifica ha un <strong>titolo</strong>, un <strong>testo</strong> e un <strong>timestamp</strong> relativo ("5 minuti fa", "ieri").</li>
+  <li>Le non lette hanno sfondo evidenziato e titolo in grassetto.</li>
+  <li>Schede in alto per filtrare per tipo: <strong>Tutte</strong>, <strong>Non lette</strong>, <strong>Allarme</strong>, <strong>Info</strong>, <strong>Avviso</strong>.</li>
+  <li>La paginazione compare in fondo quando ci sono più di 20 risultati nel filtro.</li>
+</ul>
+
+<h6>Azioni principali</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon success"><i class="bi bi-check-all"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Segna tutte come lette</span>
+      <span class="yn-help-action-desc">Azzera il badge dei non letti segnando come letta ogni notifica corrente.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon danger"><i class="bi bi-trash"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Elimina le lette</span>
+      <span class="yn-help-action-desc">Ripulisce l'archivio. Vengono rimosse solo le notifiche già lette.</span>
+    </div>
+  </div>
+</div>
+
+<h6>Azioni per notifica</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon success"><i class="bi bi-check-lg"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Segna come letta</span>
+      <span class="yn-help-action-desc">Compare sulle notifiche non lette. Toglie l'evidenziazione ma la voce resta in archivio.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon danger"><i class="bi bi-trash"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Elimina</span>
+      <span class="yn-help-action-desc">Rimuove una singola notifica.</span>
+    </div>
+  </div>
+</div>
+
+<h6>Cosa fa scattare una notifica</h6>
+<ul>
+  <li><strong>Ricorrente in arrivo</strong>: quando la scadenza di un ricorrente rientra nell'intervallo di avviso configurato.</li>
+  <li><strong>Fondi insufficienti</strong>: quando un pagamento ricorrente programmato porterebbe la fonte sotto zero e hai abilitato l'avviso sui fondi insufficienti per quella voce.</li>
+  <li><strong>Ricorrente applicato automaticamente</strong>: conferma che Yfine ha creato un movimento per un ricorrente impostato su Automatica.</li>
+  <li><strong>Risultati di operazioni in background</strong>: importazione completata, esportazione pronta, plugin scansionato e simili.</li>
+</ul>
+
+<h6>L'icona della campanella</h6>
+<p>La campanella nella barra in alto mostra un contatore rosso quando hai notifiche non lette. Cliccandola si apre un menu a tendina con le cinque non lette più recenti e una scorciatoia a questa pagina. Ogni voce nel menu ha il proprio pulsante per chiudere e per segnare come letta.</p>
+
+<div class="yn-help-tip">
+  <i class="bi bi-info-circle-fill"></i>
+  <div>Le notifiche non lette appaiono anche come toast pop-up al loro arrivo. Il toast ha un link "Segna come letta" se vuoi sbarazzartene subito.</div>
+</div>

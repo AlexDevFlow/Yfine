@@ -1,0 +1,90 @@
+name: Build Desktop App
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            artifact: Yfine-Linux
+            zip_name: Yfine-Linux.tar.gz
+          - os: macos-13
+            artifact: Yfine-macOS-Intel
+            zip_name: Yfine-macOS-Intel.zip
+          - os: macos-14
+            artifact: Yfine-macOS-AppleSilicon
+            zip_name: Yfine-macOS-AppleSilicon.zip
+          - os: windows-latest
+            artifact: Yfine-Windows
+            zip_name: Yfine-Windows.zip
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install system dependencies (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libgirepository1.0-dev \
+            gir1.2-webkit2-4.1 \
+            libwebkit2gtk-4.1-dev
+
+      - name: Install Python dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pywebview pyinstaller
+
+      - name: Build with PyInstaller
+        run: pyinstaller yfine.spec --noconfirm
+
+      - name: Package (Linux)
+        if: runner.os == 'Linux'
+        run: tar -czf ${{ matrix.zip_name }} -C dist yfine
+
+      - name: Package (macOS)
+        if: runner.os == 'macOS'
+        run: cd dist && zip -r ../${{ matrix.zip_name }} yfine
+
+      - name: Package (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: Compress-Archive -Path dist\yfine -DestinationPath ${{ matrix.zip_name }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.zip_name }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/**/*
+          generate_release_notes: true

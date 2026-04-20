@@ -1,0 +1,683 @@
+{% extends "base.html" %}
+{% set active_page = "movements" %}
+
+{% block title %}{{ _('movements') }}{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="/static/vendor/flatpickr/flatpickr.min.css" />
+{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2 mb-3">
+      <h5 class="card-title mb-0">{{ _('movements') }}</h5>
+      <div class="d-flex gap-2 flex-nowrap overflow-auto w-100 w-sm-auto pb-1 pb-sm-0 yn-action-row">
+        <button type="button" class="btn btn-sm btn-outline-secondary yn-action-btn flex-shrink-0" onclick="openMovementsCalendar()">
+          <i class="bi bi-calendar"></i>
+          <span>{{ _('view_calendar') }}</span>
+        </button>
+        <a href="/movements/new?transfer=1{% if filter_source_id %}&source_id={{ filter_source_id }}{% endif %}" class="btn btn-sm btn-outline-primary yn-action-btn flex-shrink-0">
+          <i class="bi bi-arrow-left-right"></i>
+          <span>{{ _('new_transfer') }}</span>
+        </a>
+        <a href="/movements/new{% if filter_source_id %}?source_id={{ filter_source_id }}{% endif %}" class="btn btn-sm btn-primary yn-action-btn flex-shrink-0">
+          <i class="bi bi-plus-lg"></i>
+          <span>{{ _('new_movement') }}</span>
+        </a>
+      </div>
+    </div>
+    <!-- Compact filters: date range + amount -->
+    <div class="row g-2 align-items-end">
+      <div class="col-12 col-sm-auto">
+        <input type="text" class="form-control form-control-sm" id="filter-date-range" placeholder="{{ _('date_from') }} — {{ _('date_to') }}">
+        <input type="hidden" id="filter-date-from" value="{{ filter_date_from or '' }}">
+        <input type="hidden" id="filter-date-to" value="{{ filter_date_to or '' }}">
+      </div>
+      <div class="col-6 col-sm-auto">
+        <input type="number" step="0.01" inputmode="decimal" class="form-control form-control-sm" id="filter-amount-min" placeholder="{{ _('amount_min') }}" value="{{ filter_amount_min or '' }}">
+      </div>
+      <div class="col-6 col-sm-auto">
+        <input type="number" step="0.01" inputmode="decimal" class="form-control form-control-sm" id="filter-amount-max" placeholder="{{ _('amount_max') }}" value="{{ filter_amount_max or '' }}">
+      </div>
+      {% if filter_date_from or filter_date_to or filter_amount_min or filter_amount_max or filter_source_id or filter_tag_ids or filter_direction %}
+      <div class="col-auto">
+        <a href="/movements" class="btn btn-sm btn-outline-danger"><i class="bi bi-arrow-counterclockwise me-1"></i>{{ _('reset_filters') }}</a>
+      </div>
+      {% endif %}
+    </div>
+    <!-- Hidden selects for JS access -->
+    <select class="d-none" id="filter-source"><option value="">{{ _('all') }}</option>{% for s in sources %}<option value="{{ s.id }}" {% if filter_source_id == s.id %}selected{% endif %}>{{ s.name }}</option>{% endfor %}</select>
+    <select class="d-none" id="filter-direction"><option value="">{{ _('all') }}</option><option value="in" {% if filter_direction == 'in' %}selected{% endif %}>{{ _('in') }}</option><option value="out" {% if filter_direction == 'out' %}selected{% endif %}>{{ _('out') }}</option></select>
+  </div>
+  <!-- Column filter chips -->
+  <div class="card-body pt-0 pb-2">
+    <div class="d-flex flex-wrap gap-2">
+      <div class="dropdown">
+        <button class="btn btn-sm {% if filter_source_id %}btn-primary{% else %}btn-outline-secondary{% endif %} dropdown-toggle" data-bs-toggle="dropdown">
+          <i class="bi bi-wallet2 me-1"></i>{{ _('source') }}
+        </button>
+        <ul class="dropdown-menu">
+          <li><a class="dropdown-item {% if not filter_source_id %}active{% endif %}" href="javascript:void(0)" onclick="setColumnFilter('source_id','')">{{ _('all') }}</a></li>
+          <li><hr class="dropdown-divider"></li>
+          {% for s in sources %}
+          <li><a class="dropdown-item {% if filter_source_id == s.id %}active{% endif %}" href="javascript:void(0)" onclick="setColumnFilter('source_id','{{ s.id }}')">{{ s.name }}</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="dropdown">
+        <button class="btn btn-sm {% if filter_direction %}btn-primary{% else %}btn-outline-secondary{% endif %} dropdown-toggle" data-bs-toggle="dropdown">
+          <i class="bi bi-filter me-1"></i>{{ _('direction') }}
+        </button>
+        <ul class="dropdown-menu">
+          <li><a class="dropdown-item {% if not filter_direction %}active{% endif %}" href="javascript:void(0)" onclick="setColumnFilter('direction','')">{{ _('all') }}</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item {% if filter_direction == 'in' %}active{% endif %}" href="javascript:void(0)" onclick="setColumnFilter('direction','in')">{{ _('in') }}</a></li>
+          <li><a class="dropdown-item {% if filter_direction == 'out' %}active{% endif %}" href="javascript:void(0)" onclick="setColumnFilter('direction','out')">{{ _('out') }}</a></li>
+        </ul>
+      </div>
+      <div class="dropdown">
+        <button class="btn btn-sm {% if filter_tag_ids %}btn-primary{% else %}btn-outline-secondary{% endif %} dropdown-toggle" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+          <i class="bi bi-tag me-1"></i>{{ _('tags') }}{% if filter_tag_ids %} ({{ filter_tag_ids|length }}){% endif %}
+        </button>
+        <ul class="dropdown-menu p-0" style="min-width:220px">
+          <li class="px-3 py-2" style="max-height:260px;overflow-y:auto">
+            {% for t in tags %}
+            <div class="form-check">
+              <input class="form-check-input filter-tag-cb" type="checkbox" value="{{ t.id }}" id="filter-tag-cb-{{ t.id }}" {% if t.id in filter_tag_ids %}checked{% endif %}>
+              <label class="form-check-label w-100" for="filter-tag-cb-{{ t.id }}">
+                {% if t.color %}<span class="badge" style="background-color:{{ t.color }};color:#fff">{{ t.name }}</span>
+                {% else %}<span class="badge bg-label-secondary">{{ t.name }}</span>{% endif %}
+              </label>
+            </div>
+            {% endfor %}
+            {% if not tags %}<div class="text-muted small">{{ _('no_tags') }}</div>{% endif %}
+          </li>
+          <li class="border-top px-2 py-2 d-flex gap-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary flex-fill" onclick="clearTagFilter()">{{ _('reset_filters') }}</button>
+            <button type="button" class="btn btn-sm btn-primary flex-fill" onclick="applyTagFilter()">{{ _('apply') }}</button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Grouped movements: Year → Month → Day -->
+  {% for year_group in grouped_movements %}
+  {# ── Year accordion ── #}
+  <div class="card-header border-top py-0 px-3" style="cursor:pointer" onclick="toggleGroup('year-{{ year_group.year }}', this)">
+    <div class="d-flex justify-content-between align-items-center py-3">
+      <div class="d-flex align-items-center">
+        <i class="bi bi-chevron-down me-2 group-chevron fs-5"></i>
+        <h6 class="mb-0 fw-bold">{{ year_group.year }}</h6>
+        <span class="badge bg-label-secondary ms-2">{{ year_group.count }}</span>
+      </div>
+      <div class="d-flex gap-1 gap-sm-2 align-items-center flex-shrink-0">
+        {% if year_group.total_in %}<span class="badge bg-success">+{{ "%.2f"|format(year_group.total_in) }}</span>{% endif %}
+        {% if year_group.total_out %}<span class="badge bg-danger">-{{ "%.2f"|format(year_group.total_out) }}</span>{% endif %}
+        {% set year_net = year_group.total_in - year_group.total_out %}
+        {% set year_pct = ((year_net / year_group.total_in * 100) if year_group.total_in else 0)|round(1) %}
+        <span class="badge bg-{% if year_net >= 0 %}info{% else %}warning{% endif %} d-none d-sm-inline-block" title="{{ _('balance') }}">
+          <i class="bi bi-{% if year_net >= 0 %}graph-up-arrow{% else %}graph-down-arrow{% endif %} me-1"></i>{{ "%+.2f"|format(year_net) }} <small>({{ "%+.1f"|format(year_pct) }}%)</small>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  {% for month in year_group.months %}
+  {# ── Month accordion ── #}
+  <div class="card-header border-top bg-light py-0 px-3 ps-4 year-{{ year_group.year }}-child" style="cursor:pointer" onclick="toggleGroup('month-{{ month.year_month }}', this)">
+    <div class="d-flex justify-content-between align-items-center py-2">
+      <div class="d-flex align-items-center">
+        <i class="bi bi-chevron-down me-2 group-chevron"></i>
+        <span class="fw-bold month-label" data-month="{{ month.year_month }}">{{ month.year_month }}</span>
+        <span class="badge bg-label-secondary ms-2">{{ month.count }}</span>
+      </div>
+      <div class="d-flex gap-1 gap-sm-2 align-items-center flex-shrink-0">
+        {% if month.total_in %}<span class="badge bg-label-success">+{{ "%.2f"|format(month.total_in) }}</span>{% endif %}
+        {% if month.total_out %}<span class="badge bg-label-danger">-{{ "%.2f"|format(month.total_out) }}</span>{% endif %}
+        {% set month_net = month.total_in - month.total_out %}
+        {% set month_pct = ((month_net / month.total_in * 100) if month.total_in else 0)|round(1) %}
+        <span class="badge bg-label-{% if month_net >= 0 %}info{% else %}warning{% endif %} d-none d-sm-inline-block" title="{{ _('balance') }}">
+          <i class="bi bi-{% if month_net >= 0 %}graph-up-arrow{% else %}graph-down-arrow{% endif %} me-1"></i>{{ "%+.2f"|format(month_net) }} <small>({{ "%+.1f"|format(month_pct) }}%)</small>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  {% for day in month.days %}
+  {# ── Day accordion ── #}
+  <div class="card-header border-top py-0 px-3 ps-5 year-{{ year_group.year }}-child month-{{ month.year_month }}-child" style="cursor:pointer" onclick="toggleGroup('day-{{ day.date }}', this)">
+    <div class="d-flex justify-content-between align-items-center py-2">
+      <div class="d-flex align-items-center">
+        <i class="bi bi-chevron-down me-2 group-chevron" style="font-size:.85rem"></i>
+        <small class="fw-semibold">{{ day.date|fdate }}</small>
+        <span class="badge bg-label-secondary ms-2" style="font-size:.65rem">{{ day.movements|length }}</span>
+      </div>
+      <div class="d-flex gap-1">
+        {% if day.total_in %}<small class="text-success fw-bold">+{{ "%.2f"|format(day.total_in) }}</small>{% endif %}
+        {% if day.total_out %}<small class="text-danger fw-bold ms-2">-{{ "%.2f"|format(day.total_out) }}</small>{% endif %}
+      </div>
+    </div>
+  </div>
+
+  {# ── Movement rows for this day ── #}
+  {# ── Desktop table (hidden on mobile) ── #}
+  <div class="table-responsive d-none d-md-block year-{{ year_group.year }}-child month-{{ month.year_month }}-child day-{{ day.date }}-child">
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr class="text-uppercase text-muted" style="font-size:.7rem;letter-spacing:.05em">
+          <th style="padding-left:3.5rem;width:20%">{{ _('source') }}</th>
+          <th style="width:10%">{{ _('direction') }}</th>
+          <th style="width:12%">{{ _('amount') }}</th>
+          <th style="width:18%">{{ _('tags') }}</th>
+          <th>{{ _('note') }}</th>
+          <th class="text-end" style="width:10%">{{ _('actions') }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for m in day.movements %}
+        <tr id="movement-row-{{ m.id }}">
+          <td style="padding-left:3.5rem">
+            {% if m.transfer_pair_id %}
+              <span class="fw-bold">{{ m.source_name }}</span>
+              <i class="bi bi-arrow-right text-info mx-1"></i>
+              <span class="fw-bold">{{ m.transfer_source_name }}</span>
+            {% else %}
+              {{ m.source_name }}
+            {% endif %}
+          </td>
+          <td>
+            {% if m.transfer_pair_id %}
+              <span class="badge bg-label-info"><i class="bi bi-arrow-left-right me-1"></i>{{ _('transfer') }}</span>
+            {% else %}
+              <span class="badge bg-label-{% if m.direction == 'in' %}success{% else %}danger{% endif %}">{{ _('in') if m.direction == 'in' else _('out') }}</span>
+            {% endif %}
+          </td>
+          <td class="{% if m.transfer_pair_id %}text-info{% elif m.direction == 'in' %}text-success{% else %}text-danger{% endif %} fw-bold">
+            {% if m.transfer_pair_id %}{{ "%.2f"|format(m.amount) }}{% else %}{% if m.direction == 'in' %}+{% else %}-{% endif %}{{ "%.2f"|format(m.amount) }}{% endif %}
+          </td>
+          <td>{% for t in m.tags %}{% if t.color %}<span class="badge" style="background-color:{{ t.color }};color:#fff">{{ t.name }}</span>{% else %}<span class="badge bg-label-secondary">{{ t.name }}</span>{% endif %} {% endfor %}</td>
+          <td><small class="text-muted">{{ m.note or '' }}</small>{% if m.attachment_count %} <a href="javascript:void(0)" class="yn-attach-flag ms-1" onclick="openAttachments({{ m.id }})" title="{{ _('attachments') }}"><i class="bi bi-paperclip"></i>{{ m.attachment_count }}</a>{% endif %}</td>
+          <td class="text-end" style="white-space:nowrap">
+            <a href="/movements/{{ m.id }}/edit" class="btn btn-sm btn-outline-warning me-1"><i class="bi bi-pencil"></i></a>
+            <button class="btn btn-sm btn-outline-danger" onclick="deleteMovement({{ m.id }})"><i class="bi bi-trash"></i></button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {# ── Mobile card list (hidden on desktop) ── #}
+  <div class="d-md-none year-{{ year_group.year }}-child month-{{ month.year_month }}-child day-{{ day.date }}-child">
+    {% for m in day.movements %}
+    <div class="px-3 py-2 border-top" id="movement-row-mobile-{{ m.id }}" onclick="location.href='/movements/{{ m.id }}/edit'" style="cursor:pointer">
+      <div class="d-flex justify-content-between align-items-start">
+        <div class="min-width-0">
+          <div class="fw-bold text-truncate">
+            {% if m.transfer_pair_id %}
+              {{ m.source_name }} <i class="bi bi-arrow-right text-info"></i> {{ m.transfer_source_name }}
+            {% else %}
+              {{ m.source_name }}
+            {% endif %}
+          </div>
+          <div class="d-flex flex-wrap gap-1 mt-1">
+            {% if m.transfer_pair_id %}
+              <span class="badge bg-label-info" style="font-size:.65rem">{{ _('transfer') }}</span>
+            {% else %}
+              <span class="badge bg-label-{% if m.direction == 'in' %}success{% else %}danger{% endif %}" style="font-size:.65rem">{{ _('in') if m.direction == 'in' else _('out') }}</span>
+            {% endif %}
+            {% for t in m.tags %}
+              {% if t.color %}<span class="badge" style="background-color:{{ t.color }};color:#fff;font-size:.6rem">{{ t.name }}</span>{% else %}<span class="badge bg-label-secondary" style="font-size:.6rem">{{ t.name }}</span>{% endif %}
+            {% endfor %}
+          </div>
+          {% if m.note %}<small class="text-muted d-block text-truncate mt-1" style="max-width:200px">{{ m.note }}</small>{% endif %}
+          {% if m.attachment_count %}<a href="javascript:void(0)" class="yn-attach-flag mt-1" onclick="event.stopPropagation(); openAttachments({{ m.id }})" title="{{ _('attachments') }}"><i class="bi bi-paperclip"></i>{{ m.attachment_count }}</a>{% endif %}
+        </div>
+        <span class="{% if m.transfer_pair_id %}text-info{% elif m.direction == 'in' %}text-success{% else %}text-danger{% endif %} fw-bold flex-shrink-0 ms-2" style="font-size:.95rem">
+          {% if m.transfer_pair_id %}{{ "%.2f"|format(m.amount) }}{% else %}{% if m.direction == 'in' %}+{% else %}-{% endif %}{{ "%.2f"|format(m.amount) }}{% endif %}
+        </span>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endfor %}
+  {% endfor %}
+  {% else %}
+  <div class="card-body text-center py-5">
+    <i class="bi bi-receipt text-muted mb-2" style="font-size:2.5rem"></i>
+    <p class="text-muted mb-3">{{ _('no_movements') }}</p>
+    <a href="/movements/new" class="btn btn-sm btn-primary"><i class="bi bi-plus me-1"></i>{{ _('new_movement') }}</a>
+  </div>
+  {% endfor %}
+
+  <!-- Pagination -->
+  {% if total_pages > 1 %}
+  <div class="card-footer d-flex justify-content-between align-items-center">
+    <small class="text-muted">
+      {{ _('showing_of').replace('{start}', ((page - 1) * per_page + 1)|string).replace('{end}', [page * per_page, total_count]|min|string).replace('{total}', total_count|string) }}
+    </small>
+    <nav>
+      <ul class="pagination pagination-sm mb-0">
+        <li class="page-item {% if page <= 1 %}disabled{% endif %}">
+          <a class="page-link" href="javascript:void(0)" onclick="goToPage({{ page - 1 }})">{{ _('previous') }}</a>
+        </li>
+        {% for p in range(1, total_pages + 1) %}
+          {% if p == page %}
+          <li class="page-item active"><span class="page-link">{{ p }}</span></li>
+          {% elif p <= 3 or p > total_pages - 2 or (p >= page - 1 and p <= page + 1) %}
+          <li class="page-item"><a class="page-link" href="javascript:void(0)" onclick="goToPage({{ p }})">{{ p }}</a></li>
+          {% elif p == 4 and page > 5 %}
+          <li class="page-item disabled"><span class="page-link">...</span></li>
+          {% elif p == total_pages - 2 and page < total_pages - 4 %}
+          <li class="page-item disabled"><span class="page-link">...</span></li>
+          {% endif %}
+        {% endfor %}
+        <li class="page-item {% if page >= total_pages %}disabled{% endif %}">
+          <a class="page-link" href="javascript:void(0)" onclick="goToPage({{ page + 1 }})">{{ _('next') }}</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Movements Calendar Modal -->
+<div class="modal fade" id="movCalendarModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header py-2">
+        <div class="d-flex align-items-center">
+          <button type="button" class="btn btn-sm btn-icon btn-outline-secondary me-2 d-none" id="mcm-back" onclick="movCalendarBack()">
+            <i class="bi bi-chevron-left"></i>
+          </button>
+          <h6 class="modal-title mb-0" id="mcm-title"></h6>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-0" id="mcm-body"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Attachments viewer modal -->
+<div class="modal fade" id="attachmentsModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg">
+    <div class="modal-content">
+      <div class="modal-header py-2">
+        <h6 class="modal-title mb-0"><i class="bi bi-paperclip me-1"></i>{{ _('attachments') }}</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="attachments-modal-body"></div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block page_js %}
+<script src="/static/vendor/flatpickr/flatpickr.min.js"></script>
+<script>
+  function escapeHtml(s) {
+    if (s == null) return '';
+    return String(s).replace(/[&<>"']/g, function(c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  // --- Hierarchical collapsible groups (year → month → day) ---
+  function toggleGroup(prefix, headerRow) {
+    var children = document.querySelectorAll('.' + prefix + '-child');
+    var chevron = headerRow.querySelector('.group-chevron');
+    var collapsed = headerRow.dataset.collapsed === '1';
+
+    if (collapsed) {
+      // Expand: remove the hiding class
+      children.forEach(function(r) { r.classList.remove('yn-collapsed'); });
+      headerRow.dataset.collapsed = '0';
+    } else {
+      // Collapse: add a hiding class
+      children.forEach(function(r) { r.classList.add('yn-collapsed'); });
+      headerRow.dataset.collapsed = '1';
+    }
+    if (chevron) {
+      chevron.classList.toggle('bi-chevron-down', collapsed);
+      chevron.classList.toggle('bi-chevron-right', !collapsed);
+    }
+  }
+
+  // --- Localize month labels ---
+  var _monthNames = {
+    en: ['January','February','March','April','May','June','July','August','September','October','November','December'],
+    it: ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre']
+  };
+  var _locale = '{{ get_locale() }}';
+  var _mNames = _monthNames[_locale] || _monthNames['en'];
+  document.querySelectorAll('.month-label').forEach(function(el) {
+    var parts = el.dataset.month.split('-');
+    el.textContent = _mNames[parseInt(parts[1], 10) - 1];
+  });
+
+  // --- Date range picker (flatpickr) ---
+  var _dateRangeDefault = [];
+  if (document.getElementById('filter-date-from').value) _dateRangeDefault.push(document.getElementById('filter-date-from').value);
+  if (document.getElementById('filter-date-to').value) _dateRangeDefault.push(document.getElementById('filter-date-to').value);
+
+  flatpickr('#filter-date-range', {
+    mode: 'range',
+    dateFormat: 'Y-m-d',
+    altInput: true,
+    altFormat: _fpAltFormat,
+    defaultDate: _dateRangeDefault.length ? _dateRangeDefault : null,
+    locale: { rangeSeparator: ' — ' },
+    onChange: function(dates) {
+      if (dates.length === 2) {
+        var fmt = function(d) { var m = d.getMonth()+1; var day = d.getDate(); return d.getFullYear() + '-' + (m<10?'0':'') + m + '-' + (day<10?'0':'') + day; };
+        document.getElementById('filter-date-from').value = fmt(dates[0]);
+        document.getElementById('filter-date-to').value = fmt(dates[1]);
+        applyFilters();
+      } else if (dates.length === 0) {
+        document.getElementById('filter-date-from').value = '';
+        document.getElementById('filter-date-to').value = '';
+        applyFilters();
+      }
+    }
+  });
+
+  // Column header filter
+  var _filterIdMap = { source_id: 'filter-source', direction: 'filter-direction' };
+  function setColumnFilter(key, val) {
+    var el = document.getElementById(_filterIdMap[key]);
+    if (el) el.value = val;
+    applyFilters();
+  }
+
+  // Multi-tag filter (checkbox dropdown)
+  function applyTagFilter() {
+    var ids = Array.from(document.querySelectorAll('.filter-tag-cb:checked')).map(cb => cb.value);
+    var params = getFilterParams();
+    params.delete('tag_ids');
+    ids.forEach(id => params.append('tag_ids', id));
+    var url = '/movements';
+    if (params.toString()) url += '?' + params.toString();
+    window.location.href = url;
+  }
+  function clearTagFilter() {
+    document.querySelectorAll('.filter-tag-cb').forEach(cb => cb.checked = false);
+    applyTagFilter();
+  }
+
+  // Auto-apply filters on change
+  document.addEventListener('DOMContentLoaded', function() {
+    // Number inputs: apply after short delay
+    let debounceTimer;
+    ['filter-amount-min', 'filter-amount-max'].forEach(id => {
+      document.getElementById(id).addEventListener('input', function() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(applyFilters, 600);
+      });
+    });
+  });
+
+  function getFilterParams() {
+    const params = new URLSearchParams();
+    const sourceId = document.getElementById('filter-source').value;
+    const direction = document.getElementById('filter-direction').value;
+    const dateFrom = document.getElementById('filter-date-from').value;
+    const dateTo = document.getElementById('filter-date-to').value;
+    const amountMin = document.getElementById('filter-amount-min').value;
+    const amountMax = document.getElementById('filter-amount-max').value;
+    if (sourceId) params.set('source_id', sourceId);
+    if (direction) params.set('direction', direction);
+    if (dateFrom) params.set('date_from', dateFrom);
+    if (dateTo) params.set('date_to', dateTo);
+    if (amountMin) params.set('amount_min', amountMin);
+    if (amountMax) params.set('amount_max', amountMax);
+    // Preserve currently-applied tag filter across other filter changes
+    Array.from(document.querySelectorAll('.filter-tag-cb:checked')).forEach(cb => params.append('tag_ids', cb.value));
+    return params;
+  }
+
+  function applyFilters() {
+    const params = getFilterParams();
+    let url = '/movements';
+    if (params.toString()) url += '?' + params.toString();
+    window.location.href = url;
+  }
+
+  function goToPage(p) {
+    const params = getFilterParams();
+    params.set('page', p);
+    window.location.href = '/movements?' + params.toString();
+  }
+
+  async function deleteMovement(id) {
+    if (!(await confirmDialog('{{ _("delete") }}?', {icon: 'warning', confirmColor: 'danger', confirmText: '{{ _("delete") }}'}))) return;
+    const resp = await fetch(`/api/movements/${id}`, { method: 'DELETE' });
+    if (resp.ok) {
+      showToast('{{ _("deleted_successfully") }}', 'success');
+      location.reload();
+    } else {
+      await handleApiError(resp);
+    }
+  }
+
+  // --- Movements Calendar Modal (3-level: months → days → items) ---
+  var _mcmLevel = 'months';
+  var _mcmCurrentMonth = null;
+  var _mcmMonthData = null;
+  var _mcmModal = null;
+
+  var _mcmMonthNames = {
+    en: ['January','February','March','April','May','June','July','August','September','October','November','December'],
+    it: ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre']
+  };
+  var _mcmLocale = '{{ get_locale() }}';
+  var _mcmNames = _mcmMonthNames[_mcmLocale] || _mcmMonthNames['en'];
+
+  function mcmLocalizeMonth(ym) {
+    var parts = ym.split('-');
+    return _mcmNames[parseInt(parts[1], 10) - 1] + ' ' + parts[0];
+  }
+
+  async function openMovementsCalendar() {
+    if (!_mcmModal) _mcmModal = new bootstrap.Modal(document.getElementById('movCalendarModal'));
+    await mcmShowMonths();
+    _mcmModal.show();
+  }
+
+  function movCalendarBack() {
+    if (_mcmLevel === 'items') mcmShowDays(_mcmCurrentMonth);
+    else if (_mcmLevel === 'days') mcmShowMonths();
+  }
+
+  async function mcmShowMonths() {
+    _mcmLevel = 'months';
+    document.getElementById('mcm-back').classList.add('d-none');
+    document.getElementById('mcm-title').textContent = '{{ _("movements") }}';
+    var body = document.getElementById('mcm-body');
+    body.innerHTML = '<div class="text-center py-4">' + dotWaveHtml + '</div>';
+
+    try {
+      var resp = await fetch('/api/movements/calendar/trend?months=24');
+      if (!resp.ok) return;
+      var data = await resp.json();
+
+      // Group: {month: {in: X, out: Y}}
+      var months = {};
+      var order = [];
+      data.forEach(function(d) {
+        if (!months[d.month]) { months[d.month] = {'in': 0, 'out': 0}; order.push(d.month); }
+        months[d.month][d.direction] = d.total;
+      });
+      order.reverse();
+
+      var html = '<ul class="list-group list-group-flush">';
+      order.forEach(function(m) {
+        var inBadge = months[m]['in'] > 0 ? '<span class="badge bg-success ms-1">+' + months[m]['in'].toFixed(2) + '</span>' : '';
+        var outBadge = months[m]['out'] > 0 ? '<span class="badge bg-danger ms-1">-' + months[m]['out'].toFixed(2) + '</span>' : '';
+        html += '<li class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3" style="cursor:pointer" onclick="mcmLoadMonth(\'' + m + '\')">';
+        html += '<span class="fw-bold">' + mcmLocalizeMonth(m) + '</span>';
+        html += '<div>' + inBadge + outBadge + '</div>';
+        html += '</li>';
+      });
+      if (!order.length) html += '<li class="list-group-item text-center text-muted py-4">{{ _("no_movements") }}</li>';
+      html += '</ul>';
+      body.innerHTML = html;
+    } catch(e) {
+      body.innerHTML = '<div class="text-center text-danger py-4">{{ _("error") }}</div>';
+    }
+  }
+
+  async function mcmLoadMonth(ym) {
+    _mcmCurrentMonth = ym;
+    var body = document.getElementById('mcm-body');
+    body.innerHTML = '<div class="text-center py-4">' + dotWaveHtml + '</div>';
+    try {
+      var resp = await fetch('/api/movements/calendar/' + ym);
+      if (!resp.ok) { body.innerHTML = '<div class="text-center text-danger py-4">{{ _("error") }}</div>'; return; }
+      _mcmMonthData = await resp.json();
+      mcmShowDays(ym);
+    } catch(e) {
+      body.innerHTML = '<div class="text-center text-danger py-4">{{ _("error") }}</div>';
+    }
+  }
+
+  function mcmShowDays(ym) {
+    _mcmLevel = 'days';
+    _mcmCurrentMonth = ym;
+    document.getElementById('mcm-back').classList.remove('d-none');
+    document.getElementById('mcm-title').textContent = mcmLocalizeMonth(ym);
+    var body = document.getElementById('mcm-body');
+
+    // Group by day
+    var days = {};
+    _mcmMonthData.forEach(function(m) {
+      if (!days[m.date]) days[m.date] = [];
+      days[m.date].push(m);
+    });
+
+    var parts = ym.split('-');
+    var year = parseInt(parts[0]);
+    var month = parseInt(parts[1]);
+    var daysInMonth = new Date(year, month, 0).getDate();
+    var firstDow = (new Date(year, month - 1, 1).getDay() + 6) % 7;
+
+    var dayLabels = { en: ['M','T','W','T','F','S','S'], it: ['L','M','M','G','V','S','D'] };
+    var dn = dayLabels[_mcmLocale] || dayLabels['en'];
+
+    var html = '<div class="p-3">';
+    html += '<div class="d-flex mb-2">';
+    dn.forEach(function(d) { html += '<div class="text-center text-muted small fw-bold" style="width:14.28%">' + d + '</div>'; });
+    html += '</div><div class="d-flex flex-wrap">';
+
+    for (var e = 0; e < firstDow; e++) html += '<div style="width:14.28%;aspect-ratio:1"></div>';
+
+    for (var d = 1; d <= daysInMonth; d++) {
+      var dateStr = ym + '-' + (d < 10 ? '0' : '') + d;
+      var dayItems = days[dateStr];
+      var hasData = dayItems && dayItems.length > 0;
+      var dayIn = 0, dayOut = 0;
+      if (hasData) dayItems.forEach(function(m) { if (m.direction === 'in') dayIn += m.amount; else dayOut += m.amount; });
+
+      html += '<div style="width:14.28%;aspect-ratio:1;padding:2px">';
+      if (hasData) {
+        var bgClass = dayIn > dayOut ? 'bg-label-success' : (dayOut > dayIn ? 'bg-label-danger' : 'bg-label-info');
+        var net = dayIn - dayOut;
+        var netStr = (net >= 0 ? '+' : '') + net.toFixed(0);
+        html += '<div class="rounded h-100 d-flex flex-column align-items-center justify-content-center ' + bgClass + '" style="cursor:pointer" onclick="mcmShowDayItems(\'' + dateStr + '\')">';
+        html += '<span class="fw-bold">' + d + '</span>';
+        html += '<small style="font-size:0.6rem">' + netStr + '</small>';
+        html += '</div>';
+      } else {
+        html += '<div class="rounded h-100 d-flex align-items-center justify-content-center"><span class="text-muted">' + d + '</span></div>';
+      }
+      html += '</div>';
+    }
+    html += '</div>';
+
+    // Month summary
+    var totalIn = 0, totalOut = 0;
+    _mcmMonthData.forEach(function(m) { if (m.direction === 'in') totalIn += m.amount; else totalOut += m.amount; });
+    html += '<div class="border-top mt-3 pt-2 d-flex justify-content-between align-items-center">';
+    html += '<span class="badge bg-success">+' + totalIn.toFixed(2) + '</span>';
+    html += '<span class="badge bg-danger">-' + totalOut.toFixed(2) + '</span>';
+    html += '<span class="fw-bold ' + (totalIn - totalOut >= 0 ? 'text-success' : 'text-danger') + '">' + (totalIn - totalOut >= 0 ? '+' : '') + (totalIn - totalOut).toFixed(2) + '</span>';
+    html += '</div></div>';
+    body.innerHTML = html;
+  }
+
+  function mcmShowDayItems(dateStr) {
+    _mcmLevel = 'items';
+    document.getElementById('mcm-back').classList.remove('d-none');
+    document.getElementById('mcm-title').textContent = fmtDate(dateStr);
+    var body = document.getElementById('mcm-body');
+
+    var items = _mcmMonthData.filter(function(m) { return m.date === dateStr; });
+
+    var html = '<ul class="list-group list-group-flush">';
+    items.forEach(function(m) {
+      var color = m.direction === 'in' ? 'success' : 'danger';
+      var sign = m.direction === 'in' ? '+' : '-';
+      html += '<li class="list-group-item py-3">';
+      html += '<div class="d-flex justify-content-between align-items-start">';
+      html += '<div>';
+      html += '<span class="fw-bold text-' + color + '">' + sign + m.amount.toFixed(2) + '</span>';
+      html += '<span class="text-muted ms-2">' + escapeHtml(m.source_name) + '</span>';
+      if (m.transfer_pair_id) html += ' <span class="badge bg-label-info ms-1">{{ _("transfer") }}</span>';
+      if (m.note) html += '<br><small class="text-muted">' + escapeHtml(m.note) + '</small>';
+      if (m.tags && m.tags.length) {
+        html += '<br>';
+        m.tags.forEach(function(t) { html += '<span class="badge bg-label-secondary me-1">' + escapeHtml(t.name) + '</span>'; });
+      }
+      html += '</div>';
+      html += '<a href="/movements/' + m.id + '/edit" class="btn btn-sm btn-outline-warning"><i class="bi bi-pencil"></i></a>';
+      html += '</div></li>';
+    });
+    html += '</ul>';
+    body.innerHTML = html;
+  }
+
+  // --- Attachments viewer modal ---
+  var _attModal = null;
+  function _humanSize(n) {
+    if (n < 1024) return n + ' B';
+    if (n < 1024 * 1024) return (n / 1024).toFixed(1) + ' KB';
+    return (n / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+  async function openAttachments(movementId) {
+    if (!_attModal) _attModal = new bootstrap.Modal(document.getElementById('attachmentsModal'));
+    var body = document.getElementById('attachments-modal-body');
+    body.innerHTML = '<div class="text-center py-4">' + dotWaveHtml + '</div>';
+    _attModal.show();
+    try {
+      var resp = await fetch('/api/movements/' + movementId + '/attachments');
+      if (!resp.ok) { body.innerHTML = '<div class="text-center text-danger py-4">{{ _("error") }}</div>'; return; }
+      var items = await resp.json();
+      if (!items.length) { body.innerHTML = '<div class="text-center text-muted py-4">{{ _("no_results") }}</div>'; return; }
+      var html = '<div class="d-flex flex-wrap gap-3">';
+      items.forEach(function(a) {
+        var isImage = a.mime_type && a.mime_type.indexOf('image/') === 0;
+        var url = '/api/movements/attachments/' + a.id;
+        html += '<div class="border rounded p-2 d-flex flex-column align-items-center text-center" style="width:160px">';
+        if (isImage) {
+          html += '<a href="' + url + '" target="_blank" rel="noopener" onclick="return yfOpenExternal(this.href)" class="d-block mb-2" style="width:100%;height:120px;overflow:hidden">';
+          html += '<img src="' + url + '" style="width:100%;height:100%;object-fit:cover;border-radius:.35rem" alt="' + escapeHtml(a.filename) + '">';
+          html += '</a>';
+        } else {
+          html += '<a href="' + url + '" target="_blank" rel="noopener" onclick="return yfOpenExternal(this.href)" class="d-flex align-items-center justify-content-center mb-2 bg-label-secondary rounded" style="width:100%;height:120px">';
+          html += '<i class="bi bi-file-earmark-pdf" style="font-size:2.4rem"></i>';
+          html += '</a>';
+        }
+        html += '<div class="small text-truncate w-100" title="' + escapeHtml(a.filename) + '">' + escapeHtml(a.filename) + '</div>';
+        html += '<small class="text-muted">' + _humanSize(a.size_bytes) + '</small>';
+        html += '<a href="' + url + '" target="_blank" rel="noopener" onclick="return yfOpenExternal(this.href)" class="btn btn-sm btn-outline-primary mt-2 w-100"><i class="bi bi-box-arrow-up-right me-1"></i>{{ _("open") }}</a>';
+        html += '</div>';
+      });
+      html += '</div>';
+      body.innerHTML = html;
+    } catch (e) {
+      body.innerHTML = '<div class="text-center text-danger py-4">{{ _("error") }}</div>';
+    }
+  }
+</script>
+{% endblock %}

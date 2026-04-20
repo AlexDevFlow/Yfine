@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+{% set active_page = "portfolios" %}
+
+{% block title %}{{ _('portfolios') }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+  <div>
+    <h5 class="mb-0">{{ _('portfolios') }}</h5>
+    <small class="text-muted">{{ _('portfolios_subtitle') }}</small>
+  </div>
+  <div class="d-flex align-items-center flex-wrap gap-2 yn-action-row">
+    <button type="button" class="btn btn-sm btn-outline-secondary yn-action-btn" id="toggle-prices-btn" onclick="togglePrices()">
+      <i class="bi {% if prices_enabled %}bi-toggle-on text-success{% else %}bi-toggle-off{% endif %}"></i>
+      <span>{{ _('live_prices') }}: <strong id="prices-state-label">{% if prices_enabled %}{{ _('on') }}{% else %}{{ _('off') }}{% endif %}</strong></span>
+    </button>
+    <button type="button" class="btn btn-sm btn-outline-primary yn-action-btn" onclick="refreshAllPrices()" {% if not prices_enabled %}disabled{% endif %}>
+      <i class="bi bi-arrow-clockwise"></i>
+      <span>{{ _('refresh_prices') }}</span>
+    </button>
+    <a href="/portfolios/new" class="btn btn-sm btn-primary yn-action-btn">
+      <i class="bi bi-plus-lg"></i>
+      <span>{{ _('new_portfolio') }}</span>
+    </a>
+  </div>
+</div>
+
+{% if prices_enabled %}
+<div class="small text-muted mb-3"><i class="bi bi-info-circle me-1"></i>{{ _('portfolio_auto_refresh_info') }}</div>
+{% else %}
+<div class="alert alert-info d-flex align-items-start gap-2 mb-4">
+  <i class="bi bi-info-circle mt-1"></i>
+  <div class="flex-grow-1">
+    <strong>{{ _('prices_off_title') }}</strong>
+    <div class="small">{{ _('prices_off_desc') }}</div>
+  </div>
+</div>
+{% endif %}
+
+{% if portfolios %}
+{% for group in groups %}
+<div class="d-flex justify-content-between align-items-baseline mb-2 mt-3">
+  <h6 class="mb-0">
+    {% if group.source_id %}
+    <a href="/sources/{{ group.source_id }}" class="text-decoration-none">
+      <i class="bi bi-wallet2 me-1"></i>{{ group.source_name }}
+    </a>
+    <small class="text-muted">({{ group.source_currency }})</small>
+    {% else %}
+    <i class="bi bi-wallet2 me-1"></i>{{ _('external') }}
+    {% endif %}
+  </h6>
+  <small class="text-muted">{{ _('total_value') }}: <strong>{{ "%.2f"|format(group.total_value) }} {{ group.source_currency }}</strong></small>
+</div>
+<div class="row g-4 mb-4">
+  {% for p in group.portfolios %}
+  <div class="col-md-6 col-lg-4">
+    <div class="card h-100 d-flex flex-column">
+      <div class="card-body pb-2 flex-grow-1">
+        <div class="d-flex justify-content-between align-items-start mb-2 gap-2">
+          <a href="/portfolios/{{ p.id }}" class="text-decoration-none text-truncate">
+            <h5 class="card-title mb-0 text-truncate">{{ p.name }}</h5>
+          </a>
+          <span class="badge flex-shrink-0
+            {% if p.kind == 'crypto' %}bg-label-warning
+            {% elif p.kind == 'stocks' %}bg-label-info
+            {% else %}bg-label-secondary{% endif %}">
+            {{ _('portfolio_kind_' ~ p.kind) }}
+          </span>
+        </div>
+        <div class="mb-2">
+          <small class="text-muted">{{ _('total_value') }}</small>
+          <h4 class="mb-0 fw-bold">{{ "%.2f"|format(p.total_value) }} <small class="fs-6 text-muted">{{ p.base_currency }}</small></h4>
+        </div>
+        <div class="d-flex justify-content-between align-items-center">
+          <small class="text-muted">{{ _('invested') }}: {{ "%.2f"|format(p.total_cost) }} {{ p.base_currency }}</small>
+          <small class="fw-bold {% if p.total_pnl >= 0 %}text-success{% else %}text-danger{% endif %}">
+            {% if p.total_pnl >= 0 %}+{% endif %}{{ "%.2f"|format(p.total_pnl) }}
+            ({% if p.total_pnl_pct >= 0 %}+{% endif %}{{ "%.2f"|format(p.total_pnl_pct) }}%)
+          </small>
+        </div>
+        <hr class="my-2">
+        <div class="d-flex flex-wrap gap-2 small text-muted">
+          <span><i class="bi bi-collection me-1"></i>{{ p.holdings_count }} {{ _('holdings') }}</span>
+        </div>
+        <div class="mt-2 position-relative" style="height:60px">
+          <canvas class="portfolio-sparkline" data-portfolio-id="{{ p.id }}" data-pnl="{{ p.total_pnl }}"></canvas>
+        </div>
+      </div>
+      <div class="card-footer bg-transparent border-0 d-flex justify-content-end gap-1 pt-0 pb-3 px-3">
+        <a href="/portfolios/{{ p.id }}" class="btn btn-sm btn-outline-primary" title="{{ _('view_all') }}"><i class="bi bi-eye"></i></a>
+        <a href="/portfolios/{{ p.id }}/edit" class="btn btn-sm btn-outline-warning" title="{{ _('edit') }}"><i class="bi bi-pencil"></i></a>
+        <button type="button" class="btn btn-sm btn-outline-danger portfolio-delete-btn" data-id="{{ p.id }}" data-name="{{ p.name }}" title="{{ _('delete') }}"><i class="bi bi-trash"></i></button>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endfor %}
+{% else %}
+<div class="card">
+  <div class="card-body text-center py-5">
+    <i class="bi bi-briefcase text-muted mb-3" style="font-size:3rem"></i>
+    <p class="text-muted mb-3">{{ _('no_portfolios') }}</p>
+    <a href="/portfolios/new" class="btn btn-primary"><i class="bi bi-plus me-1"></i>{{ _('new_portfolio') }}</a>
+  </div>
+</div>
+{% endif %}
+
+<div class="modal fade" id="deletePortfolioModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title"><i class="bi bi-trash me-2"></i>{{ _('delete') }}: <span id="delete-portfolio-name"></span></h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-0">{{ _('confirm') }}?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ _('cancel') }}</button>
+        <button type="button" class="btn btn-danger" id="confirm-delete-portfolio-btn">
+          <i class="bi bi-trash me-1"></i>{{ _('confirm') }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block page_js %}
+<script src="/static/vendor/chartjs/chart.umd.min.js"></script>
+<script>
+  async function togglePrices() {
+    var btn = document.getElementById('toggle-prices-btn');
+    var icon = btn.querySelector('i');
+    var isOn = icon.classList.contains('bi-toggle-on');
+    var next = !isOn;
+    var resp = await fetch('/api/settings', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ portfolio_prices_enabled: next, portfolio_prices_prompted: true })
+    });
+    if (resp.ok) {
+      showToast('{{ _("settings_saved") }}', 'success');
+      setTimeout(function() { location.reload(); }, 400);
+    } else {
+      await handleApiError(resp);
+    }
+  }
+
+  async function refreshAllPrices() {
+    showToast('{{ _("refreshing_prices") }}...', 'info');
+    var resp = await fetch('/api/portfolios/refresh-prices', { method: 'POST' });
+    if (resp.ok) {
+      var data = await resp.json();
+      if (!data.enabled) {
+        showToast('{{ _("prices_off_title") }}', 'warning');
+        return;
+      }
+      showToast('{{ _("updated") }}: ' + data.updated, 'success');
+      setTimeout(function() { location.reload(); }, 600);
+    } else {
+      await handleApiError(resp);
+    }
+  }
+
+  var _pendingDeleteId = null;
+
+  function openDeletePortfolioModal(id, name) {
+    _pendingDeleteId = id;
+    document.getElementById('delete-portfolio-name').textContent = name;
+    new bootstrap.Modal(document.getElementById('deletePortfolioModal')).show();
+  }
+
+  async function confirmDeletePortfolio() {
+    if (_pendingDeleteId == null) return;
+    var resp = await fetch('/api/portfolios/' + _pendingDeleteId, { method: 'DELETE' });
+    var modal = bootstrap.Modal.getInstance(document.getElementById('deletePortfolioModal'));
+    if (modal) modal.hide();
+    if (resp.ok) {
+      showToast('{{ _("deleted_successfully") }}', 'success');
+      setTimeout(function() { location.reload(); }, 400);
+    } else {
+      await handleApiError(resp);
+    }
+  }
+
+  document.addEventListener('click', function(e) {
+    var btn = e.target.closest('.portfolio-delete-btn');
+    if (!btn) return;
+    e.preventDefault();
+    openDeletePortfolioModal(parseInt(btn.dataset.id, 10), btn.dataset.name);
+  });
+  document.getElementById('confirm-delete-portfolio-btn').addEventListener('click', confirmDeletePortfolio);
+
+  async function loadPortfolioSparkline(canvas) {
+    var id = canvas.dataset.portfolioId;
+    var pnl = parseFloat(canvas.dataset.pnl || '0');
+    try {
+      var resp = await fetch('/api/portfolios/' + id + '/history?range=30d');
+      if (!resp.ok) return;
+      var points = await resp.json();
+      if (!points || points.length < 2) return;
+      var color = pnl >= 0 ? '#71dd37' : '#ff3e1d';
+      new Chart(canvas.getContext('2d'), {
+        type: 'line',
+        data: {
+          labels: points.map(function(p) { return p.date; }),
+          datasets: [{
+            data: points.map(function(p) { return p.value; }),
+            borderColor: color,
+            backgroundColor: color + '20',
+            fill: true, tension: 0.4, pointRadius: 0, borderWidth: 2,
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false, resizeDelay: 200,
+          plugins: { legend: { display: false }, tooltip: {
+            enabled: true, backgroundColor: 'rgba(0,0,0,0.8)',
+            displayColors: false,
+            callbacks: {
+              label: function(ctx) { return ctx.parsed.y.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2}); }
+            }
+          }},
+          scales: { x: { display: false }, y: { display: false } },
+          animation: { duration: 400 }
+        }
+      });
+    } catch (e) {}
+  }
+  document.querySelectorAll('.portfolio-sparkline').forEach(loadPortfolioSparkline);
+</script>
+{% endblock %}

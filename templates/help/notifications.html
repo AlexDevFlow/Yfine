@@ -1,0 +1,63 @@
+<h5>Notifications</h5>
+<p class="yn-help-lead">Yfine raises notifications when it has something to tell you: a recurring item is due, a balance is not enough to cover a scheduled payment, a background task finished. This page is the full archive. Recent unread items also appear under the bell icon in the top bar.</p>
+
+<h6>What you see</h6>
+<ul>
+  <li>A list of notifications. Each has an icon colored by type: <span class="yn-help-chip danger"><i class="bi bi-exclamation-octagon-fill"></i> alert</span>, <span class="yn-help-chip warning"><i class="bi bi-exclamation-triangle-fill"></i> warning</span>, <span class="yn-help-chip info"><i class="bi bi-info-circle-fill"></i> info</span>.</li>
+  <li>Each notification has a <strong>title</strong>, a <strong>body</strong>, and a <strong>timestamp</strong> in relative form ("5 minutes ago", "yesterday").</li>
+  <li>Unread items have a highlighted background and bolder title.</li>
+  <li>Tabs at the top filter by type: <strong>All</strong>, <strong>Unread</strong>, <strong>Alert</strong>, <strong>Info</strong>, <strong>Warning</strong>.</li>
+  <li>Pagination appears at the bottom when there are more than 20 results in the filter.</li>
+</ul>
+
+<h6>Main actions</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon success"><i class="bi bi-check-all"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Mark all as read</span>
+      <span class="yn-help-action-desc">Clear the unread badge by marking every current notification as read.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon danger"><i class="bi bi-trash"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Delete all read</span>
+      <span class="yn-help-action-desc">Clean up the archive. Only already-read items are removed.</span>
+    </div>
+  </div>
+</div>
+
+<h6>Per-notification actions</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon success"><i class="bi bi-check-lg"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Mark as read</span>
+      <span class="yn-help-action-desc">Appears on unread notifications. Removes the highlight but keeps the item in the archive.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon danger"><i class="bi bi-trash"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Delete</span>
+      <span class="yn-help-action-desc">Remove one notification.</span>
+    </div>
+  </div>
+</div>
+
+<h6>What triggers a notification</h6>
+<ul>
+  <li><strong>Recurring due soon</strong>: when a recurring item's due date is within the configured alert window.</li>
+  <li><strong>Insufficient funds</strong>: when a scheduled recurring payment would leave the source below zero, and you enabled the insufficient-funds warning on that item.</li>
+  <li><strong>Recurring applied automatically</strong>: confirmation that Yfine created a movement for a recurring item set to Automatic.</li>
+  <li><strong>Background task results</strong>: import completed, export ready, plugin scanned, and similar events.</li>
+</ul>
+
+<h6>The bell icon</h6>
+<p>The bell in the top bar shows a red counter when you have unread notifications. Clicking it opens a dropdown with the five most recent unread items and a shortcut to this page. Each item in the dropdown has its own dismiss and "mark as read" actions.</p>
+
+<div class="yn-help-tip">
+  <i class="bi bi-info-circle-fill"></i>
+  <div>Unread notifications also appear as toast pop-ups as they arrive. The toast has a "Mark as read" link if you want to dismiss it right then.</div>
+</div>

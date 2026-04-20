@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% set active_page = "sources" %}
+
+{% block title %}{% if source %}{{ _('edit_source') }}{% else %}{{ _('new_source') }}{% endif %}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title mb-0">{% if source %}{{ _('edit_source') }}{% else %}{{ _('new_source') }}{% endif %}</h5>
+      </div>
+      <div class="card-body">
+        <form id="source-form">
+          <div class="mb-3">
+            <label for="name" class="form-label">{{ _('name') }}</label>
+            <input type="text" class="form-control" id="name" name="name" value="{{ source.name if source else '' }}" required>
+          </div>
+          <div class="mb-3">
+            <label for="currency" class="form-label">{{ _('currency') }}</label>
+            <select class="form-select" id="currency" name="currency" required>
+              {% set currencies = ['EUR', 'USD', 'GBP', 'CHF', 'JPY', 'CAD', 'AUD', 'CNY', 'INR', 'BRL', 'KRW', 'MXN', 'SEK', 'NOK', 'DKK', 'PLN', 'CZK', 'HUF', 'RON', 'BGN', 'HRK', 'TRY', 'RUB', 'ZAR', 'NZD', 'SGD', 'HKD', 'TWD', 'THB', 'IDR', 'MYR', 'PHP', 'ARS', 'CLP', 'COP', 'PEN', 'BTC', 'ETH'] %}
+              {% for c in currencies %}
+              <option value="{{ c }}" {% if source and source.currency == c %}selected{% endif %}>{{ flag(c) }} {{ c }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="starting_balance" class="form-label">{{ _('starting_balance') }}</label>
+            <input type="number" step="0.01" inputmode="decimal" class="form-control" id="starting_balance" name="starting_balance" value="{{ source.starting_balance if source else '0.00' }}">
+          </div>
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">{{ _('save') }}</button>
+            <a href="/sources" class="btn btn-outline-secondary">{{ _('cancel') }}</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block page_js %}
+<script>
+  document.getElementById('source-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const data = {
+      name: document.getElementById('name').value,
+      currency: document.getElementById('currency').value,
+      starting_balance: parseFloat(document.getElementById('starting_balance').value) || 0
+    };
+
+    {% if source %}
+    const resp = await fetch('/api/sources/{{ source.id }}', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    {% else %}
+    const resp = await fetch('/api/sources', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    {% endif %}
+
+    if (resp.ok) {
+      setTimeout(function() { window.location.assign('/sources'); }, 100);
+    } else {
+      await handleApiError(resp);
+    }
+  });
+</script>
+{% endblock %}

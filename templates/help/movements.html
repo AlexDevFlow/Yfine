@@ -1,0 +1,133 @@
+<h5>Movements</h5>
+<p class="yn-help-lead">Every income, expense, and transfer you record. The list is grouped by year, then month, then day, so you can collapse sections and read running totals at each level.</p>
+
+<h6>What you see</h6>
+<ul>
+  <li>Movements grouped by <strong>year → month → day</strong>. Each header is clickable to collapse or expand that section.</li>
+  <li>At each level, the header shows a running count and period totals: income, expense, and the net.</li>
+  <li>Each row shows the <strong>source</strong> (or "source → target" for transfers), the <strong>direction badge</strong>, the <strong>amount</strong>, any <strong>tags</strong>, and the <strong>note</strong>.</li>
+  <li>Colors: green for income (<span class="yn-help-chip success"><i class="bi bi-arrow-down-circle"></i> in</span>), red for expense (<span class="yn-help-chip danger"><i class="bi bi-arrow-up-circle"></i> out</span>), blue for transfer (<span class="yn-help-chip info"><i class="bi bi-arrow-left-right"></i></span>).</li>
+  <li>Pagination appears at the bottom when there are more than 50 movements in the filtered view.</li>
+</ul>
+
+<h6>Main actions</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-plus-lg"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">New Movement</span>
+      <span class="yn-help-action-desc">Record an income or expense. Pick source, direction, amount, date, tags, note.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon info"><i class="bi bi-arrow-left-right"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">New Transfer</span>
+      <span class="yn-help-action-desc">Move an amount from one source to another. Two linked entries are created.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon muted"><i class="bi bi-calendar"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Calendar</span>
+      <span class="yn-help-action-desc">Open a month view that shows all movements on a calendar grid.</span>
+    </div>
+  </div>
+</div>
+
+<h6>Per-row actions</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-pencil"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Edit</span>
+      <span class="yn-help-action-desc">Change any field. Clicking the row itself also opens the edit form.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon danger"><i class="bi bi-trash"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Delete</span>
+      <span class="yn-help-action-desc">Remove the movement. For transfers, both sides are removed together.</span>
+    </div>
+  </div>
+</div>
+
+<h6>Filters</h6>
+<p>The filter bar across the top lets you narrow the list:</p>
+<ul>
+  <li><strong>Date range</strong>: pick a from and to date on the calendar.</li>
+  <li><strong>Amount</strong>: minimum and maximum.</li>
+  <li><strong>Source</strong>: limit to one source.</li>
+  <li><strong>Direction</strong>: income only, expense only, or all.</li>
+  <li><strong>Tags</strong>: multi-select. Only movements with at least one matching tag are shown.</li>
+</ul>
+<p>A <strong>Reset</strong> button appears when any filter is active.</p>
+
+<h6>Transfers</h6>
+<p>A transfer is one action that creates two linked movements: an <strong>out</strong> on the sending source and an <strong>in</strong> on the receiving source. Transfers do not change your total net worth, they just move money between sources.</p>
+<div class="yn-help-mock">
+  <div class="yn-help-mock-row"><span class="yn-help-mock-label">Main bank <i class="bi bi-arrow-right"></i> Savings</span><span class="yn-help-mock-value">500.00</span></div>
+  <div class="yn-help-mock-row"><span class="yn-help-mock-label">Main bank (out)</span><span class="yn-help-mock-value expense">-500.00</span></div>
+  <div class="yn-help-mock-row"><span class="yn-help-mock-label">Savings (in)</span><span class="yn-help-mock-value income">+500.00</span></div>
+</div>
+<p>In the list, transfers show with the two source names joined by an arrow. Editing or deleting one side updates both.</p>
+
+<h6>External movements</h6>
+<p>A movement without a source is marked <span class="yn-help-chip">external</span>. This is for income or expenses that happen outside your tracked accounts, for example: someone paid you back in cash that you spent right away without depositing it.</p>
+
+<h6>Step by step: record a first movement</h6>
+<ol class="yn-help-steps">
+  <li>Click <span class="yn-help-chip primary"><i class="bi bi-plus-lg"></i> New Movement</span>.</li>
+  <li>Pick the <strong>source</strong>. Leave blank to record it as external.</li>
+  <li>Choose <strong>Income</strong> or <strong>Expense</strong>.</li>
+  <li>Enter the <strong>amount</strong>. Use the decimal separator your locale expects.</li>
+  <li>Pick the <strong>date</strong>. Today is the default.</li>
+  <li>Optional: add a <strong>note</strong> and select one or more <strong>tags</strong>.</li>
+  <li>Save. The movement appears in the list and updates the source balance.</li>
+</ol>
+
+<h6>Step by step: record a transfer</h6>
+<ol class="yn-help-steps">
+  <li>Click <span class="yn-help-chip info"><i class="bi bi-arrow-left-right"></i> New Transfer</span>.</li>
+  <li>Pick the <strong>from source</strong> and the <strong>to source</strong>.</li>
+  <li>Enter the <strong>amount</strong> and the <strong>date</strong>.</li>
+  <li>Save. Two linked entries appear in the movement list.</li>
+</ol>
+
+<div class="yn-help-tip">
+  <i class="bi bi-info-circle-fill"></i>
+  <div>The last source you used is remembered and preselected the next time you open the form. Saves a click when entering several movements in a row.</div>
+</div>
+
+<h6>Attachments</h6>
+<p>You can attach photos of receipts, invoices, or PDFs to any movement — handy for warranties, tax deductions, or just to remember what that transaction was about.</p>
+<ul>
+  <li>Supported formats: <strong>PNG, JPEG, WebP, HEIC, PDF</strong>.</li>
+  <li>Up to <strong>5 files</strong> per movement, max <strong>10 MB</strong> each.</li>
+  <li>Files are stored locally next to the database — never uploaded anywhere.</li>
+  <li>They're included in the full <code>.yfine</code> archive export, so your backups are self-contained.</li>
+</ul>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-paperclip"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Add attachments</span>
+      <span class="yn-help-action-desc">In the movement form, drag &amp; drop files onto the "Attachments" box, or click it to browse. Files start uploading straight away when editing; when creating a new movement they're queued and sent after you click Save.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon muted"><i class="bi bi-eye"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">View attachments</span>
+      <span class="yn-help-action-desc">Rows with attachments show a <span class="yn-help-chip"><i class="bi bi-paperclip"></i> count</span> chip. Click it to open a gallery with image previews and quick links to PDFs.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon danger"><i class="bi bi-x"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Remove an attachment</span>
+      <span class="yn-help-action-desc">Hit the <i class="bi bi-x"></i> on the file chip inside the movement form. Deleting a movement also deletes its attachments.</span>
+    </div>
+  </div>
+</div>

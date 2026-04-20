@@ -1,0 +1,87 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+*.egg
+*.whl
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Database
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.db.bak*
+*.db.enc
+
+# Auth config (contains password hash and session secret)
+.yfine-auth.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+.Trash-*
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+sneat-bootstrap-html-admin-template-v3.0.0-1/
+sneat-bootstrap-html-admin-template-v3.0.0-1.zip
+
+# Sneat template assets (commercial, not redistributable)
+static/sneat/
+
+# Logs
+*.log
+
+# PyInstaller
+dist/
+build/
+*.spec.bak
+
+# Runtime unlock marker
+.yfine-unlocked
+
+# Database backups
+backups/
+
+# Plugin state (generated at runtime)
+plugins/plugin_state.json
+plugins/.plugin_state.lock
+
+# Markdown docs (CLAUDE.md, internal specs, etc.)
+*.md
+!README.md
+!CONTRIBUTING.md
+!SECURITY.md
+!CODE_OF_CONDUCT.md
+!CHANGELOG.md
+
+# Claude Code local settings
+.claude/
+
+# Misc
+*.bak
+*.tmp
+*.orig
+*.rej
+attachments/

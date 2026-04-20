@@ -1,0 +1,1241 @@
+<!doctype html>
+<html
+  lang="{{ get_locale() }}"
+  dir="ltr"
+  data-bs-theme="{{ get_theme() if get_theme() != 'system' else 'light' }}">
+  <head>
+    <meta charset="utf-8" />
+    <!-- Render-blocking: correct background from the very first frame -->
+    <style>
+      html { background: #f5f5f9; }
+      html[data-bs-theme="dark"] { background: #232333; }
+    </style>
+    <script>
+      (function(){
+        var theme = '{{ get_theme() }}';
+        var resolved;
+        if (theme === 'system') {
+          resolved = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        } else {
+          resolved = theme;
+        }
+        document.documentElement.setAttribute('data-bs-theme', resolved);
+      })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+    <title>{% block title %}{{ _('dashboard') }}{% endblock %} | {{ _('app_name') }}</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/static/img/favicon.ico" />
+
+    <!-- Fonts -->
+    <link rel="stylesheet" href="/static/vendor/fonts/public-sans.css" />
+
+    <!-- Bootstrap 5.3 CSS -->
+    <link rel="stylesheet" href="/static/vendor/bootstrap/bootstrap.min.css" />
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="/static/vendor/bootstrap-icons/bootstrap-icons.min.css" />
+
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="/static/vendor/sweetalert2/sweetalert2.min.css" />
+
+    <!-- Yfine custom CSS -->
+    <link rel="stylesheet" href="/static/css/yfine.css?v={{ cache_bust }}" />
+
+    {% block page_css %}{% endblock %}
+
+    <!-- CSRF token for fetch requests -->
+    <meta name="csrf-token" content="{{ get_csrf_token(request) }}">
+  </head>
+
+  <body data-mobile-nav="{{ get_mobile_nav_mode() }}">
+    <!-- Toast host -->
+    <div class="toast-host" id="toast-host"></div>
+
+    <!-- Generic confirm modal (pywebview doesn't render Swal, so every
+         confirmDialog call routes through this Bootstrap modal). -->
+    <div class="modal fade" id="_yfConfirmModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="_yfConfirmTitle">{{ _('confirm') }}</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ _('cancel') }}"></button>
+          </div>
+          <div class="modal-body" id="_yfConfirmBody"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" id="_yfConfirmCancel">{{ _('cancel') }}</button>
+            <button type="button" class="btn btn-primary" id="_yfConfirmOk">{{ _('confirm') }}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar overlay (mobile) -->
+    <div class="yn-sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+    <!-- Layout -->
+    <div class="yn-layout">
+      <!-- Sidebar -->
+      <aside class="yn-sidebar" id="sidebar">
+        <div class="d-flex align-items-center">
+          <a href="/" class="yn-brand flex-grow-1">
+            <svg width="25" height="25" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="32" height="32" rx="8" fill="#696CFF"/>
+              <path d="M8 8L14.5 18V25H17.5V18L24 8H20.5L16 16L11.5 8H8Z" fill="white"/>
+            </svg>
+            <span>{{ _('app_name') }}</span>
+          </a>
+          <button class="btn btn-link text-white p-1 me-3 d-lg-none" onclick="closeSidebar()" aria-label="Close">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+
+        <ul class="yn-nav">
+          <li class="yn-nav-item">
+            <a href="/" class="yn-nav-link {% if active_page == 'dashboard' %}active{% endif %}">
+              <i class="bi bi-house"></i>
+              <span>{{ _('dashboard') }}</span>
+            </a>
+          </li>
+          <li class="yn-nav-item">
+            <a href="/sources" class="yn-nav-link {% if active_page == 'sources' %}active{% endif %}">
+              <i class="bi bi-wallet2"></i>
+              <span>{{ _('sources') }}</span>
+            </a>
+          </li>
+          <li class="yn-nav-item">
+            <a href="/portfolios" class="yn-nav-link {% if active_page == 'portfolios' %}active{% endif %}">
+              <i class="bi bi-briefcase"></i>
+              <span>{{ _('portfolios') }}</span>
+            </a>
+          </li>
+          <li class="yn-nav-item">
+            <a href="/movements" class="yn-nav-link {% if active_page == 'movements' %}active{% endif %}">
+              <i class="bi bi-arrow-left-right"></i>
+              <span>{{ _('movements') }}</span>
+            </a>
+          </li>
+          <li class="yn-nav-item">
+            <a href="/tags" class="yn-nav-link {% if active_page == 'tags' %}active{% endif %}">
+              <i class="bi bi-tag"></i>
+              <span>{{ _('tags') }}</span>
+            </a>
+          </li>
+          <li class="yn-nav-item">
+            <a href="/recurring" class="yn-nav-link {% if active_page == 'recurring' %}active{% endif %}">
+              <i class="bi bi-arrow-repeat"></i>
+              <span>{{ _('recurring') }}</span>
+            </a>
+          </li>
+          <li class="yn-nav-item">
+            <a href="/whims" class="yn-nav-link {% if active_page == 'whims' %}active{% endif %}">
+              <i class="bi bi-star"></i>
+              <span>{{ _('whims') }}</span>
+            </a>
+          </li>
+          <li class="yn-nav-item">
+            <a href="/savings" class="yn-nav-link {% if active_page == 'savings' %}active{% endif %}">
+              <i class="bi bi-piggy-bank"></i>
+              <span>{{ _('savings') }}</span>
+            </a>
+          </li>
+          <li class="yn-nav-item">
+            <a href="/notifications" class="yn-nav-link {% if active_page == 'notifications' %}active{% endif %}">
+              <i class="bi bi-bell"></i>
+              <span>{{ _('notifications') }}</span>
+            </a>
+          </li>
+          <li class="yn-nav-item">
+            <a href="/settings" class="yn-nav-link {% if active_page == 'settings' %}active{% endif %}">
+              <i class="bi bi-gear"></i>
+              <span>{{ _('settings') }}</span>
+            </a>
+          </li>
+
+          {# --- Plugin section --- #}
+          {% if plugin_menu_items() %}
+          <li class="yn-nav-header">{{ _('plugins') }}</li>
+          {% for item in plugin_menu_items() %}
+          <li class="yn-nav-item">
+            <a href="{{ item.url }}" class="yn-nav-link {% if active_page == item.id %}active{% endif %}">
+              <i class="{{ item.icon|replace('bx bx-', 'bi bi-') }}"></i>
+              <span>{{ _(item.label_key) }}</span>
+            </a>
+          </li>
+          {% endfor %}
+          {% endif %}
+
+          <input type="file" id="importFile" accept=".json,.yfine" style="display:none" onchange="importData(event)">
+        </ul>
+      </aside>
+
+      <!-- Main content -->
+      <div class="yn-main">
+        <!-- Navbar -->
+        <nav class="yn-navbar d-flex align-items-center gap-3">
+          <!-- Sidebar toggle -->
+          <button class="btn btn-link text-body p-0 yn-sidebar-toggle" onclick="toggleSidebar()">
+            <i class="bi bi-list fs-4"></i>
+          </button>
+
+          <!-- Global Search -->
+          <div class="flex-grow-1 d-none d-md-block yn-search-wrapper" id="search-wrapper">
+            <div class="navbar-search-box">
+              <i class="bi bi-search navbar-search-icon"></i>
+              <input type="text" class="navbar-search-input" id="global-search" placeholder="{{ _('search_placeholder') }}" autocomplete="off" aria-autocomplete="list" aria-controls="search-results" role="combobox" aria-expanded="false">
+              <kbd class="navbar-search-kbd d-none d-lg-inline-flex">Ctrl K</kbd>
+            </div>
+            <div class="yn-search-panel" id="search-results" role="listbox"></div>
+          </div>
+
+          <div class="d-flex align-items-center gap-2 ms-auto">
+            <!-- Help -->
+            <a class="btn btn-link text-body p-1 yn-help-btn" href="javascript:void(0)" data-bs-toggle="offcanvas" data-bs-target="#helpDrawer" title="Help" aria-label="Help">
+              <i class="bi bi-question-circle fs-5"></i>
+            </a>
+            <!-- Dark Mode Toggle -->
+            <a class="btn btn-link text-body p-1" href="javascript:void(0)" onclick="toggleDarkMode()" title="{{ _('theme') }}" id="dark-mode-toggle">
+              <i class="bi bi-moon fs-5" id="dark-mode-icon"></i>
+            </a>
+            <!-- Notification Bell -->
+            <div class="dropdown">
+              <a class="btn btn-link text-body p-1 position-relative yn-bell" href="javascript:void(0)" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+                <i class="bi bi-bell fs-5"></i>
+                <span class="yn-bell-badge" id="notif-badge" style="display:none">
+                  <span id="notif-count">0</span>
+                </span>
+              </a>
+              <div class="dropdown-menu dropdown-menu-end p-0 yn-notif-dropdown">
+                <div class="yn-notif-header">
+                  <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-bell-fill text-primary"></i>
+                    <h6 class="mb-0 fw-semibold">{{ _('notifications') }}</h6>
+                  </div>
+                  <a href="javascript:void(0)" class="yn-notif-markall" id="notif-mark-all" style="display:none" onclick="markAllNotifRead()">
+                    <i class="bi bi-check2-all me-1"></i>{{ _('mark_all_read') }}
+                  </a>
+                </div>
+                <ul class="yn-notif-list" id="notif-list">
+                  <li class="yn-notif-empty" id="notif-empty">
+                    <i class="bi bi-bell-slash"></i>
+                    <span>{{ _('no_notifications') }}</span>
+                  </li>
+                </ul>
+                <div class="yn-notif-footer">
+                  <a href="/notifications" class="btn btn-sm btn-primary w-100 rounded-pill">
+                    <i class="bi bi-arrow-right-circle me-1"></i>{{ _('view_all') }}
+                  </a>
+                </div>
+              </div>
+            </div>
+            <!-- Logout -->
+            <a class="btn btn-link text-body p-1 yn-logout-btn" href="javascript:void(0)" onclick="doLogout()" title="{{ _('logout') }}" style="display:none">
+              <i class="bi bi-box-arrow-right fs-5"></i>
+            </a>
+          </div>
+        </nav>
+
+        <!-- Content -->
+        <div class="yn-content">
+          {% block content %}{% endblock %}
+        </div>
+
+        <!-- Footer -->
+        <footer class="yn-footer">
+          {{ _('app_name') }} &copy; {{ now().year if now is defined else '2026' }}
+        </footer>
+      </div>
+    </div>
+
+    <!-- Bottom Navigation Bar (mobile) -->
+    <div class="bottom-nav-overlay" id="bottom-nav-overlay"></div>
+    <div class="bottom-nav-more-menu" id="bottom-nav-more">
+      <a href="/tags" class="bottom-nav-more-item {% if active_page == 'tags' %}active{% endif %}">
+        <i class="bi bi-tag"></i>{{ _('tags') }}
+      </a>
+      <a href="/recurring" class="bottom-nav-more-item {% if active_page == 'recurring' %}active{% endif %}">
+        <i class="bi bi-arrow-repeat"></i>{{ _('recurring') }}
+      </a>
+      <a href="/whims" class="bottom-nav-more-item {% if active_page == 'whims' %}active{% endif %}">
+        <i class="bi bi-star"></i>{{ _('whims') }}
+      </a>
+      <a href="/savings" class="bottom-nav-more-item {% if active_page == 'savings' %}active{% endif %}">
+        <i class="bi bi-piggy-bank"></i>{{ _('savings') }}
+      </a>
+      <a href="/portfolios" class="bottom-nav-more-item {% if active_page == 'portfolios' %}active{% endif %}">
+        <i class="bi bi-briefcase"></i>{{ _('portfolios') }}
+      </a>
+      <a href="/notifications" class="bottom-nav-more-item {% if active_page == 'notifications' %}active{% endif %}">
+        <i class="bi bi-bell"></i>{{ _('notifications') }}
+      </a>
+      <a href="/settings" class="bottom-nav-more-item {% if active_page == 'settings' %}active{% endif %}">
+        <i class="bi bi-gear"></i>{{ _('settings') }}
+      </a>
+      <a href="javascript:void(0)" class="bottom-nav-more-item yn-logout-btn text-danger" style="display:none" onclick="doLogout()">
+        <i class="bi bi-box-arrow-right"></i>{{ _('logout') }}
+      </a>
+    </div>
+    <nav class="bottom-nav" id="bottom-nav">
+      <div class="bottom-nav-inner">
+        <a href="/" class="bottom-nav-item {% if active_page == 'dashboard' %}active{% endif %}">
+          <i class="bi bi-house"></i>
+          <span>{{ _('dashboard') }}</span>
+        </a>
+        <a href="/sources" class="bottom-nav-item {% if active_page == 'sources' %}active{% endif %}">
+          <i class="bi bi-wallet2"></i>
+          <span>{{ _('sources') }}</span>
+        </a>
+        <a href="/movements" class="bottom-nav-item {% if active_page == 'movements' %}active{% endif %}">
+          <i class="bi bi-arrow-left-right"></i>
+          <span>{{ _('movements') }}</span>
+        </a>
+        <a href="/recurring" class="bottom-nav-item {% if active_page == 'recurring' %}active{% endif %}">
+          <i class="bi bi-arrow-repeat"></i>
+          <span>{{ _('recurring') }}</span>
+        </a>
+        <a href="javascript:void(0)" class="bottom-nav-item" id="bottom-nav-more-btn" onclick="toggleBottomMore()">
+          <i class="bi bi-three-dots"></i>
+          <span>{{ _('more') }}</span>
+        </a>
+      </div>
+    </nav>
+
+    <!-- Help drawer (offcanvas) -->
+    <div class="offcanvas offcanvas-end yn-help-drawer" tabindex="-1" id="helpDrawer" aria-labelledby="helpDrawerLabel">
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title d-flex align-items-center gap-2" id="helpDrawerLabel">
+          <i class="bi bi-question-circle-fill text-primary"></i>
+          <span>Help</span>
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body yn-help-body">
+        {% include ['help/' ~ (active_page or 'default') ~ '.' ~ get_locale() ~ '.html', 'help/' ~ (active_page or 'default') ~ '.html', 'help/default.html'] ignore missing %}
+      </div>
+    </div>
+
+    <!-- Bootstrap 5.3 JS Bundle (includes Popper) -->
+    <script src="/static/vendor/bootstrap/bootstrap.bundle.min.js"></script>
+
+    <!-- SweetAlert2 -->
+    <script src="/static/vendor/sweetalert2/sweetalert2.all.min.js"></script>
+
+    {% if get_theme() == 'system' %}
+    <script>
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+        var t = e.matches ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-bs-theme', t);
+      });
+    </script>
+    {% endif %}
+
+    <script>
+      // --- CSRF fetch interceptor ---
+      (function() {
+        var _origFetch = window.fetch;
+        window.fetch = function(url, opts) {
+          opts = opts || {};
+          var method = (opts.method || 'GET').toUpperCase();
+          if (method !== 'GET' && method !== 'HEAD' && method !== 'OPTIONS') {
+            var token = document.querySelector('meta[name="csrf-token"]');
+            if (token) {
+              opts.headers = opts.headers || {};
+              if (opts.headers instanceof Headers) {
+                opts.headers.set('X-CSRF-Token', token.content);
+              } else {
+                opts.headers['X-CSRF-Token'] = token.content;
+              }
+            }
+          }
+          return _origFetch.call(this, url, opts);
+        };
+      })();
+
+      // --- Sidebar toggle ---
+      function toggleSidebar() {
+        if (window.innerWidth >= 992) {
+          document.body.classList.toggle('sidebar-collapsed');
+        } else {
+          document.getElementById('sidebar').classList.toggle('show');
+          document.getElementById('sidebar-overlay').classList.toggle('show');
+        }
+      }
+      function closeSidebar() {
+        if (window.innerWidth >= 992) {
+          document.body.classList.add('sidebar-collapsed');
+        } else {
+          document.getElementById('sidebar').classList.remove('show');
+          document.getElementById('sidebar-overlay').classList.remove('show');
+        }
+      }
+
+      // --- Date formatting ---
+      var _dateFmt = '{{ get_date_format() }}';
+      function fmtDate(s) {
+        if (!s) return '';
+        var p = s.split('-');
+        if (p.length !== 3) return s;
+        if (_dateFmt === 'mm/dd/yyyy') return p[1] + '/' + p[2] + '/' + p[0];
+        if (_dateFmt === 'yyyy-mm-dd') return s;
+        return p[2] + '/' + p[1] + '/' + p[0];
+      }
+      var _fpAltFormat = _dateFmt === 'mm/dd/yyyy' ? 'm/d/Y' : (_dateFmt === 'yyyy-mm-dd' ? 'Y-m-d' : 'd/m/Y');
+
+      // --- Dot-wave loader HTML ---
+      var dotWaveHtml = '<div class="dot-wave"><div class="dot-wave__dot"></div><div class="dot-wave__dot"></div><div class="dot-wave__dot"></div><div class="dot-wave__dot"></div></div>';
+
+      // --- Toast notification system ---
+      var _toastTypeMap = { success: 's', error: 'e', warning: 'w', info: 'i', alert: 'w' };
+      var _toastIcons = {
+        s: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2.5,8.5 6,12 13.5,4.5"/></svg>',
+        e: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="4" x2="12" y2="12"/><line x1="12" y1="4" x2="4" y2="12"/></svg>',
+        i: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><line x1="8" y1="7" x2="8" y2="11"/><circle cx="8" cy="5" r="0.6" fill="currentColor" stroke="none"/></svg>',
+        w: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="8,2 15,13.5 1,13.5"/><line x1="8" y1="7" x2="8" y2="10"/><circle cx="8" cy="12" r="0.6" fill="currentColor" stroke="none"/></svg>'
+      };
+      var _toastCloseIcon = '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="2" y1="2" x2="10" y2="10"/><line x1="10" y1="2" x2="2" y2="10"/></svg>';
+      var _toastDurations = { s: 4000, e: 5000, i: 4000, w: 5000 };
+
+      function _dismissToast(el) {
+        el.classList.add('hide');
+        setTimeout(function() { el.remove(); }, 300);
+      }
+
+      // HTML-escape user content to prevent XSS in toast notifications
+      function _escHtml(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+      function _fireToast(title, msg, type) {
+        var c = _toastTypeMap[type] || 'i';
+        var dur = _toastDurations[c] || 4000;
+        var host = document.getElementById('toast-host');
+        if (host.children.length >= 5) _dismissToast(host.firstChild);
+        var el = document.createElement('div');
+        el.className = 'yn-toast t-' + c;
+        el.innerHTML =
+          '<div class="toast-badge">' + (_toastIcons[c] || _toastIcons.i) + '</div>' +
+          '<div class="toast-body">' +
+            '<div class="toast-title">' + _escHtml(title) + '</div>' +
+            (msg ? '<div class="toast-msg">' + _escHtml(msg) + '</div>' : '') +
+          '</div>' +
+          '<button type="button" class="toast-close" onclick="_dismissToast(this.closest(\'.yn-toast\'))">' + _toastCloseIcon + '</button>' +
+          '<div class="toast-progress" style="animation-duration:' + dur + 'ms"></div>';
+        host.appendChild(el);
+        requestAnimationFrame(function() { requestAnimationFrame(function() { el.classList.add('show'); }); });
+        setTimeout(function() { if (el.parentNode) _dismissToast(el); }, dur);
+      }
+
+      function showToast(message, type) {
+        _fireToast(message, '', type);
+      }
+
+      function showNotifToast(title, body, type, notifId) {
+        var c = _toastTypeMap[type] || 'i';
+        var dur = 8000;
+        var host = document.getElementById('toast-host');
+        if (host.children.length >= 5) _dismissToast(host.firstChild);
+        var now = new Date();
+        var time = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+        var el = document.createElement('div');
+        el.className = 'yn-toast t-' + c + ' has-meta';
+        el.innerHTML =
+          '<div class="toast-badge">' + (_toastIcons[c] || _toastIcons.i) + '</div>' +
+          '<div class="toast-body">' +
+            '<div class="toast-title">' + _escHtml(title) + '</div>' +
+            (body ? '<div class="toast-msg">' + _escHtml(body) + '</div>' : '') +
+            '<div class="toast-meta">' +
+              '<span class="toast-time"><i class="bi bi-clock"></i> ' + time + '</span>' +
+              (notifId ? '<a href="javascript:void(0)" class="toast-action" onclick="markNotifRead(' + notifId + ');_dismissToast(this.closest(\'.yn-toast\'))">{{ _("mark_read") }}</a>' : '') +
+            '</div>' +
+          '</div>' +
+          '<button type="button" class="toast-close" onclick="_dismissToast(this.closest(\'.yn-toast\'))">' + _toastCloseIcon + '</button>' +
+          '<div class="toast-progress" style="animation-duration:' + dur + 'ms"></div>';
+        host.appendChild(el);
+        requestAnimationFrame(function() { requestAnimationFrame(function() { el.classList.add('show'); }); });
+        setTimeout(function() { if (el.parentNode) _dismissToast(el); }, dur);
+      }
+
+      // Open a URL outside the pywebview window (in the user's system
+      // browser) when running as a desktop app. In browser mode we fall back
+      // to the standard new-tab behavior. Wire up with
+      //   <a href="..." target="_blank" onclick="return yfOpenExternal(this.href)">
+      // so the attribute keeps working when pywebview isn't present.
+      window.yfOpenExternal = function(url) {
+        if (!url) return false;
+        if (window.pywebview && window.pywebview.api && window.pywebview.api.open_external) {
+          try { window.pywebview.api.open_external(url); } catch (e) {}
+          return false;  // cancel in-app navigation
+        }
+        return true;  // let the <a target="_blank"> open a new tab
+      };
+
+      // Logs download needs the same bridge treatment — the stock
+      // <a download> link is respected inconsistently by native webviews.
+      window.yfDownloadLogs = function() {
+        if (window.pywebview && window.pywebview.api && window.pywebview.api.save_logs) {
+          try {
+            window.pywebview.api.save_logs().then(function(ok) {
+              if (ok) showToast('{{ _("success") }}', 'success');
+            });
+          } catch (e) {}
+          return false;
+        }
+        return true;
+      };
+
+      // Bootstrap-modal-based confirmation. Swal looks nicer but silently
+      // fails to render inside pywebview, so every confirmDialog call funnels
+      // through the same Bootstrap dialog — works in browser and desktop.
+      function confirmDialog(text, opts) {
+        opts = opts || {};
+        var modalEl = document.getElementById('_yfConfirmModal');
+        if (!modalEl) {
+          // Defensive: if the modal markup is missing for some reason, fall
+          // back to a native confirm so the user can still proceed.
+          return Promise.resolve(window.confirm(typeof text === 'string' ? text.replace(/<[^>]+>/g, ' ') : ''));
+        }
+        var titleEl = document.getElementById('_yfConfirmTitle');
+        var bodyEl = document.getElementById('_yfConfirmBody');
+        var okBtn = document.getElementById('_yfConfirmOk');
+        var cancelBtn = document.getElementById('_yfConfirmCancel');
+        titleEl.textContent = opts.title || '{{ _("confirm") }}';
+        bodyEl.innerHTML = text;
+        okBtn.textContent = opts.confirmText || '{{ _("confirm") }}';
+        okBtn.className = 'btn btn-' + (opts.confirmColor || 'primary');
+        cancelBtn.textContent = opts.cancelText || '{{ _("cancel") }}';
+        var modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        return new Promise(function(resolve) {
+          var settled = false;
+          function finish(value) {
+            if (settled) return;
+            settled = true;
+            okBtn.removeEventListener('click', onOk);
+            modalEl.removeEventListener('hidden.bs.modal', onHide);
+            resolve(value);
+          }
+          function onOk() { modal.hide(); finish(true); }
+          function onHide() { finish(false); }
+          okBtn.addEventListener('click', onOk);
+          modalEl.addEventListener('hidden.bs.modal', onHide);
+          modal.show();
+        });
+      }
+
+      async function handleApiError(resp) {
+        try {
+          const err = await resp.json();
+          if (err.detail) {
+            if (Array.isArray(err.detail)) {
+              const msgs = err.detail.map(e => e.msg || JSON.stringify(e));
+              showToast(msgs.join('; '), 'error');
+            } else {
+              showToast(String(err.detail), 'error');
+            }
+          } else {
+            showToast('{{ _("error") }}', 'error');
+          }
+        } catch (e) {
+          showToast('{{ _("error") }}' + ' (' + resp.status + ')', 'error');
+        }
+      }
+
+      // --- Notification polling ---
+      var _seenRaw = [];
+      try { _seenRaw = JSON.parse(sessionStorage.getItem('yfine_seen_notifs') || '[]'); } catch(e) {}
+      const seenNotificationIds = new Set(_seenRaw);
+      function _persistSeen() {
+        try { sessionStorage.setItem('yfine_seen_notifs', JSON.stringify(Array.from(seenNotificationIds))); } catch(e) {}
+      }
+
+      async function pollNotifications() {
+        try {
+          const resp = await fetch('/api/notifications?is_read=false&limit=5');
+          if (!resp.ok) return;
+          const data = await resp.json();
+          const badge = document.getElementById('notif-badge');
+          const count = document.getElementById('notif-count');
+          const list = document.getElementById('notif-list');
+
+          const markAllBtn = document.getElementById('notif-mark-all');
+          if (data.length > 0) {
+            badge.style.display = '';
+            count.textContent = data.length;
+            if (markAllBtn) markAllBtn.style.display = '';
+
+            list.innerHTML = '';
+            data.forEach(n => {
+              const iconMap = { alert: 'bi-exclamation-octagon-fill', warning: 'bi-exclamation-triangle-fill', info: 'bi-info-circle-fill' };
+              const icon = iconMap[n.type] || 'bi-info-circle-fill';
+              const colorLabel = n.type === 'alert' ? 'danger' : n.type === 'warning' ? 'warning' : 'info';
+
+              const li = document.createElement('li');
+              li.className = 'yn-notif-item yn-notif-' + colorLabel;
+              li.id = 'notif-item-' + n.id;
+
+              const iconWrap = document.createElement('div');
+              iconWrap.className = 'yn-notif-icon';
+              iconWrap.innerHTML = '<i class="bi ' + icon + '"></i>';
+
+              const content = document.createElement('div');
+              content.className = 'yn-notif-body';
+              const h6 = document.createElement('div');
+              h6.className = 'yn-notif-title';
+              h6.textContent = n.title;
+              const small = document.createElement('div');
+              small.className = 'yn-notif-text';
+              small.textContent = n.body;
+              content.appendChild(h6);
+              content.appendChild(small);
+
+              const dismissBtn = document.createElement('button');
+              dismissBtn.type = 'button';
+              dismissBtn.className = 'yn-notif-dismiss';
+              dismissBtn.setAttribute('aria-label', 'dismiss');
+              dismissBtn.innerHTML = '<i class="bi bi-x-lg"></i>';
+              dismissBtn.onclick = function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                deleteNotif(n.id);
+              };
+
+              li.appendChild(iconWrap);
+              li.appendChild(content);
+              li.appendChild(dismissBtn);
+              list.appendChild(li);
+
+              if (!seenNotificationIds.has(n.id)) {
+                showNotifToast(n.title, n.body, n.type, n.id);
+                seenNotificationIds.add(n.id);
+                _persistSeen();
+              }
+            });
+          } else {
+            badge.style.display = 'none';
+            count.textContent = '0';
+            if (markAllBtn) markAllBtn.style.display = 'none';
+            list.innerHTML = '<li class="yn-notif-empty"><i class="bi bi-bell-slash"></i><span>{{ _("no_notifications") }}</span></li>';
+          }
+        } catch (e) {}
+      }
+
+      async function markNotifRead(id) {
+        try {
+          await fetch('/api/notifications/' + id + '/read', { method: 'PUT' });
+          var el = document.getElementById('notif-item-' + id);
+          if (el) el.remove();
+          pollNotifications();
+        } catch(e) {}
+      }
+
+      async function deleteNotif(id) {
+        try {
+          var resp = await fetch('/api/notifications/' + id, { method: 'DELETE' });
+          if (!resp.ok) return;
+          var el = document.getElementById('notif-item-' + id);
+          if (el) el.remove();
+          seenNotificationIds.delete(id);
+          _persistSeen();
+          pollNotifications();
+        } catch(e) {}
+      }
+
+      async function markAllNotifRead() {
+        try {
+          await fetch('/api/notifications/read-all', { method: 'POST' });
+          pollNotifications();
+        } catch(e) {}
+      }
+
+      pollNotifications();
+      setInterval(pollNotifications, 30000);
+
+      // --- Logout ---
+      async function doLogout() {
+        try {
+          await fetch('/api/auth/logout', { method: 'POST' });
+        } catch(e) {}
+        window.location.href = '/login';
+      }
+
+      // Show logout button only when password is set
+      (function checkLogoutVisibility() {
+        fetch('/api/settings/password-status').then(function(r) { return r.json(); }).then(function(d) {
+          if (d.password_set) {
+            document.querySelectorAll('.yn-logout-btn').forEach(function(el) { el.style.display = ''; });
+          }
+        }).catch(function() {});
+      })();
+
+      // --- Block non-numeric input on number fields ---
+      document.addEventListener('keydown', function(e) {
+        if (!e.target || e.target.type !== 'number') return;
+        if (['Backspace','Delete','Tab','Escape','Enter','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'].includes(e.key)) return;
+        if ((e.ctrlKey || e.metaKey) && ['a','c','v','x','z'].includes(e.key.toLowerCase())) return;
+        if (e.key === '.' || e.key === ',') return;
+        if (e.key === '-') return;
+        if (e.key.length === 1 && !/\d/.test(e.key)) {
+          e.preventDefault();
+        }
+      });
+      document.addEventListener('paste', function(e) {
+        if (!e.target || e.target.type !== 'number') return;
+        var pasted = (e.clipboardData || window.clipboardData).getData('text');
+        if (!/^-?[\d.,]+$/.test(pasted.trim())) {
+          e.preventDefault();
+        }
+      });
+
+      // --- Export / Import ---
+      async function exportData(mode) {
+        mode = mode || 'core';
+        if (window.pywebview && window.pywebview.api) {
+          try {
+            const ok = await window.pywebview.api.save_export(mode);
+            if (ok) showToast('{{ _("export_data") }}: {{ _("success") }}', 'success');
+          } catch (e) {
+            showToast('{{ _("error") }}', 'error');
+          }
+          return;
+        }
+        try {
+          const resp = await fetch('/api/export?mode=' + mode);
+          if (!resp.ok) { showToast('{{ _("error") }}', 'error'); return; }
+          if (mode === 'all') {
+            const blob = await resp.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'yfine-export-full.yfine';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+          } else {
+            const data = await resp.json();
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'yfine-export.json';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+          }
+          showToast('{{ _("export_data") }}: {{ _("success") }}', 'success');
+        } catch (e) {
+          showToast('{{ _("error") }}', 'error');
+        }
+      }
+
+      var _importPendingFile = null;
+
+      async function importData(event) {
+        var file = event.target.files[0];
+        event.target.value = '';
+        if (!file) return;
+        _importPendingFile = file;
+        try {
+          var fd = new FormData();
+          fd.append('file', file);
+          var resp = await fetch('/api/import/preview', { method: 'POST', body: fd });
+          if (!resp.ok) { await handleApiError(resp); return; }
+          var preview = await resp.json();
+          showImportPreview(preview);
+        } catch (e) {
+          showToast('{{ _("error") }}', 'error');
+        }
+      }
+
+      function showImportPreview(preview) {
+        var html = '<div class="mb-3">';
+        html += '<h6 class="mb-2">{{ _("data") }}</h6>';
+        html += '<div class="table-responsive"><table class="table table-sm table-bordered mb-3">';
+        html += '<thead><tr><th>{{ _("table") }}</th><th class="text-end">{{ _("records") }}</th></tr></thead><tbody>';
+        var tables = preview.core_tables || {};
+        for (var t in tables) {
+          if (tables[t] > 0) {
+            html += '<tr><td>' + t + '</td><td class="text-end">' + tables[t] + '</td></tr>';
+          }
+        }
+        html += '</tbody></table></div>';
+
+        var plugins = preview.plugins || [];
+        if (plugins.length > 0) {
+          html += '<h6 class="mb-2">{{ _("plugins") }}</h6>';
+          html += '<div class="table-responsive"><table class="table table-sm table-bordered mb-3">';
+          html += '<thead><tr><th>{{ _("name") }}</th><th>{{ _("version") }}</th><th>{{ _("action") }}</th><th>{{ _("security") }}</th></tr></thead><tbody>';
+          plugins.forEach(function(p) {
+            var verInfo = p.archive_version;
+            if (p.installed_version) verInfo += ' <small class="text-muted">({{ _("installed") }}: ' + p.installed_version + ')</small>';
+            var actionBadge = '';
+            if (p.action === 'install') actionBadge = '<span class="badge bg-success">{{ _("install") }}</span>';
+            else if (p.action === 'update') actionBadge = '<span class="badge bg-warning">{{ _("update") }}</span>';
+            else if (p.action === 'reinstall') actionBadge = '<span class="badge bg-info">{{ _("reinstall") }}</span>';
+            else actionBadge = '<span class="badge bg-secondary">{{ _("skip") }}</span>';
+            var scanBadge = '';
+            if (p.scan) {
+              if (p.scan.critical_count > 0) scanBadge = '<span class="badge bg-danger">' + p.scan.critical_count + ' critical</span>';
+              else if (p.scan.warning_count > 0) scanBadge = '<span class="badge bg-warning">' + p.scan.warning_count + ' warning</span>';
+              else scanBadge = '<span class="badge bg-success">OK</span>';
+            } else {
+              scanBadge = '<span class="badge bg-secondary">-</span>';
+            }
+            html += '<tr><td>' + p.name + '</td><td>' + verInfo + '</td><td>' + actionBadge + '</td><td>' + scanBadge + '</td></tr>';
+          });
+          html += '</tbody></table></div>';
+        }
+
+        if (preview.requires_restart) {
+          html += '<div class="alert alert-warning mb-0"><i class="bi bi-info-circle me-1"></i>{{ _("import_restart_notice") }}</div>';
+        }
+        html += '</div>';
+
+        // Route through the shared confirmDialog so it renders under
+        // pywebview too (Swal.fire would silently no-op there).
+        confirmDialog(html, {
+          title: '{{ _("import_preview") }}',
+          confirmText: '{{ _("import") }}',
+          confirmColor: 'danger'
+        }).then(function(ok) {
+          if (ok) executeImport();
+        });
+      }
+
+      async function executeImport() {
+        if (!_importPendingFile) return;
+        try {
+          var fd = new FormData();
+          fd.append('file', _importPendingFile);
+          var resp = await fetch('/api/import', { method: 'POST', body: fd });
+          if (resp.ok) {
+            var result = await resp.json();
+            showToast('{{ _("import_data") }}: {{ _("success") }}', 'success');
+            if (result.requires_restart) {
+              showToast('{{ _("import_restart_notice") }}', 'info');
+              setTimeout(function() { location.reload(); }, 2500);
+            } else {
+              setTimeout(function() { location.reload(); }, 1000);
+            }
+          } else {
+            await handleApiError(resp);
+          }
+        } catch (e) {
+          showToast('{{ _("error") }}', 'error');
+        }
+        _importPendingFile = null;
+      }
+    </script>
+
+    {% block page_js %}{% endblock %}
+
+    <!-- Dark Mode Toggle -->
+    <script>
+      function toggleDarkMode() {
+        var current = document.documentElement.getAttribute('data-bs-theme');
+        var next = current === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-bs-theme', next);
+        updateDarkModeIcon();
+        fetch('/api/settings', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ theme: next })
+        }).catch(function(){});
+      }
+      function updateDarkModeIcon() {
+        var icon = document.getElementById('dark-mode-icon');
+        if (!icon) return;
+        var isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+        icon.className = 'bi ' + (isDark ? 'bi-sun' : 'bi-moon') + ' fs-5';
+      }
+      updateDarkModeIcon();
+    </script>
+
+    <!-- Global Search -->
+    <script>
+    (function() {
+      var input = document.getElementById('global-search');
+      var resultsEl = document.getElementById('search-results');
+      var wrapper = document.getElementById('search-wrapper');
+      if (!input || !resultsEl || !wrapper) return;
+
+      var _dir_in  = '{{ _("in") }}';
+      var _dir_out = '{{ _("out") }}';
+      var _lbl_transfer = '{{ _("transfer") }}';
+      var _lbl_no_results = '{{ _("no_results") }}';
+      var _lbl_hint_empty = '{{ _("search_hint_empty") }}';
+      var _lbl_hint_footer = '{{ _("search_hint_footer") }}';
+      var _lbl_all = '{{ _("search_all") }}';
+      var _lbl_group = {
+        movements: '{{ _("search_movements") }}',
+        sources:   '{{ _("search_sources") }}',
+        tags:      '{{ _("search_tags") }}',
+        savings:   '{{ _("search_savings") }}',
+        whims:     '{{ _("search_whims") }}',
+        recurring: '{{ _("search_recurring") }}'
+      };
+      var _group_icon = {
+        movements: 'bi-arrow-left-right',
+        sources:   'bi-wallet2',
+        tags:      'bi-tag',
+        savings:   'bi-piggy-bank',
+        whims:     'bi-star',
+        recurring: 'bi-arrow-repeat'
+      };
+      var GROUP_ORDER = ['movements', 'sources', 'savings', 'whims', 'recurring', 'tags'];
+
+      var state = {
+        q: '',
+        data: null,        // last payload from /api/search
+        active: 'all',     // 'all' or a group key
+        selected: -1,      // index into the currently visible flattened list
+        items: [],         // flattened visible items [{group, item, index}]
+        req: 0,            // request counter to drop stale responses
+      };
+      var debounce = null;
+
+      input.addEventListener('input', function() {
+        clearTimeout(debounce);
+        state.q = input.value.trim();
+        if (state.q.length < 2) {
+          state.data = null;
+          render();
+          return;
+        }
+        debounce = setTimeout(runQuery, 220);
+      });
+
+      input.addEventListener('focus', function() { render(); openPanel(); });
+      input.addEventListener('blur', function() {
+        // Keep panel open on mousedown inside the panel; handled globally.
+      });
+
+      document.addEventListener('mousedown', function(e) {
+        if (!wrapper.contains(e.target)) closePanel();
+      });
+
+      // Ctrl/⌘-K to focus
+      document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key && e.key.toLowerCase() === 'k') {
+          e.preventDefault();
+          input.focus();
+          input.select();
+          openPanel();
+          return;
+        }
+        if (document.activeElement !== input) return;
+        if (e.key === 'Escape') { input.blur(); closePanel(); return; }
+        if (e.key === 'ArrowDown') { e.preventDefault(); moveSelection(1); return; }
+        if (e.key === 'ArrowUp')   { e.preventDefault(); moveSelection(-1); return; }
+        if (e.key === 'Tab') {
+          e.preventDefault();
+          cycleFilter(e.shiftKey ? -1 : 1);
+          return;
+        }
+        if (e.key === 'Enter') {
+          if (state.selected >= 0 && state.items[state.selected]) {
+            e.preventDefault();
+            go(state.items[state.selected]);
+          }
+        }
+      });
+
+      async function runQuery() {
+        var myReq = ++state.req;
+        try {
+          var resp = await fetch('/api/search?q=' + encodeURIComponent(state.q));
+          if (!resp.ok) return;
+          if (myReq !== state.req) return;   // a newer query raced ahead
+          state.data = await resp.json();
+          state.selected = 0;
+          render();
+          openPanel();
+        } catch(e) {}
+      }
+
+      function availableGroups() {
+        if (!state.data) return [];
+        var g = [];
+        GROUP_ORDER.forEach(function(k) {
+          if (state.data[k] && state.data[k].length) g.push(k);
+        });
+        return g;
+      }
+
+      function flattenVisible() {
+        state.items = [];
+        if (!state.data) return;
+        var groups = state.active === 'all' ? availableGroups() : [state.active];
+        groups.forEach(function(g) {
+          var arr = state.data[g] || [];
+          arr.forEach(function(it) {
+            state.items.push({ group: g, item: it });
+          });
+        });
+      }
+
+      function render() {
+        if (state.q.length < 2) {
+          resultsEl.innerHTML = '<div class="yn-search-empty"><i class="bi bi-search"></i><span>' + _lbl_hint_empty + '</span></div>';
+          state.items = [];
+          state.selected = -1;
+          input.setAttribute('aria-expanded', 'false');
+          return;
+        }
+        if (!state.data) {
+          resultsEl.innerHTML = '<div class="yn-search-loading">' + dotWaveHtml + '</div>';
+          return;
+        }
+
+        var groups = availableGroups();
+        var total = groups.reduce(function(a, k) { return a + state.data[k].length; }, 0);
+
+        var html = '';
+
+        // Filter chips
+        html += '<div class="yn-search-filters">';
+        html += chipHtml('all', _lbl_all, total, state.active === 'all');
+        groups.forEach(function(k) {
+          html += chipHtml(k, _lbl_group[k] || k, state.data[k].length, state.active === k);
+        });
+        html += '</div>';
+
+        if (total === 0) {
+          html += '<div class="yn-search-empty"><i class="bi bi-emoji-frown"></i><span>' + _lbl_no_results + '</span></div>';
+          resultsEl.innerHTML = html;
+          state.items = [];
+          state.selected = -1;
+          input.setAttribute('aria-expanded', 'true');
+          return;
+        }
+
+        flattenVisible();
+        if (state.selected < 0 || state.selected >= state.items.length) state.selected = 0;
+
+        html += '<div class="yn-search-body">';
+        var activeGroups = state.active === 'all' ? availableGroups() : [state.active];
+        var cursor = 0;
+        activeGroups.forEach(function(g) {
+          var arr = state.data[g] || [];
+          if (!arr.length) return;
+          html += '<div class="yn-search-group">';
+          html += '<div class="yn-search-group-header"><i class="bi ' + _group_icon[g] + '"></i><span>' + (_lbl_group[g] || g) + '</span><span class="yn-search-group-count">' + arr.length + '</span></div>';
+          arr.forEach(function(it) {
+            var idx = cursor++;
+            html += renderItem(g, it, idx, idx === state.selected);
+          });
+          html += '</div>';
+        });
+        html += '</div>';
+
+        // Footer
+        html += '<div class="yn-search-footer"><span>' + _lbl_hint_footer + '</span></div>';
+
+        resultsEl.innerHTML = html;
+        input.setAttribute('aria-expanded', 'true');
+        bindInteractions();
+      }
+
+      function chipHtml(key, label, count, active) {
+        return '<button type="button" class="yn-search-chip' + (active ? ' is-active' : '') + '" data-filter="' + key + '">'
+          + escHtml(label)
+          + '<span class="yn-search-chip-count">' + count + '</span>'
+          + '</button>';
+      }
+
+      function renderItem(group, it, idx, selected) {
+        var cls = 'yn-search-item' + (selected ? ' is-selected' : '');
+        var out = '<a href="javascript:void(0)" class="' + cls + '" data-idx="' + idx + '" role="option">';
+        if (group === 'movements') {
+          var sign = it.direction === 'in' ? '+' : '-';
+          var colorCls = it.is_transfer ? 'text-info' : (it.direction === 'in' ? 'text-success' : 'text-danger');
+          out += '<span class="yn-search-item-icon"><i class="bi ' + (it.is_transfer ? 'bi-arrow-left-right' : (it.direction === 'in' ? 'bi-arrow-down-circle' : 'bi-arrow-up-circle')) + '"></i></span>';
+          out += '<span class="yn-search-item-body">';
+          out += '<span class="yn-search-item-title">' + highlight(it.note || (it.is_transfer ? _lbl_transfer : fmtDate(it.date))) + '</span>';
+          var meta = [];
+          meta.push('<span class="' + colorCls + ' fw-semibold">' + sign + it.amount.toFixed(2) + '</span>');
+          meta.push(fmtDate(it.date));
+          if (it.source_name) meta.push(escHtml(it.source_name));
+          if (it.tags && it.tags.length) {
+            it.tags.slice(0, 3).forEach(function(t) {
+              var style = t.color ? 'style="background-color:' + t.color + ';color:#fff"' : '';
+              var cls2 = t.color ? 'badge' : 'badge bg-label-secondary';
+              meta.push('<span class="' + cls2 + '" ' + style + '>' + escHtml(t.name) + '</span>');
+            });
+          }
+          out += '<span class="yn-search-item-meta">' + meta.join(' · ') + '</span>';
+          out += '</span>';
+        } else if (group === 'sources') {
+          out += '<span class="yn-search-item-icon"><i class="bi bi-wallet2"></i></span>';
+          out += '<span class="yn-search-item-body">';
+          out += '<span class="yn-search-item-title">' + highlight(it.name) + '</span>';
+          out += '<span class="yn-search-item-meta">' + escHtml(it.currency) + '</span>';
+          out += '</span>';
+        } else if (group === 'tags') {
+          var tagStyle = it.color ? 'style="background-color:' + it.color + ';color:#fff"' : '';
+          var tagCls = it.color ? 'badge' : 'badge bg-label-secondary';
+          out += '<span class="yn-search-item-icon"><i class="bi bi-tag"></i></span>';
+          out += '<span class="yn-search-item-body">';
+          out += '<span class="yn-search-item-title"><span class="' + tagCls + '" ' + tagStyle + '>' + highlight(it.name) + '</span></span>';
+          if (it.count > 0) out += '<span class="yn-search-item-meta">' + it.count + '</span>';
+          out += '</span>';
+        } else if (group === 'savings') {
+          out += '<span class="yn-search-item-icon"><i class="bi bi-piggy-bank"></i></span>';
+          out += '<span class="yn-search-item-body">';
+          out += '<span class="yn-search-item-title">' + highlight(it.description || fmtDate(it.date)) + '</span>';
+          var m2 = '<span class="text-success fw-semibold">+' + it.amount.toFixed(2) + ' ' + escHtml(it.currency) + '</span> · ' + fmtDate(it.date);
+          if (it.note) m2 += ' · ' + escHtml(it.note);
+          out += '<span class="yn-search-item-meta">' + m2 + '</span>';
+          out += '</span>';
+        } else if (group === 'whims') {
+          out += '<span class="yn-search-item-icon"><i class="bi bi-star"></i></span>';
+          out += '<span class="yn-search-item-body">';
+          out += '<span class="yn-search-item-title">' + highlight(it.name) + '</span>';
+          out += '<span class="yn-search-item-meta">' + it.amount.toFixed(2) + ' ' + escHtml(it.currency) + ' · ' + escHtml(it.status) + '</span>';
+          out += '</span>';
+        } else if (group === 'recurring') {
+          out += '<span class="yn-search-item-icon"><i class="bi bi-arrow-repeat"></i></span>';
+          out += '<span class="yn-search-item-body">';
+          out += '<span class="yn-search-item-title">' + highlight(it.name) + '</span>';
+          var sign2 = it.direction === 'in' ? '+' : '-';
+          var rm = sign2 + it.amount.toFixed(2) + ' ' + escHtml(it.currency) + ' · ' + escHtml(it.frequency);
+          if (it.next_due_date) rm += ' · ' + fmtDate(it.next_due_date);
+          out += '<span class="yn-search-item-meta">' + rm + '</span>';
+          out += '</span>';
+        }
+        out += '</a>';
+        return out;
+      }
+
+      function bindInteractions() {
+        resultsEl.querySelectorAll('.yn-search-chip').forEach(function(btn) {
+          btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            state.active = btn.dataset.filter;
+            state.selected = 0;
+            render();
+            input.focus();
+          });
+        });
+        resultsEl.querySelectorAll('.yn-search-item').forEach(function(el) {
+          el.addEventListener('click', function(e) {
+            e.preventDefault();
+            var idx = parseInt(el.dataset.idx, 10);
+            if (state.items[idx]) go(state.items[idx]);
+          });
+          el.addEventListener('mouseenter', function() {
+            var idx = parseInt(el.dataset.idx, 10);
+            if (idx === state.selected) return;
+            state.selected = idx;
+            resultsEl.querySelectorAll('.yn-search-item.is-selected').forEach(function(s) { s.classList.remove('is-selected'); });
+            el.classList.add('is-selected');
+          });
+        });
+      }
+
+      function go(entry) {
+        var it = entry.item;
+        var url;
+        switch (entry.group) {
+          case 'movements': url = '/movements/' + it.id + '/edit'; break;
+          case 'sources':   url = '/sources/' + it.id; break;
+          case 'tags':      url = '/tags'; break;
+          case 'savings':   url = '/savings/' + it.id + '/edit'; break;
+          case 'whims':     url = '/whims/' + it.id + '/edit'; break;
+          case 'recurring': url = '/recurring/' + it.id + '/edit'; break;
+          default: return;
+        }
+        closePanel();
+        var a = document.createElement('a');
+        a.href = url; a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+      }
+
+      function moveSelection(delta) {
+        if (!state.items.length) return;
+        state.selected = (state.selected + delta + state.items.length) % state.items.length;
+        resultsEl.querySelectorAll('.yn-search-item').forEach(function(el) {
+          var idx = parseInt(el.dataset.idx, 10);
+          el.classList.toggle('is-selected', idx === state.selected);
+          if (idx === state.selected) el.scrollIntoView({ block: 'nearest' });
+        });
+      }
+
+      function cycleFilter(dir) {
+        var groups = ['all'].concat(availableGroups());
+        if (groups.length <= 1) return;
+        var idx = groups.indexOf(state.active);
+        if (idx < 0) idx = 0;
+        idx = (idx + dir + groups.length) % groups.length;
+        state.active = groups[idx];
+        state.selected = 0;
+        render();
+      }
+
+      function openPanel()  { resultsEl.classList.add('is-open'); }
+      function closePanel() { resultsEl.classList.remove('is-open'); }
+
+      function escHtml(s) { var d = document.createElement('div'); d.textContent = (s == null ? '' : String(s)); return d.innerHTML; }
+      function highlight(s) {
+        if (s == null) return '';
+        var text = String(s);
+        var q = state.q;
+        if (!q) return escHtml(text);
+        var safe = escHtml(text);
+        var qSafe = escHtml(q).replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
+        try {
+          return safe.replace(new RegExp(qSafe, 'gi'), function(m) { return '<mark>' + m + '</mark>'; });
+        } catch (e) { return safe; }
+      }
+    })();
+    </script>
+
+    <!-- Relative Time Helper -->
+    <script>
+      var _timeStrings = {
+        just_now: '{{ _("time_just_now") }}',
+        minutes_ago: '{{ _("time_minutes_ago") }}',
+        hours_ago: '{{ _("time_hours_ago") }}',
+        yesterday: '{{ _("time_yesterday") }}',
+        days_ago: '{{ _("time_days_ago") }}'
+      };
+      function relativeTime(dateStr) {
+        if (!dateStr) return '';
+        var d = new Date(dateStr);
+        var now = new Date();
+        var diffMs = now - d;
+        var diffMin = Math.floor(diffMs / 60000);
+        var diffHr = Math.floor(diffMs / 3600000);
+        var diffDay = Math.floor(diffMs / 86400000);
+        if (diffMin < 1) return _timeStrings.just_now;
+        if (diffMin < 60) return _timeStrings.minutes_ago.replace('{n}', diffMin);
+        if (diffHr < 24) return _timeStrings.hours_ago.replace('{n}', diffHr);
+        if (diffDay === 1) return _timeStrings.yesterday;
+        if (diffDay < 30) return _timeStrings.days_ago.replace('{n}', diffDay);
+        return fmtDate(dateStr.substring(0, 10));
+      }
+    </script>
+
+    <!-- Bottom nav "More" menu toggle -->
+    <script>
+      function toggleBottomMore() {
+        var menu = document.getElementById('bottom-nav-more');
+        var overlay = document.getElementById('bottom-nav-overlay');
+        var isOpen = menu.classList.contains('show');
+        menu.classList.toggle('show', !isOpen);
+        overlay.classList.toggle('show', !isOpen);
+      }
+      (function() {
+        var overlay = document.getElementById('bottom-nav-overlay');
+        if (overlay) {
+          overlay.addEventListener('click', function() {
+            document.getElementById('bottom-nav-more').classList.remove('show');
+            overlay.classList.remove('show');
+          });
+        }
+      })();
+    </script>
+
+  </body>
+</html>

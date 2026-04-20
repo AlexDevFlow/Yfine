@@ -1,0 +1,767 @@
+{% extends "base.html" %}
+{% set active_page = "dashboard" %}
+
+{% block title %}{{ _('dashboard') }}{% endblock %}
+
+{% block content %}
+{% if stats.source_count == 0 and stats.movement_count == 0 %}
+<!-- Onboarding -->
+<div class="card mb-4">
+  <div class="card-body text-center py-5">
+    <div class="mb-3">
+      <i class="bi bi-rocket-takeoff" style="font-size:3.5rem;color:var(--bs-primary)"></i>
+    </div>
+    <h3 class="mb-2">{{ _('welcome_title') }}</h3>
+    <p class="text-muted mb-4">{{ _('welcome_subtitle') }}</p>
+    <div class="row justify-content-center g-3 mb-4">
+      <div class="col-md-4">
+        <div class="card bg-label-success h-100">
+          <div class="card-body text-center py-4">
+            <i class="bi bi-wallet2 mb-2" style="font-size:2rem"></i>
+            <p class="mb-0 small fw-bold">1. {{ _('welcome_step_1') }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card bg-label-primary h-100">
+          <div class="card-body text-center py-4">
+            <i class="bi bi-arrow-left-right mb-2" style="font-size:2rem"></i>
+            <p class="mb-0 small fw-bold">2. {{ _('welcome_step_2') }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card bg-label-warning h-100">
+          <div class="card-body text-center py-4">
+            <i class="bi bi-arrow-repeat mb-2" style="font-size:2rem"></i>
+            <p class="mb-0 small fw-bold">3. {{ _('welcome_step_3') }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <a href="/sources/new" class="btn btn-lg btn-primary">
+      <i class="bi bi-plus me-1"></i>{{ _('get_started') }}
+    </a>
+    <div class="mt-4 pt-3 border-top d-inline-flex align-items-center gap-2 small text-muted">
+      <i class="bi bi-question-circle-fill text-primary"></i>
+      <span>{{ _('welcome_help_hint') }}</span>
+    </div>
+  </div>
+</div>
+{% else %}
+{% if not portfolio_prices_prompted %}
+<!-- First-launch portfolio prompt (shown once) -->
+<div class="card mb-4 border-primary" id="portfolio-onboarding-card">
+  <div class="card-body">
+    <div class="d-flex align-items-start gap-3">
+      <span class="yn-icon-box bg-label-primary p-2"><i class="bi bi-briefcase fs-4"></i></span>
+      <div class="flex-grow-1">
+        <h6 class="mb-1">{{ _('portfolio_prompt_title') }}</h6>
+        <p class="text-muted small mb-2">{{ _('portfolio_prompt_desc') }}</p>
+        <div class="d-flex gap-2 flex-wrap">
+          <button type="button" class="btn btn-sm btn-primary" onclick="portfolioPrompt(true)">
+            <i class="bi bi-check-lg me-1"></i>{{ _('portfolio_prompt_enable') }}
+          </button>
+          <button type="button" class="btn btn-sm btn-outline-secondary" onclick="portfolioPrompt(false)">
+            {{ _('portfolio_prompt_skip') }}
+          </button>
+          <a href="/portfolios" class="btn btn-sm btn-outline-primary ms-auto">
+            {{ _('learn_more') }} <i class="bi bi-arrow-right ms-1"></i>
+          </a>
+        </div>
+      </div>
+      <button type="button" class="btn-close" aria-label="Close" onclick="portfolioPrompt(false)"></button>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Quick Actions -->
+<div class="d-flex gap-2 mb-4 flex-nowrap overflow-auto pb-2 yn-quick-actions">
+  <a href="/movements/new" class="btn btn-primary flex-shrink-0">
+    <i class="bi bi-plus me-1"></i><span class="d-none d-sm-inline">{{ _('new_movement') }}</span><span class="d-sm-none">{{ _('new_movement') }}</span>
+  </a>
+  <a href="/movements/new?transfer=1" class="btn btn-info flex-shrink-0">
+    <i class="bi bi-arrow-left-right me-1"></i><span class="d-none d-sm-inline">{{ _('new_transfer') }}</span><span class="d-sm-none">{{ _('new_transfer') }}</span>
+  </a>
+  <a href="/sources/new" class="btn btn-success flex-shrink-0">
+    <i class="bi bi-wallet2 me-1"></i><span class="d-none d-sm-inline">{{ _('new_source') }}</span><span class="d-sm-none">{{ _('new_source') }}</span>
+  </a>
+  <a href="/recurring/new" class="btn btn-warning flex-shrink-0">
+    <i class="bi bi-arrow-repeat me-1"></i><span class="d-none d-sm-inline">{{ _('new_recurring') }}</span><span class="d-sm-none">{{ _('new_recurring') }}</span>
+  </a>
+</div>
+
+<!-- Dashboard Cards -->
+<div class="row">
+  <!-- Card 1: Stats Overview -->
+  <div class="col-lg-4 col-md-6 mb-4">
+    <div class="card h-100">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <small class="text-muted">{{ _('net_worth') }}</small>
+          <button class="btn btn-sm btn-outline-secondary rounded-pill" id="toggle-net-worth" type="button" title="{{ _('toggle_visibility') }}" style="min-width:36px;min-height:36px;">
+            <i class="bi bi-eye" id="net-worth-eye-icon"></i>
+          </button>
+        </div>
+        {% for currency, amount in stats.net_worth.items() %}
+        <div class="d-flex justify-content-between align-items-center mb-3" style="cursor:pointer" onclick="location.href='/sources'">
+          <div>
+            <h4 class="mb-0 fw-bold">
+              <span class="net-worth-value">{{ "%.2f"|format(amount) }} {{ currency }}</span>
+              <span class="net-worth-hidden d-none">****** {{ currency }}</span>
+            </h4>
+          </div>
+          <span class="yn-icon-box bg-label-primary p-2"><i class="bi bi-currency-dollar"></i></span>
+        </div>
+        {% endfor %}
+        <hr class="my-3">
+        <div class="d-flex justify-content-between align-items-center mb-3" style="cursor:pointer" onclick="openMonthModal('in')">
+          <div>
+            <small class="text-muted d-block">{{ _('income_this_month') }}</small>
+            <h5 class="mb-0 fw-bold text-success" id="dash-month-in">
+              {% for currency, amount in stats.month_income.items() %}
+              <span class="net-worth-value d-block">+{{ "%.2f"|format(amount) }} {{ currency }}</span>
+              {% endfor %}
+              {% if not stats.month_income %}<span class="net-worth-value">+0.00</span>{% endif %}
+              <span class="net-worth-hidden d-none">******</span>
+            </h5>
+            {% if stats.month_income_ext > 0 %}
+            <small class="text-muted net-worth-value" id="dash-ext-in">({{ _('of_which_external') }} +{{ "%.2f"|format(stats.month_income_ext) }})</small>
+            {% endif %}
+          </div>
+          <span class="yn-icon-box bg-label-success p-2"><i class="bi bi-graph-up-arrow"></i></span>
+        </div>
+        <div class="d-flex justify-content-between align-items-center" style="cursor:pointer" onclick="openMonthModal('out')">
+          <div>
+            <small class="text-muted d-block">{{ _('expenses_this_month') }}</small>
+            <h5 class="mb-0 fw-bold text-danger" id="dash-month-out">
+              {% for currency, amount in stats.month_expense.items() %}
+              <span class="net-worth-value d-block">-{{ "%.2f"|format(amount) }} {{ currency }}</span>
+              {% endfor %}
+              {% if not stats.month_expense %}<span class="net-worth-value">-0.00</span>{% endif %}
+              <span class="net-worth-hidden d-none">******</span>
+            </h5>
+            {% if stats.month_expense_ext > 0 %}
+            <small class="text-muted net-worth-value" id="dash-ext-out">({{ _('of_which_external') }} -{{ "%.2f"|format(stats.month_expense_ext) }})</small>
+            {% endif %}
+          </div>
+          <span class="yn-icon-box bg-label-danger p-2"><i class="bi bi-graph-down-arrow"></i></span>
+        </div>
+        <hr class="my-3">
+        <div class="d-flex justify-content-between align-items-center" style="cursor:pointer" onclick="location.href='/savings'">
+          <div>
+            <small class="text-muted d-block">{{ _('savings_this_month') }}</small>
+            <h5 class="mb-0 fw-bold text-info">
+              {% for currency, amount in stats.month_savings.items() %}
+              <span class="net-worth-value d-block">+{{ "%.2f"|format(amount) }} {{ currency }}</span>
+              {% endfor %}
+              {% if not stats.month_savings %}<span class="net-worth-value">+0.00</span>{% endif %}
+              <span class="net-worth-hidden d-none">******</span>
+            </h5>
+          </div>
+          <a href="/savings/new" class="btn btn-sm btn-icon btn-outline-success rounded-pill" onclick="event.stopPropagation()" title="{{ _('new_saving') }}">
+            <i class="bi bi-plus"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 2: Recent Movements -->
+  <div class="col-lg-4 col-md-6 mb-4">
+    <div class="card h-100">
+      <div class="card-header d-flex justify-content-between align-items-center pb-0">
+        <h6 class="card-title mb-0">{{ _('movements') }} <span class="text-muted fw-normal">({{ stats.movement_count }} total)</span></h6>
+        <a href="/movements" class="text-muted"><small>{{ _('view_all') }}</small></a>
+      </div>
+      <div class="card-body px-0 pb-0">
+        <ul class="list-group list-group-flush">
+          {% for m in recent_movements %}
+          <li class="list-group-item px-3 py-2" style="cursor:pointer" onclick="location.href='/movements/{{ m.id }}/edit'">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <small class="fw-bold d-block">{{ m.source_name }}</small>
+                <small class="text-muted">{{ m.date|fdate }}</small>
+              </div>
+              <span class="{% if m.direction == 'in' %}text-success{% else %}text-danger{% endif %} fw-bold">
+                {% if m.direction == 'in' %}+{% else %}-{% endif %}{{ "%.2f"|format(m.amount) }}
+              </span>
+            </div>
+          </li>
+          {% else %}
+          <li class="list-group-item text-center text-muted py-3"><small>{{ _('no_movements') }}</small></li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 3: Upcoming Recurring -->
+  <div class="col-lg-4 col-md-6 mb-4">
+    <div class="card h-100">
+      <div class="card-header d-flex justify-content-between align-items-center pb-0">
+        <h6 class="card-title mb-0">{{ _('upcoming_recurring') }}</h6>
+        <a href="/recurring" class="text-muted"><small>{{ _('view_all') }}</small></a>
+      </div>
+      <div class="card-body px-0 pb-0">
+        <ul class="list-group list-group-flush">
+          {% for r in upcoming_recurring %}
+          <li class="list-group-item px-3 py-2" style="cursor:pointer" onclick="location.href='/recurring/{{ r.id }}/edit'">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <small class="fw-bold d-block">{{ r.name }}</small>
+                <small class="text-muted">{{ r.next_due_date|fdate }}</small>
+                {% if r.days_left is not none %}
+                <span class="badge ms-1 {% if r.days_left == 0 %}bg-danger{% elif r.days_left <= 3 %}bg-warning{% else %}bg-label-secondary{% endif %}" style="font-size:0.7rem">
+                  {% if r.days_left == 0 %}{{ _('today') }}{% elif r.days_left == 1 %}{{ _('tomorrow') }}{% else %}{{ r.days_left }} {{ _('days_left') }}{% endif %}
+                </span>
+                {% endif %}
+              </div>
+              <span class="{% if r.direction == 'in' %}text-success{% else %}text-danger{% endif %} fw-bold">
+                {% if r.direction == 'in' %}+{% else %}-{% endif %}{{ "%.2f"|format(r.amount) }} {{ r.currency }}
+              </span>
+            </div>
+          </li>
+          {% else %}
+          <li class="list-group-item text-center text-muted py-3"><small>{{ _('no_recurring') }}</small></li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Net Worth Chart -->
+<div class="row">
+  <div class="col-12 mb-4">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h6 class="card-title mb-0">{{ _('net_worth') }}</h6>
+        <div class="btn-group btn-group-sm" role="group">
+          <button type="button" class="btn btn-outline-secondary" onclick="loadNetWorthChart('30d')">{{ _('30d') }}</button>
+          <button type="button" class="btn btn-outline-secondary" onclick="loadNetWorthChart('90d')">{{ _('90d') }}</button>
+          <button type="button" class="btn btn-outline-secondary active" onclick="loadNetWorthChart('1y')">{{ _('1y') }}</button>
+          <button type="button" class="btn btn-outline-secondary" onclick="loadNetWorthChart('all')">{{ _('all') }}</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div style="position:relative; height:300px;">
+          <canvas id="netWorthChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Monthly Comparison Chart -->
+<div class="row">
+  <div class="col-12 mb-4">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h6 class="card-title mb-0">{{ _('income_this_month') }} vs {{ _('expenses_this_month') }}</h6>
+        <div class="btn-group btn-group-sm" role="group">
+          <button type="button" class="btn btn-outline-secondary" onclick="loadComparisonChart(6)">6m</button>
+          <button type="button" class="btn btn-outline-secondary active" onclick="loadComparisonChart(12)">1y</button>
+          <button type="button" class="btn btn-outline-secondary" onclick="loadComparisonChart(24)">2y</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div style="position:relative; height:300px;">
+          <canvas id="comparisonChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Monthly Detail Modal -->
+<div class="modal fade" id="monthModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="monthModalTitle"></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-0">
+        <!-- Source filter chips -->
+        <div class="px-3 py-2 border-bottom" id="monthModalSourceFilter">
+          <small class="text-muted d-block mb-2">{{ _('filter') }} {{ _('sources') }}:</small>
+          <div class="d-flex flex-wrap gap-1" id="monthModalChips"></div>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead>
+              <tr>
+                <th>{{ _('date') }}</th>
+                <th>{{ _('source') }}</th>
+                <th>{{ _('amount') }}</th>
+                <th>{{ _('note') }}</th>
+                <th class="text-center" style="width:80px">{{ _('exclude_from_stats') }}</th>
+              </tr>
+            </thead>
+            <tbody id="monthModalBody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer justify-content-between">
+        <div>
+          <strong>{{ _('balance') }}: <span id="monthModalTotal" class="fw-bold"></span></strong>
+        </div>
+        <a href="#" id="monthModalLink" class="btn btn-outline-primary btn-sm">
+          {{ _('view_all') }} <i class="bi bi-box-arrow-up-right ms-1"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endif %}
+{% endblock %}
+
+{% block page_js %}
+<script src="/static/vendor/chartjs/chart.umd.min.js"></script>
+<script>
+  // --- Net Worth visibility toggle ---
+  var _netWorthHidden = {{ 'true' if get_hide_net_worth() else 'false' }};
+
+  function applyNetWorthVisibility() {
+    document.querySelectorAll('.net-worth-value').forEach(function(el) {
+      el.style.display = _netWorthHidden ? 'none' : '';
+      el.classList.toggle('d-none', _netWorthHidden);
+    });
+    document.querySelectorAll('.net-worth-hidden').forEach(function(el) {
+      el.style.display = _netWorthHidden ? '' : 'none';
+      el.classList.toggle('d-none', !_netWorthHidden);
+    });
+    var icon = document.getElementById('net-worth-eye-icon');
+    if (icon) {
+      icon.className = 'bi ' + (_netWorthHidden ? 'bi-eye-slash' : 'bi-eye');
+    }
+  }
+
+  var _toggleBtn = document.getElementById('toggle-net-worth');
+  if (_toggleBtn) _toggleBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    _netWorthHidden = !_netWorthHidden;
+    applyNetWorthVisibility();
+    fetch('/api/settings', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ hide_net_worth: _netWorthHidden })
+    });
+  });
+
+  applyNetWorthVisibility();
+
+  // --- Portfolio prompt + live prices toggle ---
+  async function portfolioPrompt(enable) {
+    var resp = await fetch('/api/settings', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ portfolio_prices_enabled: !!enable, portfolio_prices_prompted: true })
+    });
+    if (resp.ok) {
+      showToast(enable ? '{{ _("live_prices") }}: {{ _("on") }}' : '{{ _("live_prices") }}: {{ _("off") }}', 'success');
+      var card = document.getElementById('portfolio-onboarding-card');
+      if (card) card.remove();
+      setTimeout(function() { location.reload(); }, 400);
+    } else {
+      await handleApiError(resp);
+    }
+  }
+
+  // --- Monthly Detail Modal ---
+  var _monthModalDirection = null;
+  var _monthModalData = [];
+
+  async function openMonthModal(direction) {
+    _monthModalDirection = direction;
+    var titleEl = document.getElementById('monthModalTitle');
+    var linkEl = document.getElementById('monthModalLink');
+    if (direction === 'in') {
+      titleEl.textContent = '{{ _("income_this_month") }}';
+      titleEl.className = 'modal-title text-success';
+    } else {
+      titleEl.textContent = '{{ _("expenses_this_month") }}';
+      titleEl.className = 'modal-title text-danger';
+    }
+    linkEl.href = '/movements?direction=' + direction + '&date_from={{ month_start }}';
+
+    await fetchMonthData(direction);
+    var modal = new bootstrap.Modal(document.getElementById('monthModal'));
+    modal.show();
+  }
+
+  async function fetchMonthData(direction) {
+    var body = document.getElementById('monthModalBody');
+    body.innerHTML = '<tr><td colspan="5" class="text-center py-3">' + dotWaveHtml + '</td></tr>';
+    try {
+      var resp = await fetch('/api/monthly-movements?direction=' + direction);
+      if (!resp.ok) return;
+      _monthModalData = await resp.json();
+      buildSourceChips();
+      renderMonthTable();
+    } catch(e) {
+      body.innerHTML = '<tr><td colspan="5" class="text-center text-danger py-3">{{ _("error") }}</td></tr>';
+    }
+  }
+
+  // XHR helper for pywebview compatibility
+  function xhrPost(url) {
+    return new Promise(function(resolve, reject) {
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', url, true);
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.onload = function() {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try { resolve(JSON.parse(xhr.responseText)); } catch(e) { resolve({}); }
+        } else { reject(new Error(xhr.status)); }
+      };
+      xhr.onerror = function() { reject(new Error('network')); };
+      xhr.send('{}');
+    });
+  }
+
+  var _hiddenSources = new Set(); // visual-only filter in modal
+
+  function buildSourceChips() {
+    var sourceMap = new Map(); // name -> total (only non-excluded movements)
+    _monthModalData.forEach(function(m) {
+      var cur = sourceMap.get(m.source_name) || 0;
+      if (!m.exclude_from_stats) cur += m.amount;
+      sourceMap.set(m.source_name, cur);
+    });
+    var chips = document.getElementById('monthModalChips');
+    chips.innerHTML = '';
+    sourceMap.forEach(function(total, name) {
+      var hidden = _hiddenSources.has(name);
+      var cls = hidden ? 'btn-danger' : 'btn-success';
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn btn-sm ' + cls + ' rounded-pill';
+      btn.textContent = name + ' (' + total.toFixed(2) + ')';
+      btn.addEventListener('click', function() { toggleSourceFilter(name); });
+      chips.appendChild(btn);
+    });
+  }
+
+  function toggleSourceFilter(sourceName) {
+    if (_hiddenSources.has(sourceName)) {
+      _hiddenSources.delete(sourceName);
+    } else {
+      _hiddenSources.add(sourceName);
+    }
+    buildSourceChips();
+    renderMonthTable();
+  }
+
+  function _txt(tag, text, cls) {
+    var el = document.createElement(tag);
+    if (cls) el.className = cls;
+    el.textContent = text;
+    return el;
+  }
+
+  function renderMonthTable() {
+    var direction = _monthModalDirection;
+    var body = document.getElementById('monthModalBody');
+    var sign = direction === 'in' ? '+' : '-';
+    var colorClass = direction === 'in' ? 'text-success' : 'text-danger';
+    var total = 0;
+
+    body.innerHTML = '';
+    var hasRows = false;
+
+    _monthModalData.forEach(function(m) {
+      if (_hiddenSources.has(m.source_name)) return; // filtered out visually
+
+      hasRows = true;
+      var excluded = m.exclude_from_stats;
+      if (!excluded) total += m.amount;
+
+      var tr = document.createElement('tr');
+      if (excluded) tr.className = 'text-decoration-line-through opacity-50';
+
+      var td1 = document.createElement('td');
+      td1.appendChild(_txt('small', fmtDate(m.date)));
+      var td2 = document.createElement('td');
+      td2.appendChild(_txt('small', m.source_name));
+      var td3 = document.createElement('td');
+      td3.className = colorClass + ' fw-bold';
+      td3.textContent = sign + m.amount.toFixed(2);
+      var td4 = document.createElement('td');
+      td4.appendChild(_txt('small', m.note || '', 'text-muted'));
+      var td5 = document.createElement('td');
+      td5.className = 'text-center';
+      var switchDiv = document.createElement('div');
+      switchDiv.className = 'form-check form-switch d-flex justify-content-center mb-0';
+      var input = document.createElement('input');
+      input.className = 'form-check-input';
+      input.type = 'checkbox';
+      if (excluded) input.checked = true;
+      input.addEventListener('change', (function(mid, dir) {
+        return function() { toggleExclude(mid, dir); };
+      })(m.id, direction));
+      switchDiv.appendChild(input);
+      td5.appendChild(switchDiv);
+
+      tr.appendChild(td1);
+      tr.appendChild(td2);
+      tr.appendChild(td3);
+      tr.appendChild(td4);
+      tr.appendChild(td5);
+      body.appendChild(tr);
+    });
+
+    if (!hasRows) {
+      body.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-3">{{ _("no_movements") }}</td></tr>';
+    }
+
+    var totalEl = document.getElementById('monthModalTotal');
+    totalEl.textContent = sign + total.toFixed(2);
+    totalEl.className = 'fw-bold ' + colorClass;
+  }
+
+  async function toggleExclude(movementId, direction) {
+    try {
+      var result = await xhrPost('/api/movements/' + movementId + '/exclude');
+      _monthModalData.forEach(function(m) {
+        if (m.id === movementId) m.exclude_from_stats = result.exclude_from_stats;
+      });
+      buildSourceChips();
+      renderMonthTable();
+      refreshDashboardTotals();
+    } catch(e) {
+      showToast('{{ _("error") }}', 'error');
+    }
+  }
+
+  async function refreshDashboardTotals() {
+    try {
+      var resp = await fetch('/api/monthly-totals');
+      if (!resp.ok) return;
+      var data = await resp.json();
+      var incEl = document.getElementById('dash-month-in');
+      var outEl = document.getElementById('dash-month-out');
+      if (incEl) {
+        var html = '';
+        var entries = Object.entries(data.month_income || {});
+        entries.forEach(function(e) {
+          html += '<span class="net-worth-value d-block">+' + e[1].toFixed(2) + ' ' + e[0] + '</span>';
+        });
+        if (!entries.length) html = '<span class="net-worth-value">+0.00</span>';
+        html += '<span class="net-worth-hidden d-none">******</span>';
+        incEl.innerHTML = html;
+      }
+      if (outEl) {
+        var html = '';
+        var entries = Object.entries(data.month_expense || {});
+        entries.forEach(function(e) {
+          html += '<span class="net-worth-value d-block">-' + e[1].toFixed(2) + ' ' + e[0] + '</span>';
+        });
+        if (!entries.length) html = '<span class="net-worth-value">-0.00</span>';
+        html += '<span class="net-worth-hidden d-none">******</span>';
+        outEl.innerHTML = html;
+      }
+      applyNetWorthVisibility();
+    } catch(e) {}
+  }
+
+  // --- Net Worth Chart ---
+  var _nwChart = null;
+  var _nwColors = ['#696cff', '#71dd37', '#ff3e1d', '#ffab00', '#03c3ec', '#8592a3'];
+
+  async function loadNetWorthChart(range) {
+    // Update active button
+    document.querySelectorAll('.card .btn-group-sm .btn').forEach(function(btn) {
+      btn.classList.remove('active');
+      if (btn.textContent.trim() === range || btn.getAttribute('onclick').indexOf("'" + range + "'") !== -1) {
+        btn.classList.add('active');
+      }
+    });
+
+    try {
+      var resp = await fetch('/api/net-worth/history?range=' + range);
+      if (!resp.ok) return;
+      var data = await resp.json();
+
+      // Collect all unique dates across currencies, build label array
+      var allDates = new Set();
+      for (var currency in data) {
+        data[currency].forEach(function(p) { allDates.add(p.date); });
+      }
+      var labels = Array.from(allDates).sort();
+
+      var datasets = [];
+      var i = 0;
+      for (var currency in data) {
+        var points = data[currency];
+        // Build a map date->balance
+        var dateMap = {};
+        points.forEach(function(p) { dateMap[p.date] = p.balance; });
+        // Fill data aligned to labels, carry forward last known value
+        var values = [];
+        var lastVal = null;
+        labels.forEach(function(d) {
+          if (dateMap[d] !== undefined) lastVal = dateMap[d];
+          values.push(lastVal);
+        });
+        var color = _nwColors[i % _nwColors.length];
+        datasets.push({
+          label: currency,
+          data: values,
+          borderColor: color,
+          backgroundColor: color + '20',
+          fill: true,
+          tension: 0.3,
+          pointRadius: labels.length > 60 ? 0 : 2,
+          pointHoverRadius: 4,
+          borderWidth: 2
+        });
+        i++;
+      }
+
+      if (_nwChart) _nwChart.destroy();
+
+      _nwChart = new Chart(document.getElementById('netWorthChart'), {
+        type: 'line',
+        data: { labels: labels, datasets: datasets },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          resizeDelay: 200,
+          interaction: { intersect: false, mode: 'index' },
+          plugins: {
+            legend: { display: datasets.length > 1 },
+            tooltip: {
+              callbacks: {
+                title: function(items) { return fmtDate(items[0].label); },
+                label: function(ctx) {
+                  return ctx.dataset.label + ': ' + ctx.parsed.y.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: {
+                maxTicksLimit: 10,
+                callback: function(val, idx) { return fmtDate(labels[idx]); }
+              }
+            },
+            y: {
+              ticks: {
+                callback: function(v) { return v.toLocaleString(); }
+              }
+            }
+          }
+        }
+      });
+    } catch(e) {}
+  }
+
+  // Load chart on page load
+  loadNetWorthChart('1y');
+
+  // --- Monthly Comparison Chart ---
+  var _compChart = null;
+  var _compMonthNames = {
+    en: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+    it: ['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic']
+  };
+  var _compLocale = '{{ get_locale() }}';
+  var _compMN = _compMonthNames[_compLocale] || _compMonthNames['en'];
+
+  async function loadComparisonChart(months) {
+    try {
+      var resp = await fetch('/api/monthly-comparison?months=' + months);
+      if (!resp.ok) return;
+      var data = await resp.json();
+
+      var labels = data.map(function(d) {
+        var parts = d.month.split('-');
+        return _compMN[parseInt(parts[1], 10) - 1] + ' ' + parts[0].substring(2);
+      });
+      var incomeData = data.map(function(d) { return d.income; });
+      var expenseData = data.map(function(d) { return d.expense; });
+      var balanceData = data.map(function(d) { return Math.round((d.income - d.expense) * 100) / 100; });
+
+      var ctx = document.getElementById('comparisonChart');
+      if (!ctx) return;
+      if (_compChart) _compChart.destroy();
+
+      _compChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: '{{ _("income") }}',
+              data: incomeData,
+              backgroundColor: '#71dd3788',
+              borderColor: '#71dd37',
+              borderWidth: 1,
+              borderRadius: 4,
+              order: 2,
+            },
+            {
+              label: '{{ _("expense") }}',
+              data: expenseData,
+              backgroundColor: '#ff3e1d88',
+              borderColor: '#ff3e1d',
+              borderWidth: 1,
+              borderRadius: 4,
+              order: 2,
+            },
+            {
+              label: '{{ _("balance") }}',
+              data: balanceData,
+              type: 'line',
+              borderColor: '#696cff',
+              backgroundColor: '#696cff22',
+              fill: true,
+              tension: 0.3,
+              pointRadius: 3,
+              borderWidth: 2,
+              order: 1,
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          resizeDelay: 200,
+          interaction: { intersect: false, mode: 'index' },
+          scales: {
+            y: { beginAtZero: true, ticks: { callback: function(v) { return v.toFixed(0); } } },
+            x: { grid: { display: false } }
+          },
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function(ctx) {
+                  return ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(2);
+                }
+              }
+            }
+          }
+        }
+      });
+
+      // Update active button
+      document.querySelectorAll('#comparisonChart').forEach(function() {
+        var btns = document.querySelectorAll('.card:has(#comparisonChart) .btn-group .btn');
+        btns.forEach(function(b) { b.classList.remove('active'); });
+        btns.forEach(function(b) {
+          if (b.textContent.trim() === (months === 6 ? '6m' : months === 12 ? '1y' : '2y')) b.classList.add('active');
+        });
+      });
+    } catch(e) {}
+  }
+
+  loadComparisonChart(12);
+</script>
+{% endblock %}

@@ -1,0 +1,137 @@
+<h5>Carteras</h5>
+<p class="yn-help-lead">Las carteras siguen la pista de inversiones: cripto, acciones, ETF o una mezcla. Cada cartera está enlazada a una fuente y contiene una o varias posiciones. Los precios se pueden obtener en tiempo real desde internet o llevarse de forma manual.</p>
+
+<h6>Cómo se relacionan carteras y fuentes</h6>
+<p>Una cartera <strong>no</strong> es una cuenta aparte. Es un registro adicional enganchado a una fuente existente.</p>
+<p>Piensa en una fuente como una cuenta en un banco o bróker. Esa cuenta puede contener <strong>efectivo</strong> (euros, dólares, la moneda de la fuente) e <strong>inversiones</strong> (acciones, tokens, fondos). Yfine lleva los dos lados por separado:</p>
+<ul>
+  <li>El <strong>saldo de la fuente</strong> (efectivo) cambia cuando registras movimientos: ingresos, gastos, transferencias.</li>
+  <li>El <strong>valor de la cartera</strong> (inversiones) cambia cuando añades, editas o eliminas posiciones, y cuando se mueven los precios.</li>
+</ul>
+<p>En la página Fuentes, una fuente con una cartera enlazada muestra los dos en la misma tarjeta:</p>
+<div class="yn-help-mock">
+  <div class="yn-help-mock-row"><span class="yn-help-mock-label">Banco principal · EUR</span><span class="yn-help-mock-value">12.700,00</span></div>
+  <div class="yn-help-mock-row"><span class="yn-help-mock-label">&nbsp;&nbsp;Efectivo</span><span class="yn-help-mock-value">2.700,00</span></div>
+  <div class="yn-help-mock-row"><span class="yn-help-mock-label">&nbsp;&nbsp;Inversiones</span><span class="yn-help-mock-value">10.000,00</span></div>
+</div>
+<p>El número de arriba es el total combinado. Solo suma las carteras que estén en la misma moneda que la fuente. Las inversiones en otra moneda aparecen como un distintivo aparte, porque mezclar monedas en una suma única sería engañoso.</p>
+
+<div class="yn-help-tip warn">
+  <i class="bi bi-exclamation-triangle-fill"></i>
+  <div>Añadir una posición <strong>no</strong> reduce el saldo de efectivo de tu fuente. Los dos registros son independientes. Si compras acciones con dinero de tu cuenta bancaria y quieres que el saldo refleje la compra, registra un movimiento de gasto por el mismo importe en la misma fuente.</div>
+</div>
+
+<h6>Una compra típica, paso a paso</h6>
+<ol class="yn-help-steps">
+  <li>Compras 0,5 BTC por 15.000 EUR, pagando desde tu fuente "Banco principal".</li>
+  <li>Abre <strong>Movimientos</strong>. Registra un <strong>gasto</strong> de 15.000 EUR en Banco principal con una nota tipo "Compra 0,5 BTC". Esto reduce el saldo en efectivo de la fuente.</li>
+  <li>Abre la cartera enlazada a Banco principal. Pulsa <span class="yn-help-chip primary"><i class="bi bi-plus"></i> Añadir Posición</span>.</li>
+  <li>Introduce símbolo BTC, cantidad 0,5, coste medio 30.000 EUR. Guarda.</li>
+  <li>La tarjeta de la fuente muestra ahora efectivo <strong>menos 15.000</strong> e inversiones <strong>más el valor de mercado del BTC</strong>. Tu patrimonio total en esa fuente no cambia, pero la composición refleja el cambio de efectivo a cripto.</li>
+</ol>
+<p>Así las cuentas cuadran: el dinero gastado es dinero ido, y el valor de mercado de la inversión se lleva aparte y se actualiza con los precios.</p>
+
+<h6>Qué ves</h6>
+<ul>
+  <li>Un interruptor de <strong>Precios en vivo</strong> arriba. Cuando está activo, los precios se refrescan automáticamente cada 30 minutos. Cuando está apagado, Yfine solo muestra el coste de adquisición.</li>
+  <li>Un botón de <strong>Actualizar</strong> para forzar ya una actualización de precios (desactivado con Precios en vivo apagado).</li>
+  <li>Carteras agrupadas por su <strong>fuente</strong> enlazada, con el total de inversión mostrado por cada fuente.</li>
+  <li>Cada tarjeta de cartera: nombre, <strong>distintivo de tipo</strong> (cripto, acciones, mixto), valor total, coste invertido, <strong>ganancia o pérdida</strong> con porcentaje, número de posiciones y una minigráfica de 30 días.</li>
+</ul>
+
+<h6>Acciones principales</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-plus-lg"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Nueva Cartera</span>
+      <span class="yn-help-action-desc">Crea una cartera. Elige nombre, tipo, moneda base y la fuente a la que pertenece.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon info"><i class="bi bi-toggle-on"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Interruptor Precios en vivo</span>
+      <span class="yn-help-action-desc">Actívalo para obtener precios de internet cada 30 minutos. Apagado mantiene todo manual.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-arrow-clockwise"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Actualizar Precios</span>
+      <span class="yn-help-action-desc">Fuerza una actualización inmediata. Solo activo con Precios en vivo encendido.</span>
+    </div>
+  </div>
+</div>
+
+<h6>Acciones por cartera</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon info"><i class="bi bi-eye"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Ver</span>
+      <span class="yn-help-action-desc">Abre la página de detalle con la lista de posiciones.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-pencil"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Editar</span>
+      <span class="yn-help-action-desc">Cambia nombre, tipo, moneda base, fuente o nota de la cartera.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon danger"><i class="bi bi-trash"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Eliminar</span>
+      <span class="yn-help-action-desc">Borra la cartera y todas sus posiciones.</span>
+    </div>
+  </div>
+</div>
+
+<h6>Tipo de cartera</h6>
+<ul>
+  <li><strong>Cripto</strong>: las posiciones son tokens. La cantidad se llama "número de tokens".</li>
+  <li><strong>Acciones</strong>: las posiciones son acciones. La cantidad se llama "número de acciones".</li>
+  <li><strong>Mixto</strong>: cada posición elige su propio tipo de activo. Útil para una única cartera con acciones y cripto a la vez.</li>
+</ul>
+
+<h6>Moneda base</h6>
+<p>La moneda base es en la que la cartera reporta sus totales. Las posiciones individuales pueden tener precio en cualquier moneda, y Yfine las convierte a la base. La moneda de la fuente es la opción natural, pero puedes elegir cualquiera.</p>
+
+<h6>Precios en vivo y privacidad</h6>
+<p>Los precios en vivo obtienen datos de APIs públicas. Mantenerlos apagados significa que no se hacen llamadas de red para las carteras, e introduces cada precio a mano. Un aviso recuerda cuando los precios están apagados, porque los totales que ves son coste de adquisición, no valor de mercado.</p>
+
+<h6>Paso a paso: crear una cartera con una posición</h6>
+<ol class="yn-help-steps">
+  <li>Asegúrate de tener una fuente (créala primero en Fuentes si no).</li>
+  <li>En esta página pulsa <span class="yn-help-chip primary"><i class="bi bi-plus-lg"></i> Nueva Cartera</span>.</li>
+  <li>Introduce un <strong>nombre</strong> (por ejemplo "Cripto largo plazo").</li>
+  <li>Elige el <strong>tipo</strong> (cripto, acciones o mixto).</li>
+  <li>Elige la <strong>moneda base</strong> (normalmente la de la fuente).</li>
+  <li>Elige la <strong>fuente</strong> a la que se enlaza.</li>
+  <li>Guarda. Aterrizas en la página de detalle de la cartera.</li>
+  <li>Pulsa <span class="yn-help-chip primary"><i class="bi bi-plus"></i> Añadir Posición</span>.</li>
+  <li>Introduce el <strong>símbolo</strong> (BTC, ETH, AAPL). Para carteras mixtas, elige primero el tipo de activo.</li>
+  <li>Introduce la <strong>cantidad</strong>, el <strong>coste medio</strong> y la <strong>moneda</strong>.</li>
+  <li>Opcional: activa <strong>precio manual</strong> si no quieres que Yfine lo obtenga.</li>
+  <li>Guarda. La posición aparece en la tabla y los totales de la cartera se actualizan.</li>
+</ol>
+
+<h6>Ganancia y pérdida</h6>
+<p>Yfine compara cuánto vale ahora cada posición (cantidad × precio actual) con lo que pagaste (cantidad × coste medio). La diferencia es la ganancia o pérdida no realizada:</p>
+<div class="yn-help-mock">
+  <div class="yn-help-mock-row"><span class="yn-help-mock-label">BTC · 0,5 × 30.000 coste</span><span class="yn-help-mock-value">15.000,00</span></div>
+  <div class="yn-help-mock-row"><span class="yn-help-mock-label">BTC · 0,5 × 40.000 ahora</span><span class="yn-help-mock-value">20.000,00</span></div>
+  <div class="yn-help-mock-row"><span class="yn-help-mock-label"><strong>P/G no realizada</strong></span><span class="yn-help-mock-value income">+5.000,00 (+33%)</span></div>
+</div>
+
+<div class="yn-help-tip">
+  <i class="bi bi-info-circle-fill"></i>
+  <div>El coste invertido es la media ponderada de lo que pagaste. Si luego añades más unidades a otro precio, actualiza el coste medio para reflejar el nuevo valor combinado.</div>
+</div>
+
+<div class="yn-help-tip warn">
+  <i class="bi bi-exclamation-triangle-fill"></i>
+  <div>Los precios en vivo dependen de servicios externos. Pueden estar limitados, retrasados o temporalmente equivocados. Para decisiones importantes confirma los precios en otro sitio.</div>
+</div>

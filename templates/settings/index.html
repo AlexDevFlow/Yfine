@@ -1,0 +1,1092 @@
+{% extends "base.html" %}
+{% set active_page = "settings" %}
+
+{% block title %}{{ _('settings') }}{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-3 col-md-4">
+    <h5 class="mb-3">{{ _('settings') }}</h5>
+    <div class="list-group settings-nav" role="tablist">
+      <a href="#tab-appearance" class="list-group-item list-group-item-action d-flex align-items-center gap-2 active" data-bs-toggle="pill" role="tab">
+        <i class="bi bi-palette text-primary"></i><span>{{ _('theme') }}</span>
+      </a>
+      <a href="#tab-language" class="list-group-item list-group-item-action d-flex align-items-center gap-2" data-bs-toggle="pill" role="tab">
+        <i class="bi bi-translate text-info"></i><span>{{ _('language') }}</span>
+      </a>
+      <a href="#tab-portfolios" class="list-group-item list-group-item-action d-flex align-items-center gap-2" data-bs-toggle="pill" role="tab">
+        <i class="bi bi-briefcase text-info"></i><span>{{ _('portfolios') }}</span>
+      </a>
+      <a href="#tab-network" class="list-group-item list-group-item-action d-flex align-items-center gap-2" data-bs-toggle="pill" role="tab">
+        <i class="bi bi-wifi text-warning"></i><span>{{ _('lan_access') }}</span>
+      </a>
+      <a href="#tab-security" class="list-group-item list-group-item-action d-flex align-items-center gap-2" data-bs-toggle="pill" role="tab">
+        <i class="bi bi-shield-lock text-danger"></i><span>{{ _('security') }}</span>
+      </a>
+      <a href="#tab-data" class="list-group-item list-group-item-action d-flex align-items-center gap-2" data-bs-toggle="pill" role="tab">
+        <i class="bi bi-database text-success"></i><span>{{ _('data') }}</span>
+      </a>
+      <a href="#tab-imports" class="list-group-item list-group-item-action d-flex align-items-center gap-2" data-bs-toggle="pill" role="tab">
+        <i class="bi bi-cloud-upload text-info"></i><span>{{ _('import_from_bank') }}</span>
+      </a>
+      <a href="#tab-plugins" class="list-group-item list-group-item-action d-flex align-items-center gap-2" data-bs-toggle="pill" role="tab">
+        <i class="bi bi-puzzle text-primary"></i><span>{{ _('plugins') }}</span>
+      </a>
+    </div>
+  </div>
+  <div class="col-lg-9 col-md-8">
+  <div class="tab-content">
+
+  <div class="tab-pane fade show active" id="tab-appearance" role="tabpanel">
+    <div class="card mb-3">
+      <div class="card-body">
+        <h6 class="d-flex align-items-center gap-2 mb-3">
+          <span class="yn-icon-box rounded bg-label-primary p-2"><i class="bi bi-palette"></i></span>
+          {{ _('theme') }}
+        </h6>
+        <div class="d-flex flex-wrap gap-2 mb-4">
+          <input type="hidden" id="theme" name="theme" value="{{ settings.theme }}">
+          <button type="button" class="btn btn-sm theme-btn {% if settings.theme == 'light' %}btn-primary{% else %}btn-outline-primary{% endif %}" data-theme="light">
+            <i class="bi bi-sun me-1"></i>{{ _('theme_light') }}
+          </button>
+          <button type="button" class="btn btn-sm theme-btn {% if settings.theme == 'dark' %}btn-primary{% else %}btn-outline-primary{% endif %}" data-theme="dark">
+            <i class="bi bi-moon me-1"></i>{{ _('theme_dark') }}
+          </button>
+          <button type="button" class="btn btn-sm theme-btn {% if settings.theme == 'system' %}btn-primary{% else %}btn-outline-primary{% endif %}" data-theme="system">
+            <i class="bi bi-laptop me-1"></i>{{ _('theme_system') }}
+          </button>
+        </div>
+
+        <h6 class="d-flex align-items-center gap-2 mb-3">
+          <span class="yn-icon-box rounded bg-label-primary p-2"><i class="bi bi-phone"></i></span>
+          {{ _('mobile_navigation') }}
+        </h6>
+        <div class="d-flex flex-wrap gap-2">
+          <input type="hidden" id="mobile_nav_mode" name="mobile_nav_mode" value="{{ settings.mobile_nav_mode }}">
+          <button type="button" class="btn btn-sm mobile-nav-btn {% if settings.mobile_nav_mode == 'sidebar' %}btn-primary{% else %}btn-outline-primary{% endif %}" data-mode="sidebar">
+            <i class="bi bi-list me-1"></i>{{ _('mobile_nav_sidebar') }}
+          </button>
+          <button type="button" class="btn btn-sm mobile-nav-btn {% if settings.mobile_nav_mode == 'bottom' %}btn-primary{% else %}btn-outline-primary{% endif %}" data-mode="bottom">
+            <i class="bi bi-phone me-1"></i>{{ _('mobile_nav_bottom') }}
+          </button>
+        </div>
+        <small class="form-text text-muted d-block mt-1" id="mobile-nav-desc">
+          {% if settings.mobile_nav_mode == 'bottom' %}{{ _('mobile_nav_bottom_desc') }}{% else %}{{ _('mobile_nav_sidebar_desc') }}{% endif %}
+        </small>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-pane fade" id="tab-language" role="tabpanel">
+    <div class="card mb-3">
+      <div class="card-body">
+        <h6 class="d-flex align-items-center gap-2 mb-3">
+          <span class="yn-icon-box rounded bg-label-info p-2"><i class="bi bi-translate"></i></span>
+          {{ _('language') }}
+        </h6>
+        <div class="row g-3">
+          <div class="col-sm-4">
+            <label for="locale" class="form-label small text-muted mb-1">{{ _('language') }}</label>
+            <select class="form-select form-select-sm" id="locale" name="locale">
+              <option value="en" {% if settings.locale == 'en' %}selected{% endif %}>English</option>
+              <option value="es" {% if settings.locale == 'es' %}selected{% endif %}>Español</option>
+              <option value="it" {% if settings.locale == 'it' %}selected{% endif %}>Italiano</option>
+              <option value="uk" {% if settings.locale == 'uk' %}selected{% endif %}>Українська</option>
+            </select>
+          </div>
+          <div class="col-sm-4">
+            <label for="date_format" class="form-label small text-muted mb-1">{{ _('date_format') }}</label>
+            <select class="form-select form-select-sm" id="date_format" name="date_format">
+              <option value="dd/mm/yyyy" {% if settings.date_format == 'dd/mm/yyyy' %}selected{% endif %}>{{ _('date_format_dmy') }}</option>
+              <option value="mm/dd/yyyy" {% if settings.date_format == 'mm/dd/yyyy' %}selected{% endif %}>{{ _('date_format_mdy') }}</option>
+              <option value="yyyy-mm-dd" {% if settings.date_format == 'yyyy-mm-dd' %}selected{% endif %}>{{ _('date_format_ymd') }}</option>
+            </select>
+          </div>
+          <div class="col-sm-4">
+            <label for="base_currency" class="form-label small text-muted mb-1">{{ _('base_currency_setting') }}</label>
+            <select class="form-select form-select-sm" id="base_currency" name="base_currency">
+              <option value="">—</option>
+              {% set currencies = ['EUR', 'USD', 'GBP', 'CHF', 'JPY', 'CAD', 'AUD', 'CNY', 'INR', 'BRL', 'KRW', 'MXN', 'SEK', 'NOK', 'DKK', 'PLN', 'CZK', 'HUF', 'RON', 'BGN', 'HRK', 'TRY', 'RUB', 'ZAR', 'NZD', 'SGD', 'HKD', 'TWD', 'THB', 'IDR', 'MYR', 'PHP', 'ARS', 'CLP', 'COP', 'PEN', 'BTC', 'ETH'] %}
+              {% for c in currencies %}
+              <option value="{{ c }}" {% if settings.base_currency == c %}selected{% endif %}>{{ flag(c) }} {{ c }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-pane fade" id="tab-network" role="tabpanel">
+    <div class="card mb-3">
+      <div class="card-body">
+        <h6 class="d-flex align-items-center gap-2 mb-3">
+          <span class="yn-icon-box rounded bg-label-warning p-2"><i class="bi bi-wifi"></i></span>
+          {{ _('lan_access') }}
+        </h6>
+        <div class="d-flex align-items-center gap-3 mb-2">
+          <div class="form-check form-switch mb-0">
+            <input class="form-check-input" type="checkbox" id="lan_access" {% if settings.lan_access %}checked{% endif %}>
+          </div>
+          <small class="text-muted" id="lan-access-desc">
+            {% if settings.lan_access %}{{ _('lan_access_on_desc') }}{% else %}{{ _('lan_access_off_desc') }}{% endif %}
+          </small>
+        </div>
+        <div class="d-none mt-2" id="lan-access-link-box">
+          <div class="input-group input-group-sm" style="max-width:360px">
+            <span class="input-group-text"><i class="bi bi-wifi"></i></span>
+            <input type="text" class="form-control form-control-sm font-monospace" id="lan-access-url" readonly>
+            <button class="btn btn-outline-primary" type="button" id="lan-copy-btn" onclick="copyLanUrl()">
+              <i class="bi bi-clipboard"></i>
+            </button>
+          </div>
+          <small class="text-muted mt-1 d-block" id="lan-copy-feedback"></small>
+        </div>
+
+        <hr class="my-3">
+
+        <h6 class="d-flex align-items-center gap-2 mb-3">
+          <span class="yn-icon-box rounded bg-label-warning p-2"><i class="bi bi-hdd-network"></i></span>
+          {{ _('server_port') }}
+        </h6>
+        <div class="d-flex align-items-center gap-2" style="max-width:280px">
+          <input type="number" class="form-control form-control-sm" id="server_port" min="1024" max="65535" value="8000" style="width:120px">
+          <button class="btn btn-sm btn-outline-primary" id="save-port-btn" onclick="savePort()">
+            <i class="bi bi-check-lg"></i>
+          </button>
+          <small class="text-muted" id="port-feedback"></small>
+        </div>
+        <small class="form-text text-muted d-block mt-1">{{ _('server_port_desc') }}</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-pane fade" id="tab-portfolios" role="tabpanel">
+    <div class="card mb-3">
+      <div class="card-body">
+        <h6 class="d-flex align-items-center gap-2 mb-3">
+          <span class="yn-icon-box rounded bg-label-info p-2"><i class="bi bi-briefcase"></i></span>
+          {{ _('portfolios') }}
+        </h6>
+        <div class="d-flex align-items-center gap-3">
+          <div class="form-check form-switch mb-0">
+            <input class="form-check-input" type="checkbox" id="portfolio_prices_enabled" {% if settings.portfolio_prices_enabled %}checked{% endif %}>
+          </div>
+          <div class="flex-grow-1">
+            <div class="fw-bold small">{{ _('portfolio_prices_enabled_title') }}</div>
+            <small class="text-muted" id="portfolio-prices-desc">
+              {% if settings.portfolio_prices_enabled %}{{ _('portfolio_prices_on_desc') }}{% else %}{{ _('portfolio_prices_off_desc') }}{% endif %}
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-pane fade" id="tab-security" role="tabpanel">
+    <div class="card mb-3">
+      <div class="card-body">
+        <h6 class="d-flex align-items-center gap-2 mb-3">
+          <span class="yn-icon-box rounded bg-label-danger p-2"><i class="bi bi-shield-lock"></i></span>
+          {{ _('security') }}
+        </h6>
+        <div id="security-section">
+          <div class="text-center py-3">
+            <div class="dot-wave"><div class="dot-wave__dot"></div><div class="dot-wave__dot"></div><div class="dot-wave__dot"></div><div class="dot-wave__dot"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-pane fade" id="tab-data" role="tabpanel">
+    <div class="card mb-3">
+      <div class="card-body">
+        <h6 class="d-flex align-items-center gap-2 mb-3">
+          <span class="yn-icon-box rounded bg-label-success p-2"><i class="bi bi-database"></i></span>
+          {{ _('data') }}
+        </h6>
+        <label class="form-label small text-muted mb-2">{{ _('export_data') }}</label>
+        <div class="d-flex gap-2 flex-wrap mb-3">
+          <button class="btn btn-sm btn-outline-primary" onclick="exportData('core')">
+            <i class="bi bi-box-arrow-up me-1"></i>{{ _('export_core') }}
+          </button>
+          <button class="btn btn-sm btn-outline-primary" onclick="exportData('all')">
+            <i class="bi bi-box-arrow-up me-1"></i>{{ _('export_all') }}
+          </button>
+          <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#excelExportModal">
+            <i class="bi bi-file-earmark-spreadsheet me-1"></i>{{ _('export_excel') }}
+          </button>
+          <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#pdfExportModal">
+            <i class="bi bi-file-earmark-pdf me-1"></i>{{ _('export_pdf') }}
+          </button>
+        </div>
+        <label class="form-label small text-muted mb-2">{{ _('import_data') }}</label>
+        <div class="d-flex gap-2 flex-wrap mb-0">
+          <button class="btn btn-sm btn-outline-warning" onclick="document.getElementById('importFile').click()">
+            <i class="bi bi-box-arrow-in-down me-1"></i>{{ _('import_data') }}
+          </button>
+          <button class="btn btn-sm btn-outline-danger ms-auto" onclick="resetAllData()">
+            <i class="bi bi-exclamation-triangle me-1"></i>{{ _('reset_all_data') }}
+          </button>
+        </div>
+
+        <hr class="my-3">
+
+        <h6 class="d-flex align-items-center gap-2 mb-2">
+          <span class="yn-icon-box rounded bg-label-secondary p-2"><i class="bi bi-journal-text"></i></span>
+          {{ _('logs') }}
+        </h6>
+        <p class="text-muted small mb-2">{{ _('logs_desc') }}</p>
+        <div class="d-flex gap-2">
+          <a href="/api/settings/logs/download" class="btn btn-sm btn-outline-primary" download onclick="return yfDownloadLogs()">
+            <i class="bi bi-download me-1"></i>{{ _('download_logs') }}
+          </a>
+          <button class="btn btn-sm btn-outline-danger" onclick="clearLogs()">
+            <i class="bi bi-trash me-1"></i>{{ _('clear_logs') }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% include "settings/_tab_imports.html" %}
+
+  <div class="tab-pane fade" id="tab-plugins" role="tabpanel">
+    <div class="card mb-3">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h6 class="d-flex align-items-center gap-2 mb-0">
+            <span class="yn-icon-box rounded bg-label-primary p-2"><i class="bi bi-puzzle"></i></span>
+            {{ _('plugins') }}
+          </h6>
+          <label class="btn btn-sm btn-primary mb-0">
+            <i class="bi bi-upload me-1"></i>{{ _('install_plugin') }}
+            <input type="file" id="pluginZipInput" accept=".zip" style="display:none" onchange="scanPlugin(event)">
+          </label>
+        </div>
+
+        <!-- Scan report (hidden by default) -->
+        <div id="scanReport" style="display:none" class="mb-4">
+          <div class="border rounded p-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h6 class="mb-0" id="scanPluginName"></h6>
+              <span id="scanBadge" class="badge"></span>
+            </div>
+            <div id="scanFindings" class="mb-3" style="max-height:300px;overflow-y:auto"></div>
+            <div class="d-flex gap-2">
+              <button class="btn btn-sm btn-primary" id="confirmInstallBtn" onclick="confirmInstall()">
+                <i class="bi bi-check-lg me-1"></i>{{ _('confirm_install') }}
+              </button>
+              <button class="btn btn-sm btn-outline-secondary" onclick="cancelInstall()">
+                {{ _('cancel') }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {% if plugins %}
+        {% for p in plugins %}
+        <div class="d-flex align-items-center justify-content-between py-2 {% if not loop.last %}border-bottom{% endif %}">
+          <div class="d-flex align-items-center gap-2">
+            <i class="{{ p.icon }} fs-5 text-primary"></i>
+            <div>
+              <span class="fw-bold">{{ p.name }}</span>
+              <small class="text-muted ms-1">v{{ p.version }}</small>
+              {% if p.description %}<br><small class="text-muted">{{ p.description }}</small>{% endif %}
+            </div>
+          </div>
+          <button class="btn btn-sm btn-outline-danger uninstall-btn" data-plugin-id="{{ p.id }}" data-plugin-name="{{ p.name }}">
+            <i class="bi bi-trash"></i>
+          </button>
+        </div>
+        {% endfor %}
+        {% else %}
+        <p class="text-muted mb-0" id="noPluginsMsg">{{ _('no_plugins_installed') }}</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  </div>
+  </div>
+</div>
+
+<!-- Excel Export Modal -->
+<div class="modal fade" id="excelExportModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="bi bi-file-earmark-spreadsheet me-1 text-success"></i>{{ _('export_excel') }}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted mb-3">{{ _('export_excel_select_sections') }}</p>
+        <div class="d-flex justify-content-end gap-2 mb-3">
+          <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleExcelSections(true)">
+            {{ _('export_excel_select_all') }}
+          </button>
+          <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleExcelSections(false)">
+            {{ _('export_excel_deselect_all') }}
+          </button>
+        </div>
+        {% set excel_sections = [
+          ('sources', 'bi-wallet2', 'sources'),
+          ('movements', 'bi-arrow-left-right', 'movements'),
+          ('tags', 'bi-tag', 'tags'),
+          ('recurring', 'bi-arrow-repeat', 'recurring'),
+          ('savings', 'bi-stack', 'savings'),
+          ('whims', 'bi-heart', 'whims')
+        ] %}
+        <div class="list-group">
+          {% for key, icon, label in excel_sections %}
+          <label class="list-group-item d-flex align-items-center gap-3" style="cursor:pointer">
+            <input class="form-check-input excel-section-check" type="checkbox" value="{{ key }}" checked>
+            <i class="bi {{ icon }} fs-4 text-primary"></i>
+            <span class="fw-medium">{{ _(label) }}</span>
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ _('cancel') }}</button>
+        <button type="button" class="btn btn-success" onclick="downloadExcel()">
+          <i class="bi bi-download me-1"></i>{{ _('export_excel_download') }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PDF Export Modal -->
+<div class="modal fade" id="pdfExportModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="bi bi-file-earmark-pdf me-1 text-danger"></i>{{ _('export_pdf') }}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted mb-3">{{ _('export_pdf_select_sections') }}</p>
+        <div class="d-flex justify-content-end gap-2 mb-3">
+          <button type="button" class="btn btn-sm btn-outline-secondary" onclick="togglePdfSections(true)">
+            {{ _('export_excel_select_all') }}
+          </button>
+          <button type="button" class="btn btn-sm btn-outline-secondary" onclick="togglePdfSections(false)">
+            {{ _('export_excel_deselect_all') }}
+          </button>
+        </div>
+        {% set pdf_sections = [
+          ('sources', 'bi-wallet2', 'sources'),
+          ('movements', 'bi-arrow-left-right', 'movements'),
+          ('tags', 'bi-tag', 'tags'),
+          ('recurring', 'bi-arrow-repeat', 'recurring'),
+          ('savings', 'bi-stack', 'savings'),
+          ('whims', 'bi-heart', 'whims')
+        ] %}
+        <div class="list-group">
+          {% for key, icon, label in pdf_sections %}
+          <label class="list-group-item d-flex align-items-center gap-3" style="cursor:pointer">
+            <input class="form-check-input pdf-section-check" type="checkbox" value="{{ key }}" checked>
+            <i class="bi {{ icon }} fs-4 text-danger"></i>
+            <span class="fw-medium">{{ _(label) }}</span>
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ _('cancel') }}</button>
+        <button type="button" class="btn btn-danger" onclick="downloadPdf()">
+          <i class="bi bi-download me-1"></i>{{ _('export_pdf_download') }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Restart required modal -->
+<div class="modal fade" id="restartModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-body text-center py-4">
+        <i class="bi bi-arrow-repeat text-primary" style="font-size:3rem"></i>
+        <h5 class="mt-3 mb-2">{{ _('restart_required') }}</h5>
+        <p class="text-muted small mb-3" id="restartModalMsg"></p>
+        <button class="btn btn-primary" onclick="location.reload()">
+          <i class="bi bi-arrow-clockwise me-1"></i>{{ _('restart_now') }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block page_js %}
+<script>
+  let _pendingPluginId = null;
+
+  const severityIcon = {
+    critical: '<i class="bi bi-shield-x text-danger me-1"></i>',
+    warning: '<i class="bi bi-exclamation-triangle text-warning me-1"></i>',
+    info: '<i class="bi bi-info-circle text-info me-1"></i>',
+  };
+
+  async function scanPlugin(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    event.target.value = '';
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const resp = await fetch('/api/plugins/scan', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!resp.ok) {
+        await handleApiError(resp);
+        return;
+      }
+
+      const data = await resp.json();
+      _pendingPluginId = data.plugin_id;
+      showScanReport(data);
+
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  }
+
+  function showScanReport(data) {
+    const report = data.scan;
+    const panel = document.getElementById('scanReport');
+    const nameEl = document.getElementById('scanPluginName');
+    const badge = document.getElementById('scanBadge');
+    const findingsEl = document.getElementById('scanFindings');
+    const confirmBtn = document.getElementById('confirmInstallBtn');
+
+    nameEl.textContent = `${data.plugin_name} v${data.plugin_version}`;
+
+    if (report.is_safe) {
+      badge.className = 'badge bg-success';
+      badge.textContent = '{{ _("scan_safe") }}';
+      confirmBtn.className = 'btn btn-sm btn-primary';
+    } else if (report.counts.critical > 0) {
+      badge.className = 'badge bg-danger';
+      badge.textContent = `${report.counts.critical} {{ _("critical") }}, ${report.counts.warning} {{ _("warning") }}`;
+      confirmBtn.className = 'btn btn-sm btn-danger';
+    } else {
+      badge.className = 'badge bg-warning';
+      badge.textContent = `${report.counts.warning} {{ _("warning") }}`;
+      confirmBtn.className = 'btn btn-sm btn-warning';
+    }
+
+    if (report.findings.length === 0) {
+      findingsEl.innerHTML = '<p class="text-success mb-0"><i class="bi bi-check-circle me-1"></i>{{ _("scan_no_issues") }}</p>';
+    } else {
+      findingsEl.innerHTML = '';
+      report.findings.forEach(f => {
+        const row = document.createElement('div');
+        row.className = 'd-flex align-items-start py-1 small';
+        row.innerHTML = severityIcon[f.severity] || '';
+        const info = document.createElement('div');
+        const cat = document.createElement('span');
+        cat.className = 'fw-medium';
+        cat.textContent = f.category;
+        const file = document.createElement('span');
+        file.className = 'text-muted ms-1';
+        file.textContent = f.file + (f.line ? ':' + f.line : '');
+        const msg = document.createElement('span');
+        msg.textContent = f.message;
+        info.appendChild(cat);
+        info.appendChild(file);
+        info.appendChild(document.createElement('br'));
+        info.appendChild(msg);
+        row.appendChild(info);
+        findingsEl.appendChild(row);
+      });
+    }
+
+    panel.style.display = '';
+  }
+
+  function showRestartModal(message) {
+    document.getElementById('restartModalMsg').textContent = message;
+    new bootstrap.Modal(document.getElementById('restartModal')).show();
+  }
+
+  async function confirmInstall() {
+    if (!_pendingPluginId) return;
+
+    try {
+      const resp = await fetch(`/api/plugins/install?plugin_id=${encodeURIComponent(_pendingPluginId)}`, {
+        method: 'POST'
+      });
+
+      if (resp.ok) {
+        const data = await resp.json();
+        cancelInstall();
+        showRestartModal('{{ _("plugin_installed") }}');
+      } else {
+        await handleApiError(resp);
+      }
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  }
+
+  function cancelInstall() {
+    _pendingPluginId = null;
+    document.getElementById('scanReport').style.display = 'none';
+  }
+
+  async function uninstallPlugin(pluginId, pluginName) {
+    if (!(await confirmDialog(`{{ _("uninstall_plugin") }}: ${pluginName}?`, {icon: 'warning', confirmColor: 'danger', confirmText: '{{ _("uninstall_plugin") }}'}))) return;
+
+    try {
+      const resp = await fetch(`/api/plugins/${pluginId}`, { method: 'DELETE' });
+      if (resp.ok) {
+        showRestartModal('{{ _("plugin_uninstalled") }}');
+      } else {
+        await handleApiError(resp);
+      }
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  }
+
+  document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.uninstall-btn');
+    if (btn) uninstallPlugin(btn.dataset.pluginId, btn.dataset.pluginName);
+  });
+
+  // Auto-save helper
+  async function saveSettings(opts) {
+    opts = opts || {};
+    const data = {
+      locale: document.getElementById('locale').value,
+      date_format: document.getElementById('date_format').value,
+      base_currency: document.getElementById('base_currency').value || null,
+      theme: document.getElementById('theme').value,
+      mobile_nav_mode: document.getElementById('mobile_nav_mode').value,
+      lan_access: document.getElementById('lan_access').checked
+    };
+
+    const resp = await fetch('/api/settings', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+
+    if (resp.ok) {
+      showToast('{{ _("settings_saved") }}', 'success');
+      if (opts.lanChanged) {
+        showToast('{{ _("lan_restart_required") }}', 'info');
+      }
+      const needsReload = data.locale !== '{{ settings.locale }}' || data.date_format !== '{{ settings.date_format }}' || data.mobile_nav_mode !== '{{ settings.mobile_nav_mode }}';
+      if (needsReload) setTimeout(() => location.reload(), 600);
+    } else {
+      await handleApiError(resp);
+    }
+  }
+
+  // Theme button toggle with live preview + auto-save
+  document.querySelectorAll('.theme-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.theme-btn').forEach(b => {
+        b.classList.remove('btn-primary');
+        b.classList.add('btn-outline-primary');
+      });
+      this.classList.remove('btn-outline-primary');
+      this.classList.add('btn-primary');
+      const theme = this.dataset.theme;
+      document.getElementById('theme').value = theme;
+      if (theme === 'system') {
+        const sys = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-bs-theme', sys);
+      } else {
+        document.documentElement.setAttribute('data-bs-theme', theme);
+      }
+      saveSettings();
+    });
+  });
+
+  // Mobile nav mode toggle with auto-save
+  const mobileNavDescs = {
+    sidebar: '{{ _("mobile_nav_sidebar_desc") }}',
+    bottom: '{{ _("mobile_nav_bottom_desc") }}'
+  };
+  document.querySelectorAll('.mobile-nav-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.mobile-nav-btn').forEach(b => {
+        b.classList.remove('btn-primary');
+        b.classList.add('btn-outline-primary');
+      });
+      this.classList.remove('btn-outline-primary');
+      this.classList.add('btn-primary');
+      const mode = this.dataset.mode;
+      document.getElementById('mobile_nav_mode').value = mode;
+      document.getElementById('mobile-nav-desc').textContent = mobileNavDescs[mode] || '';
+      saveSettings();
+    });
+  });
+
+  // Auto-save on select change
+  document.querySelectorAll('#locale, #date_format, #base_currency').forEach(el => {
+    el.addEventListener('change', () => saveSettings());
+  });
+
+  // Portfolio live prices toggle
+  var _portfolioPricesDescs = {
+    on: '{{ _("portfolio_prices_on_desc") }}',
+    off: '{{ _("portfolio_prices_off_desc") }}'
+  };
+  document.getElementById('portfolio_prices_enabled').addEventListener('change', async function() {
+    document.getElementById('portfolio-prices-desc').textContent = this.checked ? _portfolioPricesDescs.on : _portfolioPricesDescs.off;
+    var resp = await fetch('/api/settings', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ portfolio_prices_enabled: this.checked, portfolio_prices_prompted: true })
+    });
+    if (resp.ok) {
+      showToast('{{ _("settings_saved") }}', 'success');
+    } else {
+      await handleApiError(resp);
+    }
+  });
+
+  // LAN access toggle
+  var _lanDescs = {
+    on: '{{ _("lan_access_on_desc") }}',
+    off: '{{ _("lan_access_off_desc") }}'
+  };
+  document.getElementById('lan_access').addEventListener('change', function() {
+    document.getElementById('lan-access-desc').textContent = this.checked ? _lanDescs.on : _lanDescs.off;
+    saveSettings({ lanChanged: true });
+    updateLanLinkBox();
+  });
+
+  function updateLanLinkBox() {
+    var box = document.getElementById('lan-access-link-box');
+    if (document.getElementById('lan_access').checked) {
+      fetch('/api/settings/lan-info').then(function(r) { return r.json(); }).then(function(data) {
+        if (data.ip) {
+          var url = 'http://' + data.ip + ':' + data.port;
+          document.getElementById('lan-access-url').value = url;
+          box.classList.remove('d-none');
+        }
+      }).catch(function() {});
+    } else {
+      box.classList.add('d-none');
+    }
+  }
+
+  function copyLanUrl() {
+    var input = document.getElementById('lan-access-url');
+    var feedback = document.getElementById('lan-copy-feedback');
+    var btn = document.getElementById('lan-copy-btn');
+    navigator.clipboard.writeText(input.value).then(function() {
+      btn.innerHTML = '<i class="bi bi-check-lg"></i>';
+      btn.classList.remove('btn-outline-primary');
+      btn.classList.add('btn-success');
+      feedback.textContent = '{{ _("copied") }}';
+      setTimeout(function() {
+        btn.innerHTML = '<i class="bi bi-clipboard"></i>';
+        btn.classList.remove('btn-success');
+        btn.classList.add('btn-outline-primary');
+        feedback.textContent = '';
+      }, 2000);
+    }).catch(function() {
+      input.select();
+      document.execCommand('copy');
+      feedback.textContent = '{{ _("copied") }}';
+      setTimeout(function() { feedback.textContent = ''; }, 2000);
+    });
+  }
+
+  updateLanLinkBox();
+
+  // --- Port ---
+  (function loadPort() {
+    fetch('/api/settings/port').then(function(r) { return r.json(); }).then(function(data) {
+      document.getElementById('server_port').value = data.port || 8000;
+    }).catch(function() {});
+  })();
+
+  async function savePort() {
+    var port = parseInt(document.getElementById('server_port').value);
+    if (!port || port < 1024 || port > 65535) {
+      showToast('{{ _("invalid_port") }}', 'warning');
+      return;
+    }
+    var resp = await fetch('/api/settings/port', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ port: port })
+    });
+    if (resp.ok) {
+      document.getElementById('port-feedback').textContent = '{{ _("restart_required") }}';
+      showToast('{{ _("settings_saved") }}', 'success');
+      setTimeout(function() { document.getElementById('port-feedback').textContent = ''; }, 4000);
+    } else {
+      await handleApiError(resp);
+    }
+  }
+
+  // Excel export
+  function toggleExcelSections(state) {
+    document.querySelectorAll('.excel-section-check').forEach(cb => cb.checked = state);
+  }
+
+  async function downloadExcel() {
+    const checks = document.querySelectorAll('.excel-section-check:checked');
+    const sections = Array.from(checks).map(cb => cb.value);
+    if (sections.length === 0) {
+      showToast('{{ _("export_excel_select_sections") }}', 'warning');
+      return;
+    }
+    const joined = sections.join(',');
+
+    if (window.pywebview && window.pywebview.api && window.pywebview.api.save_excel_export) {
+      try {
+        const ok = await window.pywebview.api.save_excel_export(joined);
+        if (ok) {
+          bootstrap.Modal.getInstance(document.getElementById('excelExportModal')).hide();
+          showToast('{{ _("success") }}', 'success');
+        }
+      } catch (e) {
+        showToast('{{ _("error") }}', 'error');
+      }
+      return;
+    }
+
+    try {
+      const resp = await fetch('/api/export/excel?sections=' + encodeURIComponent(joined));
+      if (!resp.ok) { await handleApiError(resp); return; }
+      const blob = await resp.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'yfine-export.xlsx';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      bootstrap.Modal.getInstance(document.getElementById('excelExportModal')).hide();
+      showToast('{{ _("success") }}', 'success');
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  }
+
+  // PDF export
+  function togglePdfSections(state) {
+    document.querySelectorAll('.pdf-section-check').forEach(cb => cb.checked = state);
+  }
+
+  async function downloadPdf() {
+    const checks = document.querySelectorAll('.pdf-section-check:checked');
+    const sections = Array.from(checks).map(cb => cb.value);
+    if (sections.length === 0) {
+      showToast('{{ _("export_pdf_select_sections") }}', 'warning');
+      return;
+    }
+    const joined = sections.join(',');
+
+    if (window.pywebview && window.pywebview.api && window.pywebview.api.save_pdf_export) {
+      try {
+        const ok = await window.pywebview.api.save_pdf_export(joined);
+        if (ok) {
+          bootstrap.Modal.getInstance(document.getElementById('pdfExportModal')).hide();
+          showToast('{{ _("success") }}', 'success');
+        }
+      } catch (e) {
+        showToast('{{ _("error") }}', 'error');
+      }
+      return;
+    }
+
+    try {
+      const resp = await fetch('/api/export/pdf?sections=' + encodeURIComponent(joined));
+      if (!resp.ok) { await handleApiError(resp); return; }
+      const blob = await resp.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'yfine-report.pdf';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      bootstrap.Modal.getInstance(document.getElementById('pdfExportModal')).hide();
+      showToast('{{ _("success") }}', 'success');
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  }
+
+  // --- Logs ---
+  async function clearLogs() {
+    if (!(await confirmDialog('{{ _("clear_logs_confirm") }}', {icon: 'warning', confirmColor: 'danger', confirmText: '{{ _("clear_logs") }}'}))) return;
+    var resp = await fetch('/api/settings/logs', { method: 'DELETE' });
+    if (resp.ok) {
+      showToast('{{ _("logs_cleared") }}', 'success');
+    } else {
+      await handleApiError(resp);
+    }
+  }
+
+  async function resetAllData() {
+    // First confirmation — intent
+    const step1 = await confirmDialog('{{ _("reset_all_data_confirm_1") }}', {
+      icon: 'warning',
+      confirmColor: 'danger',
+      confirmText: '{{ _("reset_all_data") }}'
+    });
+    if (!step1) return;
+
+    // Second confirmation — irreversibility
+    const step2 = await confirmDialog('{{ _("reset_all_data_confirm_2") }}', {
+      title: '{{ _("irreversible_action") }}',
+      icon: 'error',
+      confirmColor: 'danger',
+      confirmText: '{{ _("delete_everything") }}'
+    });
+    if (!step2) return;
+
+    const resp = await fetch('/api/settings/data', { method: 'DELETE' });
+    if (resp.ok) {
+      showToast('{{ _("data_reset_success") }}', 'success');
+      setTimeout(function() { location.href = '/'; }, 900);
+    } else {
+      await handleApiError(resp);
+    }
+  }
+
+  // --- Security / Password section ---
+  (async function loadSecuritySection() {
+    var container = document.getElementById('security-section');
+    try {
+      var resp = await fetch('/api/settings/password-status');
+      var data = await resp.json();
+
+      if (data.password_set) {
+        container.innerHTML = `
+          <div class="d-flex align-items-start gap-3 mb-3">
+            <span class="yn-icon-box rounded bg-label-success p-2"><i class="bi bi-shield-check" style="font-size:1.3rem"></i></span>
+            <div>
+              <h6 class="mb-1">{{ _('password_active') }}</h6>
+              <small class="text-muted">{{ _('password_active_desc') }}</small>
+            </div>
+          </div>
+          <div class="border rounded p-3">
+            <div class="mb-3">
+              <label class="form-label small fw-bold">{{ _('change_password') }}</label>
+              <input type="password" class="form-control form-control-sm mb-2" id="sec-current-pw" placeholder="{{ _('current_password') }}">
+              <input type="password" class="form-control form-control-sm mb-2" id="sec-new-pw" placeholder="{{ _('new_password') }}">
+              <input type="password" class="form-control form-control-sm" id="sec-confirm-pw" placeholder="{{ _('confirm_password') }}">
+              <div id="sec-strength" class="mt-2" style="display:none">
+                <div class="progress" style="height:4px">
+                  <div class="progress-bar" id="sec-strength-bar" style="width:0%"></div>
+                </div>
+                <small class="text-muted" id="sec-strength-text"></small>
+              </div>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+              <button class="btn btn-sm btn-primary" onclick="changePassword()">
+                <i class="bi bi-key me-1"></i>{{ _('change_password') }}
+              </button>
+              <button class="btn btn-sm btn-outline-danger" onclick="removePassword()">
+                <i class="bi bi-unlock me-1"></i>{{ _('remove_password') }}
+              </button>
+            </div>
+          </div>
+          <hr class="my-3">
+          <div>
+            <h6 class="mb-1"><i class="bi bi-people me-1"></i>{{ _('revoke_all_sessions') }}</h6>
+            <small class="text-muted d-block mb-2">{{ _('revoke_sessions_desc') }}</small>
+            <button class="btn btn-sm btn-outline-warning" onclick="revokeSessions()">
+              <i class="bi bi-shield-slash me-1"></i>{{ _('revoke_all_sessions') }}
+            </button>
+          </div>`;
+        document.getElementById('sec-new-pw').addEventListener('input', updateStrength);
+      } else {
+        container.innerHTML = `
+          <div class="d-flex align-items-start gap-3 mb-3">
+            <span class="yn-icon-box rounded bg-label-warning p-2"><i class="bi bi-shield-exclamation" style="font-size:1.3rem"></i></span>
+            <div>
+              <h6 class="mb-1">{{ _('password_not_set') }}</h6>
+              <small class="text-muted">{{ _('password_not_set_desc') }}</small>
+            </div>
+          </div>
+          <div class="border rounded p-3">
+            <div class="mb-3">
+              <label class="form-label small fw-bold">{{ _('set_password') }}</label>
+              <input type="password" class="form-control form-control-sm mb-2" id="sec-new-pw" placeholder="{{ _('password') }}">
+              <input type="password" class="form-control form-control-sm" id="sec-confirm-pw" placeholder="{{ _('confirm_password') }}">
+              <div id="sec-strength" class="mt-2" style="display:none">
+                <div class="progress" style="height:4px">
+                  <div class="progress-bar" id="sec-strength-bar" style="width:0%"></div>
+                </div>
+                <small class="text-muted" id="sec-strength-text"></small>
+              </div>
+            </div>
+            <div class="mb-3 small text-muted">
+              <div class="fw-bold mb-1">{{ _('password_guidelines_title') }}</div>
+              <div id="pw-guide-len"><i class="bi bi-x-circle text-danger me-1"></i>{{ _('password_guide_length') }}</div>
+              <div id="pw-guide-mix"><i class="bi bi-x-circle text-danger me-1"></i>{{ _('password_guide_mix') }}</div>
+              <div id="pw-guide-num"><i class="bi bi-x-circle text-danger me-1"></i>{{ _('password_guide_numbers') }}</div>
+              <div id="pw-guide-spe"><i class="bi bi-x-circle text-danger me-1"></i>{{ _('password_guide_special') }}</div>
+            </div>
+            <button class="btn btn-sm btn-primary" onclick="setNewPassword()">
+              <i class="bi bi-shield-lock me-1"></i>{{ _('set_password') }}
+            </button>
+          </div>`;
+        document.getElementById('sec-new-pw').addEventListener('input', function() {
+          updateStrength();
+          updateGuides(this.value);
+        });
+      }
+    } catch (e) {
+      container.innerHTML = '<p class="text-muted mb-0">{{ _("error") }}</p>';
+    }
+  })();
+
+  function updateStrength() {
+    var pw = document.getElementById('sec-new-pw').value;
+    var bar = document.getElementById('sec-strength-bar');
+    var text = document.getElementById('sec-strength-text');
+    var wrap = document.getElementById('sec-strength');
+    if (!pw) { wrap.style.display = 'none'; return; }
+    wrap.style.display = '';
+
+    var score = 0;
+    if (pw.length >= 8) score++;
+    if (pw.length >= 12) score++;
+    if (/[a-z]/.test(pw) && /[A-Z]/.test(pw)) score++;
+    if (/\d/.test(pw)) score++;
+    if (/[^a-zA-Z0-9]/.test(pw)) score++;
+
+    var pct = Math.min(score * 20, 100);
+    var labels = ['{{ _("pw_very_weak") }}', '{{ _("pw_weak") }}', '{{ _("pw_fair") }}', '{{ _("pw_strong") }}', '{{ _("pw_very_strong") }}'];
+    var colors = ['#ff3e1d', '#ff5722', '#ffab00', '#71dd37', '#28c76f'];
+    var idx = Math.min(score, labels.length) - 1;
+    if (idx < 0) idx = 0;
+    bar.style.width = pct + '%';
+    bar.style.backgroundColor = colors[idx];
+    text.textContent = labels[idx];
+    text.style.color = colors[idx];
+  }
+
+  function updateGuides(pw) {
+    var checks = [
+      { id: 'pw-guide-len', ok: pw.length >= 8 },
+      { id: 'pw-guide-mix', ok: /[a-z]/.test(pw) && /[A-Z]/.test(pw) },
+      { id: 'pw-guide-num', ok: /\d/.test(pw) },
+      { id: 'pw-guide-spe', ok: /[^a-zA-Z0-9]/.test(pw) }
+    ];
+    checks.forEach(function(c) {
+      var el = document.getElementById(c.id);
+      if (!el) return;
+      var icon = el.querySelector('i');
+      if (c.ok) {
+        icon.className = 'bi bi-check-circle text-success me-1';
+      } else {
+        icon.className = 'bi bi-x-circle text-danger me-1';
+      }
+    });
+  }
+
+  async function setNewPassword() {
+    var pw = document.getElementById('sec-new-pw').value;
+    var confirm = document.getElementById('sec-confirm-pw').value;
+    if (!pw) { showToast('{{ _("password_empty") }}', 'warning'); return; }
+    if (pw !== confirm) { showToast('{{ _("passwords_dont_match") }}', 'warning'); return; }
+
+    var resp = await fetch('/api/settings/password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw })
+    });
+    if (resp.ok) {
+      showToast('{{ _("password_set_success") }}', 'success');
+      showToast('{{ _("password_restart_hint") }}', 'info');
+      setTimeout(function() { location.reload(); }, 1500);
+    } else {
+      await handleApiError(resp);
+    }
+  }
+
+  async function changePassword() {
+    var current = document.getElementById('sec-current-pw').value;
+    var newPw = document.getElementById('sec-new-pw').value;
+    var confirm = document.getElementById('sec-confirm-pw').value;
+    if (!current) { showToast('{{ _("enter_current_password") }}', 'warning'); return; }
+    if (!newPw) { showToast('{{ _("password_empty") }}', 'warning'); return; }
+    if (newPw !== confirm) { showToast('{{ _("passwords_dont_match") }}', 'warning'); return; }
+
+    var resp = await fetch('/api/settings/password', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ current_password: current, new_password: newPw })
+    });
+    if (resp.ok) {
+      showToast('{{ _("password_changed_success") }}', 'success');
+      setTimeout(function() { location.reload(); }, 1500);
+    } else {
+      await handleApiError(resp);
+    }
+  }
+
+  async function removePassword() {
+    var current = document.getElementById('sec-current-pw').value;
+    if (!current) { showToast('{{ _("enter_current_password") }}', 'warning'); return; }
+
+    if (!(await confirmDialog('{{ _("remove_password_confirm") }}', {icon: 'warning', confirmColor: 'danger', confirmText: '{{ _("remove_password") }}'}))) return;
+
+    var resp = await fetch('/api/settings/password', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ current_password: current })
+    });
+    if (resp.ok) {
+      showToast('{{ _("password_removed_success") }}', 'success');
+      setTimeout(function() { location.reload(); }, 1500);
+    } else {
+      await handleApiError(resp);
+    }
+  }
+
+  async function revokeSessions() {
+    if (!(await confirmDialog('{{ _("revoke_sessions_confirm") }}', {icon: 'warning', confirmColor: 'warning', confirmText: '{{ _("revoke_all_sessions") }}'}))) return;
+
+    var resp = await fetch('/api/settings/revoke-sessions', { method: 'POST' });
+    if (resp.ok) {
+      showToast('{{ _("sessions_revoked") }}', 'success');
+      setTimeout(function() { window.location.href = '/login'; }, 1500);
+    } else {
+      await handleApiError(resp);
+    }
+  }
+
+  // --- Import from bank / other apps ---
+  window.IMP_I18N = {
+    success: '{{ _("import_success_toast") }}',
+    undo: '{{ _("import_undo_btn") }}',
+    undoDone: '{{ _("import_undo_success") }}',
+    undoExpired: '{{ _("import_undo_expired") }}',
+    error: '{{ _("error") }}',
+    noSource: '{{ _("import_no_source_selected") }}',
+    noRows: '{{ _("import_no_rows_selected") }}',
+    emptyFile: '{{ _("import_empty_file") }}',
+    confirmLabel: '{{ _("import_confirm_btn") }}'
+  };
+</script>
+<script src="/static/js/imports.js?v={{ cache_bust }}"></script>
+{% endblock %}

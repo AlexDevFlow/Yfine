@@ -1,0 +1,2768 @@
+{
+  "sources": [
+    {
+      "id": 1,
+      "name": "Main Checking",
+      "currency": "EUR",
+      "starting_balance": 1200.0,
+      "exclude_from_stats": false,
+      "created_at": "2025-01-01T00:00:00",
+      "updated_at": "2026-04-17T10:30:00"
+    },
+    {
+      "id": 2,
+      "name": "Savings",
+      "currency": "EUR",
+      "starting_balance": 8500.0,
+      "exclude_from_stats": false,
+      "created_at": "2025-01-01T00:00:00",
+      "updated_at": "2026-04-17T10:30:00"
+    },
+    {
+      "id": 3,
+      "name": "Cash Wallet",
+      "currency": "EUR",
+      "starting_balance": 80.0,
+      "exclude_from_stats": false,
+      "created_at": "2025-01-01T00:00:00",
+      "updated_at": "2026-04-17T10:30:00"
+    },
+    {
+      "id": 4,
+      "name": "Revolut USD",
+      "currency": "USD",
+      "starting_balance": 1800.0,
+      "exclude_from_stats": false,
+      "created_at": "2025-01-01T00:00:00",
+      "updated_at": "2026-04-17T10:30:00"
+    },
+    {
+      "id": 5,
+      "name": "BTC Hardware",
+      "currency": "BTC",
+      "starting_balance": 0.085,
+      "exclude_from_stats": false,
+      "created_at": "2025-01-01T00:00:00",
+      "updated_at": "2026-04-17T10:30:00"
+    }
+  ],
+  "tags": [
+    {
+      "id": 1,
+      "name": "Salary",
+      "color": "#10b981",
+      "created_at": "2025-01-01T00:00:00",
+      "updated_at": "2025-01-01T00:00:00"
+    },
+    {
+      "id": 2,
+      "name": "Groceries",
+      "color": "#f59e0b",
+      "created_at": "2025-01-01T00:00:00",
+      "updated_at": "2025-01-01T00:00:00"
+    },
+    {
+      "id": 3,
+      "name": "Rent",
+      "color": "#ef4444",
+      "created_at": "2025-01-01T00:00:00",
+      "updated_at": "2025-01-01T00:00:00"
+    },
+    {
+      "id": 4,
+      "name": "Bills",
+      "color": "#8b5cf6",
+      "created_at": "2025-01-01T00:00:00",
+      "updated_at": "2025-01-01T00:00:00"
+    },
+    {
+      "id": 5,
+      "name": "Transport",
+      "color": "#06b6d4",
+      "created_at": "2025-01-01T00:00:00",
+      "updated_at": "2025-01-01T00:00:00"
+    },
+    {
+      "id": 6,
+      "name": "Restaurants",
+      "color": "#ec4899",
+      "created_at": "2025-01-01T00:00:00",
+      "updated_at": "2025-01-01T00:00:00"
+    },
+    {
+      "id": 7,
+      "name": "Entertainment",
+      "color": "#6366f1",
+      "created_at": "2025-01-01T00:00:00",
+      "updated_at": "2025-01-01T00:00:00"
+    },
+    {
+      "id": 8,
+      "name": "Health",
+      "color": "#14b8a6",
+      "created_at": "2025-01-01T00:00:00",
+      "updated_at": "2025-01-01T00:00:00"
+    },
+    {
+      "id": 9,
+      "name": "Shopping",
+      "color": "#f97316",
+      "created_at": "2025-01-01T00:00:00",
+      "updated_at": "2025-01-01T00:00:00"
+    },
+    {
+      "id": 10,
+      "name": "Subscriptions",
+      "color": "#a855f7",
+      "created_at": "2025-01-01T00:00:00",
+      "updated_at": "2025-01-01T00:00:00"
+    },
+    {
+      "id": 11,
+      "name": "Savings",
+      "color": "#22c55e",
+      "created_at": "2025-01-01T00:00:00",
+      "updated_at": "2025-01-01T00:00:00"
+    },
+    {
+      "id": 12,
+      "name": "Travel",
+      "color": "#3b82f6",
+      "created_at": "2025-01-01T00:00:00",
+      "updated_at": "2025-01-01T00:00:00"
+    },
+    {
+      "id": 13,
+      "name": "Gift",
+      "color": "#d946ef",
+      "created_at": "2025-01-01T00:00:00",
+      "updated_at": "2025-01-01T00:00:00"
+    }
+  ],
+  "movements": [
+    {
+      "id": 1,
+      "source_id": 1,
+      "amount": 950.0,
+      "direction": "out",
+      "date": "2025-11-01",
+      "note": "Monthly rent",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2025-11-01T09:00:00",
+      "updated_at": "2025-11-01T09:00:00"
+    },
+    {
+      "id": 2,
+      "source_id": 1,
+      "amount": 2780.0,
+      "direction": "in",
+      "date": "2025-11-05",
+      "note": "Salary",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2025-11-05T09:00:00",
+      "updated_at": "2025-11-05T09:00:00"
+    },
+    {
+      "id": 3,
+      "source_id": 1,
+      "amount": 58.4,
+      "direction": "out",
+      "date": "2025-11-10",
+      "note": "Electricity bill",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2025-11-10T09:00:00",
+      "updated_at": "2025-11-10T09:00:00"
+    },
+    {
+      "id": 4,
+      "source_id": 1,
+      "amount": 34.9,
+      "direction": "out",
+      "date": "2025-11-12",
+      "note": "Fiber internet",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2025-11-12T09:00:00",
+      "updated_at": "2025-11-12T09:00:00"
+    },
+    {
+      "id": 5,
+      "source_id": 1,
+      "amount": 12.99,
+      "direction": "out",
+      "date": "2025-11-15",
+      "note": "Mobile plan",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2025-11-15T09:00:00",
+      "updated_at": "2025-11-15T09:00:00"
+    },
+    {
+      "id": 6,
+      "source_id": 1,
+      "amount": 13.99,
+      "direction": "out",
+      "date": "2025-11-15",
+      "note": "Netflix",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2025-11-15T09:00:00",
+      "updated_at": "2025-11-15T09:00:00"
+    },
+    {
+      "id": 7,
+      "source_id": 1,
+      "amount": 10.99,
+      "direction": "out",
+      "date": "2025-11-16",
+      "note": "Spotify Premium",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2025-11-16T09:00:00",
+      "updated_at": "2025-11-16T09:00:00"
+    },
+    {
+      "id": 8,
+      "source_id": 1,
+      "amount": 29.99,
+      "direction": "out",
+      "date": "2025-11-18",
+      "note": "Gym membership",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2025-11-18T09:00:00",
+      "updated_at": "2025-11-18T09:00:00"
+    },
+    {
+      "id": 9,
+      "source_id": 2,
+      "amount": 300.0,
+      "direction": "in",
+      "date": "2025-11-25",
+      "note": "Monthly savings",
+      "transfer_pair_id": 10,
+      "exclude_from_stats": false,
+      "created_at": "2025-11-25T09:00:00",
+      "updated_at": "2025-11-25T09:00:00"
+    },
+    {
+      "id": 10,
+      "source_id": 1,
+      "amount": 300.0,
+      "direction": "out",
+      "date": "2025-11-25",
+      "note": "Monthly savings",
+      "transfer_pair_id": 9,
+      "exclude_from_stats": false,
+      "created_at": "2025-11-25T09:00:00",
+      "updated_at": "2025-11-25T09:00:00"
+    },
+    {
+      "id": 11,
+      "source_id": 1,
+      "amount": 42.8,
+      "direction": "out",
+      "date": "2025-11-03",
+      "note": "Supermarket",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2025-11-03T09:00:00",
+      "updated_at": "2025-11-03T09:00:00"
+    },
+    {
+      "id": 12,
+      "source_id": 1,
+      "amount": 68.5,
+      "direction": "out",
+      "date": "2025-11-09",
+      "note": "Weekly shop",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2025-11-09T09:00:00",
+      "updated_at": "2025-11-09T09:00:00"
+    },
+    {
+      "id": 13,
+      "source_id": 1,
+      "amount": 51.2,
+      "direction": "out",
+      "date": "2025-11-14",
+      "note": "Grocery run",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2025-11-14T09:00:00",
+      "updated_at": "2025-11-14T09:00:00"
+    },
+    {
+      "id": 14,
+      "source_id": 1,
+      "amount": 74.6,
+      "direction": "out",
+      "date": "2025-11-21",
+      "note": "Lidl",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2025-11-21T09:00:00",
+      "updated_at": "2025-11-21T09:00:00"
+    },
+    {
+      "id": 15,
+      "source_id": 1,
+      "amount": 38.9,
+      "direction": "out",
+      "date": "2025-11-28",
+      "note": "Eataly",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2025-11-28T09:00:00",
+      "updated_at": "2025-11-28T09:00:00"
+    },
+    {
+      "id": 16,
+      "source_id": 1,
+      "amount": 28.5,
+      "direction": "out",
+      "date": "2025-11-07",
+      "note": "Pizza with friends",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2025-11-07T09:00:00",
+      "updated_at": "2025-11-07T09:00:00"
+    },
+    {
+      "id": 17,
+      "source_id": 1,
+      "amount": 42.0,
+      "direction": "out",
+      "date": "2025-11-17",
+      "note": "Dinner out",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2025-11-17T09:00:00",
+      "updated_at": "2025-11-17T09:00:00"
+    },
+    {
+      "id": 18,
+      "source_id": 1,
+      "amount": 19.8,
+      "direction": "out",
+      "date": "2025-11-26",
+      "note": "Lunch break",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2025-11-26T09:00:00",
+      "updated_at": "2025-11-26T09:00:00"
+    },
+    {
+      "id": 19,
+      "source_id": 1,
+      "amount": 55.0,
+      "direction": "out",
+      "date": "2025-11-08",
+      "note": "Shell fuel",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2025-11-08T09:00:00",
+      "updated_at": "2025-11-08T09:00:00"
+    },
+    {
+      "id": 20,
+      "source_id": 1,
+      "amount": 58.5,
+      "direction": "out",
+      "date": "2025-11-22",
+      "note": "Shell fuel",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2025-11-22T09:00:00",
+      "updated_at": "2025-11-22T09:00:00"
+    },
+    {
+      "id": 21,
+      "source_id": 3,
+      "amount": 80.0,
+      "direction": "in",
+      "date": "2025-11-11",
+      "note": "ATM withdrawal",
+      "transfer_pair_id": 22,
+      "exclude_from_stats": false,
+      "created_at": "2025-11-11T09:00:00",
+      "updated_at": "2025-11-11T09:00:00"
+    },
+    {
+      "id": 22,
+      "source_id": 1,
+      "amount": 80.0,
+      "direction": "out",
+      "date": "2025-11-11",
+      "note": "ATM withdrawal",
+      "transfer_pair_id": 21,
+      "exclude_from_stats": false,
+      "created_at": "2025-11-11T09:00:00",
+      "updated_at": "2025-11-11T09:00:00"
+    },
+    {
+      "id": 23,
+      "source_id": 1,
+      "amount": 89.9,
+      "direction": "out",
+      "date": "2025-11-20",
+      "note": "Sneakers",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2025-11-20T09:00:00",
+      "updated_at": "2025-11-20T09:00:00"
+    },
+    {
+      "id": 24,
+      "source_id": 1,
+      "amount": 950.0,
+      "direction": "out",
+      "date": "2025-12-01",
+      "note": "Monthly rent",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2025-12-01T09:00:00",
+      "updated_at": "2025-12-01T09:00:00"
+    },
+    {
+      "id": 25,
+      "source_id": 1,
+      "amount": 2820.0,
+      "direction": "in",
+      "date": "2025-12-05",
+      "note": "Salary",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2025-12-05T09:00:00",
+      "updated_at": "2025-12-05T09:00:00"
+    },
+    {
+      "id": 26,
+      "source_id": 1,
+      "amount": 71.2,
+      "direction": "out",
+      "date": "2025-12-10",
+      "note": "Electricity bill",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2025-12-10T09:00:00",
+      "updated_at": "2025-12-10T09:00:00"
+    },
+    {
+      "id": 27,
+      "source_id": 1,
+      "amount": 34.9,
+      "direction": "out",
+      "date": "2025-12-12",
+      "note": "Fiber internet",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2025-12-12T09:00:00",
+      "updated_at": "2025-12-12T09:00:00"
+    },
+    {
+      "id": 28,
+      "source_id": 1,
+      "amount": 12.99,
+      "direction": "out",
+      "date": "2025-12-15",
+      "note": "Mobile plan",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2025-12-15T09:00:00",
+      "updated_at": "2025-12-15T09:00:00"
+    },
+    {
+      "id": 29,
+      "source_id": 1,
+      "amount": 13.99,
+      "direction": "out",
+      "date": "2025-12-15",
+      "note": "Netflix",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2025-12-15T09:00:00",
+      "updated_at": "2025-12-15T09:00:00"
+    },
+    {
+      "id": 30,
+      "source_id": 1,
+      "amount": 10.99,
+      "direction": "out",
+      "date": "2025-12-16",
+      "note": "Spotify Premium",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2025-12-16T09:00:00",
+      "updated_at": "2025-12-16T09:00:00"
+    },
+    {
+      "id": 31,
+      "source_id": 1,
+      "amount": 29.99,
+      "direction": "out",
+      "date": "2025-12-18",
+      "note": "Gym membership",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2025-12-18T09:00:00",
+      "updated_at": "2025-12-18T09:00:00"
+    },
+    {
+      "id": 32,
+      "source_id": 2,
+      "amount": 300.0,
+      "direction": "in",
+      "date": "2025-12-25",
+      "note": "Monthly savings",
+      "transfer_pair_id": 33,
+      "exclude_from_stats": false,
+      "created_at": "2025-12-25T09:00:00",
+      "updated_at": "2025-12-25T09:00:00"
+    },
+    {
+      "id": 33,
+      "source_id": 1,
+      "amount": 300.0,
+      "direction": "out",
+      "date": "2025-12-25",
+      "note": "Monthly savings",
+      "transfer_pair_id": 32,
+      "exclude_from_stats": false,
+      "created_at": "2025-12-25T09:00:00",
+      "updated_at": "2025-12-25T09:00:00"
+    },
+    {
+      "id": 34,
+      "source_id": 1,
+      "amount": 42.8,
+      "direction": "out",
+      "date": "2025-12-03",
+      "note": "Supermarket",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2025-12-03T09:00:00",
+      "updated_at": "2025-12-03T09:00:00"
+    },
+    {
+      "id": 35,
+      "source_id": 1,
+      "amount": 68.5,
+      "direction": "out",
+      "date": "2025-12-09",
+      "note": "Weekly shop",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2025-12-09T09:00:00",
+      "updated_at": "2025-12-09T09:00:00"
+    },
+    {
+      "id": 36,
+      "source_id": 1,
+      "amount": 51.2,
+      "direction": "out",
+      "date": "2025-12-14",
+      "note": "Grocery run",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2025-12-14T09:00:00",
+      "updated_at": "2025-12-14T09:00:00"
+    },
+    {
+      "id": 37,
+      "source_id": 1,
+      "amount": 74.6,
+      "direction": "out",
+      "date": "2025-12-21",
+      "note": "Lidl",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2025-12-21T09:00:00",
+      "updated_at": "2025-12-21T09:00:00"
+    },
+    {
+      "id": 38,
+      "source_id": 1,
+      "amount": 38.9,
+      "direction": "out",
+      "date": "2025-12-28",
+      "note": "Eataly",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2025-12-28T09:00:00",
+      "updated_at": "2025-12-28T09:00:00"
+    },
+    {
+      "id": 39,
+      "source_id": 1,
+      "amount": 28.5,
+      "direction": "out",
+      "date": "2025-12-07",
+      "note": "Pizza with friends",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2025-12-07T09:00:00",
+      "updated_at": "2025-12-07T09:00:00"
+    },
+    {
+      "id": 40,
+      "source_id": 1,
+      "amount": 42.0,
+      "direction": "out",
+      "date": "2025-12-17",
+      "note": "Dinner out",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2025-12-17T09:00:00",
+      "updated_at": "2025-12-17T09:00:00"
+    },
+    {
+      "id": 41,
+      "source_id": 1,
+      "amount": 19.8,
+      "direction": "out",
+      "date": "2025-12-26",
+      "note": "Lunch break",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2025-12-26T09:00:00",
+      "updated_at": "2025-12-26T09:00:00"
+    },
+    {
+      "id": 42,
+      "source_id": 1,
+      "amount": 55.0,
+      "direction": "out",
+      "date": "2025-12-08",
+      "note": "Shell fuel",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2025-12-08T09:00:00",
+      "updated_at": "2025-12-08T09:00:00"
+    },
+    {
+      "id": 43,
+      "source_id": 1,
+      "amount": 58.5,
+      "direction": "out",
+      "date": "2025-12-22",
+      "note": "Shell fuel",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2025-12-22T09:00:00",
+      "updated_at": "2025-12-22T09:00:00"
+    },
+    {
+      "id": 44,
+      "source_id": 3,
+      "amount": 80.0,
+      "direction": "in",
+      "date": "2025-12-11",
+      "note": "ATM withdrawal",
+      "transfer_pair_id": 45,
+      "exclude_from_stats": false,
+      "created_at": "2025-12-11T09:00:00",
+      "updated_at": "2025-12-11T09:00:00"
+    },
+    {
+      "id": 45,
+      "source_id": 1,
+      "amount": 80.0,
+      "direction": "out",
+      "date": "2025-12-11",
+      "note": "ATM withdrawal",
+      "transfer_pair_id": 44,
+      "exclude_from_stats": false,
+      "created_at": "2025-12-11T09:00:00",
+      "updated_at": "2025-12-11T09:00:00"
+    },
+    {
+      "id": 46,
+      "source_id": 1,
+      "amount": 950.0,
+      "direction": "out",
+      "date": "2026-01-01",
+      "note": "Monthly rent",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-01-01T09:00:00",
+      "updated_at": "2026-01-01T09:00:00"
+    },
+    {
+      "id": 47,
+      "source_id": 1,
+      "amount": 2850.0,
+      "direction": "in",
+      "date": "2026-01-05",
+      "note": "Salary",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-01-05T09:00:00",
+      "updated_at": "2026-01-05T09:00:00"
+    },
+    {
+      "id": 48,
+      "source_id": 1,
+      "amount": 82.1,
+      "direction": "out",
+      "date": "2026-01-10",
+      "note": "Electricity bill",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-01-10T09:00:00",
+      "updated_at": "2026-01-10T09:00:00"
+    },
+    {
+      "id": 49,
+      "source_id": 1,
+      "amount": 34.9,
+      "direction": "out",
+      "date": "2026-01-12",
+      "note": "Fiber internet",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-01-12T09:00:00",
+      "updated_at": "2026-01-12T09:00:00"
+    },
+    {
+      "id": 50,
+      "source_id": 1,
+      "amount": 12.99,
+      "direction": "out",
+      "date": "2026-01-15",
+      "note": "Mobile plan",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-01-15T09:00:00",
+      "updated_at": "2026-01-15T09:00:00"
+    },
+    {
+      "id": 51,
+      "source_id": 1,
+      "amount": 13.99,
+      "direction": "out",
+      "date": "2026-01-15",
+      "note": "Netflix",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-01-15T09:00:00",
+      "updated_at": "2026-01-15T09:00:00"
+    },
+    {
+      "id": 52,
+      "source_id": 1,
+      "amount": 10.99,
+      "direction": "out",
+      "date": "2026-01-16",
+      "note": "Spotify Premium",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-01-16T09:00:00",
+      "updated_at": "2026-01-16T09:00:00"
+    },
+    {
+      "id": 53,
+      "source_id": 1,
+      "amount": 29.99,
+      "direction": "out",
+      "date": "2026-01-18",
+      "note": "Gym membership",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-01-18T09:00:00",
+      "updated_at": "2026-01-18T09:00:00"
+    },
+    {
+      "id": 54,
+      "source_id": 2,
+      "amount": 300.0,
+      "direction": "in",
+      "date": "2026-01-25",
+      "note": "Monthly savings",
+      "transfer_pair_id": 55,
+      "exclude_from_stats": false,
+      "created_at": "2026-01-25T09:00:00",
+      "updated_at": "2026-01-25T09:00:00"
+    },
+    {
+      "id": 55,
+      "source_id": 1,
+      "amount": 300.0,
+      "direction": "out",
+      "date": "2026-01-25",
+      "note": "Monthly savings",
+      "transfer_pair_id": 54,
+      "exclude_from_stats": false,
+      "created_at": "2026-01-25T09:00:00",
+      "updated_at": "2026-01-25T09:00:00"
+    },
+    {
+      "id": 56,
+      "source_id": 1,
+      "amount": 42.8,
+      "direction": "out",
+      "date": "2026-01-03",
+      "note": "Supermarket",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-01-03T09:00:00",
+      "updated_at": "2026-01-03T09:00:00"
+    },
+    {
+      "id": 57,
+      "source_id": 1,
+      "amount": 68.5,
+      "direction": "out",
+      "date": "2026-01-09",
+      "note": "Weekly shop",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-01-09T09:00:00",
+      "updated_at": "2026-01-09T09:00:00"
+    },
+    {
+      "id": 58,
+      "source_id": 1,
+      "amount": 51.2,
+      "direction": "out",
+      "date": "2026-01-14",
+      "note": "Grocery run",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-01-14T09:00:00",
+      "updated_at": "2026-01-14T09:00:00"
+    },
+    {
+      "id": 59,
+      "source_id": 1,
+      "amount": 74.6,
+      "direction": "out",
+      "date": "2026-01-21",
+      "note": "Lidl",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-01-21T09:00:00",
+      "updated_at": "2026-01-21T09:00:00"
+    },
+    {
+      "id": 60,
+      "source_id": 1,
+      "amount": 38.9,
+      "direction": "out",
+      "date": "2026-01-28",
+      "note": "Eataly",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-01-28T09:00:00",
+      "updated_at": "2026-01-28T09:00:00"
+    },
+    {
+      "id": 61,
+      "source_id": 1,
+      "amount": 28.5,
+      "direction": "out",
+      "date": "2026-01-07",
+      "note": "Pizza with friends",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-01-07T09:00:00",
+      "updated_at": "2026-01-07T09:00:00"
+    },
+    {
+      "id": 62,
+      "source_id": 1,
+      "amount": 42.0,
+      "direction": "out",
+      "date": "2026-01-17",
+      "note": "Dinner out",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-01-17T09:00:00",
+      "updated_at": "2026-01-17T09:00:00"
+    },
+    {
+      "id": 63,
+      "source_id": 1,
+      "amount": 19.8,
+      "direction": "out",
+      "date": "2026-01-26",
+      "note": "Lunch break",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-01-26T09:00:00",
+      "updated_at": "2026-01-26T09:00:00"
+    },
+    {
+      "id": 64,
+      "source_id": 1,
+      "amount": 55.0,
+      "direction": "out",
+      "date": "2026-01-08",
+      "note": "Shell fuel",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-01-08T09:00:00",
+      "updated_at": "2026-01-08T09:00:00"
+    },
+    {
+      "id": 65,
+      "source_id": 1,
+      "amount": 58.5,
+      "direction": "out",
+      "date": "2026-01-22",
+      "note": "Shell fuel",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-01-22T09:00:00",
+      "updated_at": "2026-01-22T09:00:00"
+    },
+    {
+      "id": 66,
+      "source_id": 3,
+      "amount": 80.0,
+      "direction": "in",
+      "date": "2026-01-11",
+      "note": "ATM withdrawal",
+      "transfer_pair_id": 67,
+      "exclude_from_stats": false,
+      "created_at": "2026-01-11T09:00:00",
+      "updated_at": "2026-01-11T09:00:00"
+    },
+    {
+      "id": 67,
+      "source_id": 1,
+      "amount": 80.0,
+      "direction": "out",
+      "date": "2026-01-11",
+      "note": "ATM withdrawal",
+      "transfer_pair_id": 66,
+      "exclude_from_stats": false,
+      "created_at": "2026-01-11T09:00:00",
+      "updated_at": "2026-01-11T09:00:00"
+    },
+    {
+      "id": 68,
+      "source_id": 1,
+      "amount": 145.0,
+      "direction": "out",
+      "date": "2026-01-20",
+      "note": "Winter jacket",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-01-20T09:00:00",
+      "updated_at": "2026-01-20T09:00:00"
+    },
+    {
+      "id": 69,
+      "source_id": 1,
+      "amount": 950.0,
+      "direction": "out",
+      "date": "2026-02-01",
+      "note": "Monthly rent",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-02-01T09:00:00",
+      "updated_at": "2026-02-01T09:00:00"
+    },
+    {
+      "id": 70,
+      "source_id": 1,
+      "amount": 2800.0,
+      "direction": "in",
+      "date": "2026-02-05",
+      "note": "Salary",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-02-05T09:00:00",
+      "updated_at": "2026-02-05T09:00:00"
+    },
+    {
+      "id": 71,
+      "source_id": 1,
+      "amount": 76.5,
+      "direction": "out",
+      "date": "2026-02-10",
+      "note": "Electricity bill",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-02-10T09:00:00",
+      "updated_at": "2026-02-10T09:00:00"
+    },
+    {
+      "id": 72,
+      "source_id": 1,
+      "amount": 34.9,
+      "direction": "out",
+      "date": "2026-02-12",
+      "note": "Fiber internet",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-02-12T09:00:00",
+      "updated_at": "2026-02-12T09:00:00"
+    },
+    {
+      "id": 73,
+      "source_id": 1,
+      "amount": 12.99,
+      "direction": "out",
+      "date": "2026-02-15",
+      "note": "Mobile plan",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-02-15T09:00:00",
+      "updated_at": "2026-02-15T09:00:00"
+    },
+    {
+      "id": 74,
+      "source_id": 1,
+      "amount": 13.99,
+      "direction": "out",
+      "date": "2026-02-15",
+      "note": "Netflix",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-02-15T09:00:00",
+      "updated_at": "2026-02-15T09:00:00"
+    },
+    {
+      "id": 75,
+      "source_id": 1,
+      "amount": 10.99,
+      "direction": "out",
+      "date": "2026-02-16",
+      "note": "Spotify Premium",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-02-16T09:00:00",
+      "updated_at": "2026-02-16T09:00:00"
+    },
+    {
+      "id": 76,
+      "source_id": 1,
+      "amount": 29.99,
+      "direction": "out",
+      "date": "2026-02-18",
+      "note": "Gym membership",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-02-18T09:00:00",
+      "updated_at": "2026-02-18T09:00:00"
+    },
+    {
+      "id": 77,
+      "source_id": 2,
+      "amount": 300.0,
+      "direction": "in",
+      "date": "2026-02-25",
+      "note": "Monthly savings",
+      "transfer_pair_id": 78,
+      "exclude_from_stats": false,
+      "created_at": "2026-02-25T09:00:00",
+      "updated_at": "2026-02-25T09:00:00"
+    },
+    {
+      "id": 78,
+      "source_id": 1,
+      "amount": 300.0,
+      "direction": "out",
+      "date": "2026-02-25",
+      "note": "Monthly savings",
+      "transfer_pair_id": 77,
+      "exclude_from_stats": false,
+      "created_at": "2026-02-25T09:00:00",
+      "updated_at": "2026-02-25T09:00:00"
+    },
+    {
+      "id": 79,
+      "source_id": 1,
+      "amount": 42.8,
+      "direction": "out",
+      "date": "2026-02-03",
+      "note": "Supermarket",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-02-03T09:00:00",
+      "updated_at": "2026-02-03T09:00:00"
+    },
+    {
+      "id": 80,
+      "source_id": 1,
+      "amount": 68.5,
+      "direction": "out",
+      "date": "2026-02-09",
+      "note": "Weekly shop",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-02-09T09:00:00",
+      "updated_at": "2026-02-09T09:00:00"
+    },
+    {
+      "id": 81,
+      "source_id": 1,
+      "amount": 51.2,
+      "direction": "out",
+      "date": "2026-02-14",
+      "note": "Grocery run",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-02-14T09:00:00",
+      "updated_at": "2026-02-14T09:00:00"
+    },
+    {
+      "id": 82,
+      "source_id": 1,
+      "amount": 74.6,
+      "direction": "out",
+      "date": "2026-02-21",
+      "note": "Lidl",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-02-21T09:00:00",
+      "updated_at": "2026-02-21T09:00:00"
+    },
+    {
+      "id": 83,
+      "source_id": 1,
+      "amount": 38.9,
+      "direction": "out",
+      "date": "2026-02-28",
+      "note": "Eataly",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-02-28T09:00:00",
+      "updated_at": "2026-02-28T09:00:00"
+    },
+    {
+      "id": 84,
+      "source_id": 1,
+      "amount": 28.5,
+      "direction": "out",
+      "date": "2026-02-07",
+      "note": "Pizza with friends",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-02-07T09:00:00",
+      "updated_at": "2026-02-07T09:00:00"
+    },
+    {
+      "id": 85,
+      "source_id": 1,
+      "amount": 42.0,
+      "direction": "out",
+      "date": "2026-02-17",
+      "note": "Dinner out",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-02-17T09:00:00",
+      "updated_at": "2026-02-17T09:00:00"
+    },
+    {
+      "id": 86,
+      "source_id": 1,
+      "amount": 19.8,
+      "direction": "out",
+      "date": "2026-02-26",
+      "note": "Lunch break",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-02-26T09:00:00",
+      "updated_at": "2026-02-26T09:00:00"
+    },
+    {
+      "id": 87,
+      "source_id": 1,
+      "amount": 55.0,
+      "direction": "out",
+      "date": "2026-02-08",
+      "note": "Shell fuel",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-02-08T09:00:00",
+      "updated_at": "2026-02-08T09:00:00"
+    },
+    {
+      "id": 88,
+      "source_id": 1,
+      "amount": 58.5,
+      "direction": "out",
+      "date": "2026-02-22",
+      "note": "Shell fuel",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-02-22T09:00:00",
+      "updated_at": "2026-02-22T09:00:00"
+    },
+    {
+      "id": 89,
+      "source_id": 3,
+      "amount": 80.0,
+      "direction": "in",
+      "date": "2026-02-11",
+      "note": "ATM withdrawal",
+      "transfer_pair_id": 90,
+      "exclude_from_stats": false,
+      "created_at": "2026-02-11T09:00:00",
+      "updated_at": "2026-02-11T09:00:00"
+    },
+    {
+      "id": 90,
+      "source_id": 1,
+      "amount": 80.0,
+      "direction": "out",
+      "date": "2026-02-11",
+      "note": "ATM withdrawal",
+      "transfer_pair_id": 89,
+      "exclude_from_stats": false,
+      "created_at": "2026-02-11T09:00:00",
+      "updated_at": "2026-02-11T09:00:00"
+    },
+    {
+      "id": 91,
+      "source_id": 1,
+      "amount": 950.0,
+      "direction": "out",
+      "date": "2026-03-01",
+      "note": "Monthly rent",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-03-01T09:00:00",
+      "updated_at": "2026-03-01T09:00:00"
+    },
+    {
+      "id": 92,
+      "source_id": 1,
+      "amount": 2890.0,
+      "direction": "in",
+      "date": "2026-03-05",
+      "note": "Salary",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-03-05T09:00:00",
+      "updated_at": "2026-03-05T09:00:00"
+    },
+    {
+      "id": 93,
+      "source_id": 1,
+      "amount": 64.3,
+      "direction": "out",
+      "date": "2026-03-10",
+      "note": "Electricity bill",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-03-10T09:00:00",
+      "updated_at": "2026-03-10T09:00:00"
+    },
+    {
+      "id": 94,
+      "source_id": 1,
+      "amount": 34.9,
+      "direction": "out",
+      "date": "2026-03-12",
+      "note": "Fiber internet",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-03-12T09:00:00",
+      "updated_at": "2026-03-12T09:00:00"
+    },
+    {
+      "id": 95,
+      "source_id": 1,
+      "amount": 12.99,
+      "direction": "out",
+      "date": "2026-03-15",
+      "note": "Mobile plan",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-03-15T09:00:00",
+      "updated_at": "2026-03-15T09:00:00"
+    },
+    {
+      "id": 96,
+      "source_id": 1,
+      "amount": 13.99,
+      "direction": "out",
+      "date": "2026-03-15",
+      "note": "Netflix",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-03-15T09:00:00",
+      "updated_at": "2026-03-15T09:00:00"
+    },
+    {
+      "id": 97,
+      "source_id": 1,
+      "amount": 10.99,
+      "direction": "out",
+      "date": "2026-03-16",
+      "note": "Spotify Premium",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-03-16T09:00:00",
+      "updated_at": "2026-03-16T09:00:00"
+    },
+    {
+      "id": 98,
+      "source_id": 1,
+      "amount": 29.99,
+      "direction": "out",
+      "date": "2026-03-18",
+      "note": "Gym membership",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-03-18T09:00:00",
+      "updated_at": "2026-03-18T09:00:00"
+    },
+    {
+      "id": 99,
+      "source_id": 2,
+      "amount": 300.0,
+      "direction": "in",
+      "date": "2026-03-25",
+      "note": "Monthly savings",
+      "transfer_pair_id": 100,
+      "exclude_from_stats": false,
+      "created_at": "2026-03-25T09:00:00",
+      "updated_at": "2026-03-25T09:00:00"
+    },
+    {
+      "id": 100,
+      "source_id": 1,
+      "amount": 300.0,
+      "direction": "out",
+      "date": "2026-03-25",
+      "note": "Monthly savings",
+      "transfer_pair_id": 99,
+      "exclude_from_stats": false,
+      "created_at": "2026-03-25T09:00:00",
+      "updated_at": "2026-03-25T09:00:00"
+    },
+    {
+      "id": 101,
+      "source_id": 1,
+      "amount": 42.8,
+      "direction": "out",
+      "date": "2026-03-03",
+      "note": "Supermarket",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-03-03T09:00:00",
+      "updated_at": "2026-03-03T09:00:00"
+    },
+    {
+      "id": 102,
+      "source_id": 1,
+      "amount": 68.5,
+      "direction": "out",
+      "date": "2026-03-09",
+      "note": "Weekly shop",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-03-09T09:00:00",
+      "updated_at": "2026-03-09T09:00:00"
+    },
+    {
+      "id": 103,
+      "source_id": 1,
+      "amount": 51.2,
+      "direction": "out",
+      "date": "2026-03-14",
+      "note": "Grocery run",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-03-14T09:00:00",
+      "updated_at": "2026-03-14T09:00:00"
+    },
+    {
+      "id": 104,
+      "source_id": 1,
+      "amount": 74.6,
+      "direction": "out",
+      "date": "2026-03-21",
+      "note": "Lidl",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-03-21T09:00:00",
+      "updated_at": "2026-03-21T09:00:00"
+    },
+    {
+      "id": 105,
+      "source_id": 1,
+      "amount": 38.9,
+      "direction": "out",
+      "date": "2026-03-28",
+      "note": "Eataly",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-03-28T09:00:00",
+      "updated_at": "2026-03-28T09:00:00"
+    },
+    {
+      "id": 106,
+      "source_id": 1,
+      "amount": 28.5,
+      "direction": "out",
+      "date": "2026-03-07",
+      "note": "Pizza with friends",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-03-07T09:00:00",
+      "updated_at": "2026-03-07T09:00:00"
+    },
+    {
+      "id": 107,
+      "source_id": 1,
+      "amount": 42.0,
+      "direction": "out",
+      "date": "2026-03-17",
+      "note": "Dinner out",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-03-17T09:00:00",
+      "updated_at": "2026-03-17T09:00:00"
+    },
+    {
+      "id": 108,
+      "source_id": 1,
+      "amount": 19.8,
+      "direction": "out",
+      "date": "2026-03-26",
+      "note": "Lunch break",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-03-26T09:00:00",
+      "updated_at": "2026-03-26T09:00:00"
+    },
+    {
+      "id": 109,
+      "source_id": 1,
+      "amount": 55.0,
+      "direction": "out",
+      "date": "2026-03-08",
+      "note": "Shell fuel",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-03-08T09:00:00",
+      "updated_at": "2026-03-08T09:00:00"
+    },
+    {
+      "id": 110,
+      "source_id": 1,
+      "amount": 58.5,
+      "direction": "out",
+      "date": "2026-03-22",
+      "note": "Shell fuel",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-03-22T09:00:00",
+      "updated_at": "2026-03-22T09:00:00"
+    },
+    {
+      "id": 111,
+      "source_id": 3,
+      "amount": 80.0,
+      "direction": "in",
+      "date": "2026-03-11",
+      "note": "ATM withdrawal",
+      "transfer_pair_id": 112,
+      "exclude_from_stats": false,
+      "created_at": "2026-03-11T09:00:00",
+      "updated_at": "2026-03-11T09:00:00"
+    },
+    {
+      "id": 112,
+      "source_id": 1,
+      "amount": 80.0,
+      "direction": "out",
+      "date": "2026-03-11",
+      "note": "ATM withdrawal",
+      "transfer_pair_id": 111,
+      "exclude_from_stats": false,
+      "created_at": "2026-03-11T09:00:00",
+      "updated_at": "2026-03-11T09:00:00"
+    },
+    {
+      "id": 113,
+      "source_id": 1,
+      "amount": 62.5,
+      "direction": "out",
+      "date": "2026-03-20",
+      "note": "Kitchen stuff",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-03-20T09:00:00",
+      "updated_at": "2026-03-20T09:00:00"
+    },
+    {
+      "id": 114,
+      "source_id": 1,
+      "amount": 950.0,
+      "direction": "out",
+      "date": "2026-04-01",
+      "note": "Monthly rent",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-04-01T09:00:00",
+      "updated_at": "2026-04-01T09:00:00"
+    },
+    {
+      "id": 115,
+      "source_id": 1,
+      "amount": 2815.0,
+      "direction": "in",
+      "date": "2026-04-05",
+      "note": "Salary",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-04-05T09:00:00",
+      "updated_at": "2026-04-05T09:00:00"
+    },
+    {
+      "id": 116,
+      "source_id": 1,
+      "amount": 55.8,
+      "direction": "out",
+      "date": "2026-04-10",
+      "note": "Electricity bill",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-04-10T09:00:00",
+      "updated_at": "2026-04-10T09:00:00"
+    },
+    {
+      "id": 117,
+      "source_id": 1,
+      "amount": 34.9,
+      "direction": "out",
+      "date": "2026-04-12",
+      "note": "Fiber internet",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-04-12T09:00:00",
+      "updated_at": "2026-04-12T09:00:00"
+    },
+    {
+      "id": 118,
+      "source_id": 1,
+      "amount": 12.99,
+      "direction": "out",
+      "date": "2026-04-15",
+      "note": "Mobile plan",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-04-15T09:00:00",
+      "updated_at": "2026-04-15T09:00:00"
+    },
+    {
+      "id": 119,
+      "source_id": 1,
+      "amount": 13.99,
+      "direction": "out",
+      "date": "2026-04-15",
+      "note": "Netflix",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-04-15T09:00:00",
+      "updated_at": "2026-04-15T09:00:00"
+    },
+    {
+      "id": 120,
+      "source_id": 1,
+      "amount": 10.99,
+      "direction": "out",
+      "date": "2026-04-16",
+      "note": "Spotify Premium",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-04-16T09:00:00",
+      "updated_at": "2026-04-16T09:00:00"
+    },
+    {
+      "id": 121,
+      "source_id": 1,
+      "amount": 29.99,
+      "direction": "out",
+      "date": "2026-04-18",
+      "note": "Gym membership",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-04-18T09:00:00",
+      "updated_at": "2026-04-18T09:00:00"
+    },
+    {
+      "id": 122,
+      "source_id": 2,
+      "amount": 300.0,
+      "direction": "in",
+      "date": "2026-04-25",
+      "note": "Monthly savings",
+      "transfer_pair_id": 123,
+      "exclude_from_stats": false,
+      "created_at": "2026-04-25T09:00:00",
+      "updated_at": "2026-04-25T09:00:00"
+    },
+    {
+      "id": 123,
+      "source_id": 1,
+      "amount": 300.0,
+      "direction": "out",
+      "date": "2026-04-25",
+      "note": "Monthly savings",
+      "transfer_pair_id": 122,
+      "exclude_from_stats": false,
+      "created_at": "2026-04-25T09:00:00",
+      "updated_at": "2026-04-25T09:00:00"
+    },
+    {
+      "id": 124,
+      "source_id": 1,
+      "amount": 42.8,
+      "direction": "out",
+      "date": "2026-04-03",
+      "note": "Supermarket",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-04-03T09:00:00",
+      "updated_at": "2026-04-03T09:00:00"
+    },
+    {
+      "id": 125,
+      "source_id": 1,
+      "amount": 68.5,
+      "direction": "out",
+      "date": "2026-04-09",
+      "note": "Weekly shop",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-04-09T09:00:00",
+      "updated_at": "2026-04-09T09:00:00"
+    },
+    {
+      "id": 126,
+      "source_id": 1,
+      "amount": 51.2,
+      "direction": "out",
+      "date": "2026-04-14",
+      "note": "Grocery run",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-04-14T09:00:00",
+      "updated_at": "2026-04-14T09:00:00"
+    },
+    {
+      "id": 127,
+      "source_id": 1,
+      "amount": 28.5,
+      "direction": "out",
+      "date": "2026-04-07",
+      "note": "Pizza with friends",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-04-07T09:00:00",
+      "updated_at": "2026-04-07T09:00:00"
+    },
+    {
+      "id": 128,
+      "source_id": 1,
+      "amount": 42.0,
+      "direction": "out",
+      "date": "2026-04-17",
+      "note": "Dinner out",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-04-17T09:00:00",
+      "updated_at": "2026-04-17T09:00:00"
+    },
+    {
+      "id": 129,
+      "source_id": 1,
+      "amount": 55.0,
+      "direction": "out",
+      "date": "2026-04-08",
+      "note": "Shell fuel",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-04-08T09:00:00",
+      "updated_at": "2026-04-08T09:00:00"
+    },
+    {
+      "id": 130,
+      "source_id": 1,
+      "amount": 150.0,
+      "direction": "in",
+      "date": "2025-12-24",
+      "note": "Christmas gift from family",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2025-12-24T09:00:00",
+      "updated_at": "2025-12-24T09:00:00"
+    },
+    {
+      "id": 131,
+      "source_id": 1,
+      "amount": 420.0,
+      "direction": "out",
+      "date": "2025-12-28",
+      "note": "Weekend in Vienna",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2025-12-28T09:00:00",
+      "updated_at": "2025-12-28T09:00:00"
+    },
+    {
+      "id": 132,
+      "source_id": 1,
+      "amount": 485.2,
+      "direction": "in",
+      "date": "2026-02-12",
+      "note": "Tax refund",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-02-12T09:00:00",
+      "updated_at": "2026-02-12T09:00:00"
+    },
+    {
+      "id": 133,
+      "source_id": 1,
+      "amount": 78.0,
+      "direction": "out",
+      "date": "2026-01-23",
+      "note": "Dentist check-up",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-01-23T09:00:00",
+      "updated_at": "2026-01-23T09:00:00"
+    },
+    {
+      "id": 134,
+      "source_id": 1,
+      "amount": 60.0,
+      "direction": "out",
+      "date": "2026-03-08",
+      "note": "Gift for mom's birthday",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-03-08T09:00:00",
+      "updated_at": "2026-03-08T09:00:00"
+    },
+    {
+      "id": 135,
+      "source_id": 4,
+      "amount": 500.0,
+      "direction": "out",
+      "date": "2026-01-15",
+      "note": "Swap to BTC",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-01-15T09:00:00",
+      "updated_at": "2026-01-15T09:00:00"
+    },
+    {
+      "id": 136,
+      "source_id": 5,
+      "amount": 0.0085,
+      "direction": "in",
+      "date": "2026-01-15",
+      "note": "BTC buy",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-01-15T09:00:00",
+      "updated_at": "2026-01-15T09:00:00"
+    },
+    {
+      "id": 137,
+      "source_id": 4,
+      "amount": 120.0,
+      "direction": "out",
+      "date": "2025-12-04",
+      "note": "Domain renewals",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2025-12-04T09:00:00",
+      "updated_at": "2025-12-04T09:00:00"
+    },
+    {
+      "id": 138,
+      "source_id": 4,
+      "amount": 68.5,
+      "direction": "out",
+      "date": "2026-02-20",
+      "note": "Online course",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-02-20T09:00:00",
+      "updated_at": "2026-02-20T09:00:00"
+    },
+    {
+      "id": 139,
+      "source_id": 4,
+      "amount": 240.0,
+      "direction": "in",
+      "date": "2026-03-02",
+      "note": "Freelance \u2014 invoice #42",
+      "transfer_pair_id": null,
+      "exclude_from_stats": false,
+      "created_at": "2026-03-02T09:00:00",
+      "updated_at": "2026-03-02T09:00:00"
+    }
+  ],
+  "movement_tag": [
+    {
+      "movement_id": 1,
+      "tag_id": 3
+    },
+    {
+      "movement_id": 2,
+      "tag_id": 1
+    },
+    {
+      "movement_id": 3,
+      "tag_id": 4
+    },
+    {
+      "movement_id": 4,
+      "tag_id": 4
+    },
+    {
+      "movement_id": 4,
+      "tag_id": 10
+    },
+    {
+      "movement_id": 5,
+      "tag_id": 4
+    },
+    {
+      "movement_id": 5,
+      "tag_id": 10
+    },
+    {
+      "movement_id": 6,
+      "tag_id": 10
+    },
+    {
+      "movement_id": 6,
+      "tag_id": 7
+    },
+    {
+      "movement_id": 7,
+      "tag_id": 10
+    },
+    {
+      "movement_id": 7,
+      "tag_id": 7
+    },
+    {
+      "movement_id": 8,
+      "tag_id": 8
+    },
+    {
+      "movement_id": 8,
+      "tag_id": 10
+    },
+    {
+      "movement_id": 11,
+      "tag_id": 2
+    },
+    {
+      "movement_id": 12,
+      "tag_id": 2
+    },
+    {
+      "movement_id": 13,
+      "tag_id": 2
+    },
+    {
+      "movement_id": 14,
+      "tag_id": 2
+    },
+    {
+      "movement_id": 15,
+      "tag_id": 2
+    },
+    {
+      "movement_id": 16,
+      "tag_id": 6
+    },
+    {
+      "movement_id": 17,
+      "tag_id": 6
+    },
+    {
+      "movement_id": 18,
+      "tag_id": 6
+    },
+    {
+      "movement_id": 19,
+      "tag_id": 5
+    },
+    {
+      "movement_id": 20,
+      "tag_id": 5
+    },
+    {
+      "movement_id": 23,
+      "tag_id": 9
+    },
+    {
+      "movement_id": 24,
+      "tag_id": 3
+    },
+    {
+      "movement_id": 25,
+      "tag_id": 1
+    },
+    {
+      "movement_id": 26,
+      "tag_id": 4
+    },
+    {
+      "movement_id": 27,
+      "tag_id": 4
+    },
+    {
+      "movement_id": 27,
+      "tag_id": 10
+    },
+    {
+      "movement_id": 28,
+      "tag_id": 4
+    },
+    {
+      "movement_id": 28,
+      "tag_id": 10
+    },
+    {
+      "movement_id": 29,
+      "tag_id": 10
+    },
+    {
+      "movement_id": 29,
+      "tag_id": 7
+    },
+    {
+      "movement_id": 30,
+      "tag_id": 10
+    },
+    {
+      "movement_id": 30,
+      "tag_id": 7
+    },
+    {
+      "movement_id": 31,
+      "tag_id": 8
+    },
+    {
+      "movement_id": 31,
+      "tag_id": 10
+    },
+    {
+      "movement_id": 34,
+      "tag_id": 2
+    },
+    {
+      "movement_id": 35,
+      "tag_id": 2
+    },
+    {
+      "movement_id": 36,
+      "tag_id": 2
+    },
+    {
+      "movement_id": 37,
+      "tag_id": 2
+    },
+    {
+      "movement_id": 38,
+      "tag_id": 2
+    },
+    {
+      "movement_id": 39,
+      "tag_id": 6
+    },
+    {
+      "movement_id": 40,
+      "tag_id": 6
+    },
+    {
+      "movement_id": 41,
+      "tag_id": 6
+    },
+    {
+      "movement_id": 42,
+      "tag_id": 5
+    },
+    {
+      "movement_id": 43,
+      "tag_id": 5
+    },
+    {
+      "movement_id": 46,
+      "tag_id": 3
+    },
+    {
+      "movement_id": 47,
+      "tag_id": 1
+    },
+    {
+      "movement_id": 48,
+      "tag_id": 4
+    },
+    {
+      "movement_id": 49,
+      "tag_id": 4
+    },
+    {
+      "movement_id": 49,
+      "tag_id": 10
+    },
+    {
+      "movement_id": 50,
+      "tag_id": 4
+    },
+    {
+      "movement_id": 50,
+      "tag_id": 10
+    },
+    {
+      "movement_id": 51,
+      "tag_id": 10
+    },
+    {
+      "movement_id": 51,
+      "tag_id": 7
+    },
+    {
+      "movement_id": 52,
+      "tag_id": 10
+    },
+    {
+      "movement_id": 52,
+      "tag_id": 7
+    },
+    {
+      "movement_id": 53,
+      "tag_id": 8
+    },
+    {
+      "movement_id": 53,
+      "tag_id": 10
+    },
+    {
+      "movement_id": 56,
+      "tag_id": 2
+    },
+    {
+      "movement_id": 57,
+      "tag_id": 2
+    },
+    {
+      "movement_id": 58,
+      "tag_id": 2
+    },
+    {
+      "movement_id": 59,
+      "tag_id": 2
+    },
+    {
+      "movement_id": 60,
+      "tag_id": 2
+    },
+    {
+      "movement_id": 61,
+      "tag_id": 6
+    },
+    {
+      "movement_id": 62,
+      "tag_id": 6
+    },
+    {
+      "movement_id": 63,
+      "tag_id": 6
+    },
+    {
+      "movement_id": 64,
+      "tag_id": 5
+    },
+    {
+      "movement_id": 65,
+      "tag_id": 5
+    },
+    {
+      "movement_id": 68,
+      "tag_id": 9
+    },
+    {
+      "movement_id": 69,
+      "tag_id": 3
+    },
+    {
+      "movement_id": 70,
+      "tag_id": 1
+    },
+    {
+      "movement_id": 71,
+      "tag_id": 4
+    },
+    {
+      "movement_id": 72,
+      "tag_id": 4
+    },
+    {
+      "movement_id": 72,
+      "tag_id": 10
+    },
+    {
+      "movement_id": 73,
+      "tag_id": 4
+    },
+    {
+      "movement_id": 73,
+      "tag_id": 10
+    },
+    {
+      "movement_id": 74,
+      "tag_id": 10
+    },
+    {
+      "movement_id": 74,
+      "tag_id": 7
+    },
+    {
+      "movement_id": 75,
+      "tag_id": 10
+    },
+    {
+      "movement_id": 75,
+      "tag_id": 7
+    },
+    {
+      "movement_id": 76,
+      "tag_id": 8
+    },
+    {
+      "movement_id": 76,
+      "tag_id": 10
+    },
+    {
+      "movement_id": 79,
+      "tag_id": 2
+    },
+    {
+      "movement_id": 80,
+      "tag_id": 2
+    },
+    {
+      "movement_id": 81,
+      "tag_id": 2
+    },
+    {
+      "movement_id": 82,
+      "tag_id": 2
+    },
+    {
+      "movement_id": 83,
+      "tag_id": 2
+    },
+    {
+      "movement_id": 84,
+      "tag_id": 6
+    },
+    {
+      "movement_id": 85,
+      "tag_id": 6
+    },
+    {
+      "movement_id": 86,
+      "tag_id": 6
+    },
+    {
+      "movement_id": 87,
+      "tag_id": 5
+    },
+    {
+      "movement_id": 88,
+      "tag_id": 5
+    },
+    {
+      "movement_id": 91,
+      "tag_id": 3
+    },
+    {
+      "movement_id": 92,
+      "tag_id": 1
+    },
+    {
+      "movement_id": 93,
+      "tag_id": 4
+    },
+    {
+      "movement_id": 94,
+      "tag_id": 4
+    },
+    {
+      "movement_id": 94,
+      "tag_id": 10
+    },
+    {
+      "movement_id": 95,
+      "tag_id": 4
+    },
+    {
+      "movement_id": 95,
+      "tag_id": 10
+    },
+    {
+      "movement_id": 96,
+      "tag_id": 10
+    },
+    {
+      "movement_id": 96,
+      "tag_id": 7
+    },
+    {
+      "movement_id": 97,
+      "tag_id": 10
+    },
+    {
+      "movement_id": 97,
+      "tag_id": 7
+    },
+    {
+      "movement_id": 98,
+      "tag_id": 8
+    },
+    {
+      "movement_id": 98,
+      "tag_id": 10
+    },
+    {
+      "movement_id": 101,
+      "tag_id": 2
+    },
+    {
+      "movement_id": 102,
+      "tag_id": 2
+    },
+    {
+      "movement_id": 103,
+      "tag_id": 2
+    },
+    {
+      "movement_id": 104,
+      "tag_id": 2
+    },
+    {
+      "movement_id": 105,
+      "tag_id": 2
+    },
+    {
+      "movement_id": 106,
+      "tag_id": 6
+    },
+    {
+      "movement_id": 107,
+      "tag_id": 6
+    },
+    {
+      "movement_id": 108,
+      "tag_id": 6
+    },
+    {
+      "movement_id": 109,
+      "tag_id": 5
+    },
+    {
+      "movement_id": 110,
+      "tag_id": 5
+    },
+    {
+      "movement_id": 113,
+      "tag_id": 9
+    },
+    {
+      "movement_id": 114,
+      "tag_id": 3
+    },
+    {
+      "movement_id": 115,
+      "tag_id": 1
+    },
+    {
+      "movement_id": 116,
+      "tag_id": 4
+    },
+    {
+      "movement_id": 117,
+      "tag_id": 4
+    },
+    {
+      "movement_id": 117,
+      "tag_id": 10
+    },
+    {
+      "movement_id": 118,
+      "tag_id": 4
+    },
+    {
+      "movement_id": 118,
+      "tag_id": 10
+    },
+    {
+      "movement_id": 119,
+      "tag_id": 10
+    },
+    {
+      "movement_id": 119,
+      "tag_id": 7
+    },
+    {
+      "movement_id": 120,
+      "tag_id": 10
+    },
+    {
+      "movement_id": 120,
+      "tag_id": 7
+    },
+    {
+      "movement_id": 121,
+      "tag_id": 8
+    },
+    {
+      "movement_id": 121,
+      "tag_id": 10
+    },
+    {
+      "movement_id": 124,
+      "tag_id": 2
+    },
+    {
+      "movement_id": 125,
+      "tag_id": 2
+    },
+    {
+      "movement_id": 126,
+      "tag_id": 2
+    },
+    {
+      "movement_id": 127,
+      "tag_id": 6
+    },
+    {
+      "movement_id": 128,
+      "tag_id": 6
+    },
+    {
+      "movement_id": 129,
+      "tag_id": 5
+    },
+    {
+      "movement_id": 130,
+      "tag_id": 13
+    },
+    {
+      "movement_id": 131,
+      "tag_id": 12
+    },
+    {
+      "movement_id": 132,
+      "tag_id": 1
+    },
+    {
+      "movement_id": 133,
+      "tag_id": 8
+    },
+    {
+      "movement_id": 134,
+      "tag_id": 13
+    },
+    {
+      "movement_id": 134,
+      "tag_id": 9
+    },
+    {
+      "movement_id": 135,
+      "tag_id": 9
+    },
+    {
+      "movement_id": 136,
+      "tag_id": 9
+    },
+    {
+      "movement_id": 137,
+      "tag_id": 10
+    },
+    {
+      "movement_id": 138,
+      "tag_id": 7
+    },
+    {
+      "movement_id": 139,
+      "tag_id": 1
+    }
+  ],
+  "recurring_items": [
+    {
+      "id": 1,
+      "name": "Rent",
+      "amount": 950.0,
+      "direction": "out",
+      "currency": "EUR",
+      "frequency": "monthly",
+      "start_date": "2025-01-01",
+      "end_date": null,
+      "source_id": 1,
+      "apply_mode": "confirm",
+      "next_due_date": "2026-05-01",
+      "alert_days_before": 3,
+      "alert_if_insufficient": true,
+      "created_at": "2025-01-01T09:00:00",
+      "updated_at": "2026-04-17T10:30:00"
+    },
+    {
+      "id": 2,
+      "name": "Salary",
+      "amount": 2815.0,
+      "direction": "in",
+      "currency": "EUR",
+      "frequency": "monthly",
+      "start_date": "2025-01-05",
+      "end_date": null,
+      "source_id": 1,
+      "apply_mode": "auto",
+      "next_due_date": "2026-05-05",
+      "alert_days_before": 1,
+      "alert_if_insufficient": false,
+      "created_at": "2025-01-05T09:00:00",
+      "updated_at": "2026-04-17T10:30:00"
+    },
+    {
+      "id": 3,
+      "name": "Internet",
+      "amount": 34.9,
+      "direction": "out",
+      "currency": "EUR",
+      "frequency": "monthly",
+      "start_date": "2025-01-12",
+      "end_date": null,
+      "source_id": 1,
+      "apply_mode": "auto",
+      "next_due_date": "2026-05-12",
+      "alert_days_before": 5,
+      "alert_if_insufficient": true,
+      "created_at": "2025-01-12T09:00:00",
+      "updated_at": "2026-04-17T10:30:00"
+    },
+    {
+      "id": 4,
+      "name": "Netflix",
+      "amount": 13.99,
+      "direction": "out",
+      "currency": "EUR",
+      "frequency": "monthly",
+      "start_date": "2025-01-15",
+      "end_date": null,
+      "source_id": 1,
+      "apply_mode": "auto",
+      "next_due_date": "2026-04-15",
+      "alert_days_before": 2,
+      "alert_if_insufficient": false,
+      "created_at": "2025-01-15T09:00:00",
+      "updated_at": "2026-04-17T10:30:00"
+    },
+    {
+      "id": 5,
+      "name": "Spotify Premium",
+      "amount": 10.99,
+      "direction": "out",
+      "currency": "EUR",
+      "frequency": "monthly",
+      "start_date": "2025-01-16",
+      "end_date": null,
+      "source_id": 1,
+      "apply_mode": "auto",
+      "next_due_date": "2026-04-16",
+      "alert_days_before": 2,
+      "alert_if_insufficient": false,
+      "created_at": "2025-01-16T09:00:00",
+      "updated_at": "2026-04-17T10:30:00"
+    },
+    {
+      "id": 6,
+      "name": "Gym",
+      "amount": 29.99,
+      "direction": "out",
+      "currency": "EUR",
+      "frequency": "monthly",
+      "start_date": "2025-01-18",
+      "end_date": null,
+      "source_id": 1,
+      "apply_mode": "confirm",
+      "next_due_date": "2026-04-18",
+      "alert_days_before": 3,
+      "alert_if_insufficient": true,
+      "created_at": "2025-01-18T09:00:00",
+      "updated_at": "2026-04-17T10:30:00"
+    },
+    {
+      "id": 7,
+      "name": "Home insurance",
+      "amount": 185.0,
+      "direction": "out",
+      "currency": "EUR",
+      "frequency": "yearly",
+      "start_date": "2025-06-01",
+      "end_date": null,
+      "source_id": 1,
+      "apply_mode": "confirm",
+      "next_due_date": "2026-06-01",
+      "alert_days_before": 14,
+      "alert_if_insufficient": true,
+      "created_at": "2025-06-01T09:00:00",
+      "updated_at": "2026-04-17T10:30:00"
+    }
+  ],
+  "notifications": [
+    {
+      "id": 1,
+      "type": "alert",
+      "title": "Rent due in 3 days",
+      "body": "Rent of \u20ac950.00 from Main Checking is due on 2026-05-01.",
+      "related_entity": "recurring:1",
+      "is_read": false,
+      "created_at": "2026-04-28T09:00:00"
+    },
+    {
+      "id": 2,
+      "type": "info",
+      "title": "Netflix applied",
+      "body": "\u20ac13.99 debited from Main Checking.",
+      "related_entity": "recurring:4",
+      "is_read": false,
+      "created_at": "2026-04-15T09:01:00"
+    },
+    {
+      "id": 3,
+      "type": "info",
+      "title": "Spotify Premium applied",
+      "body": "\u20ac10.99 debited from Main Checking.",
+      "related_entity": "recurring:5",
+      "is_read": true,
+      "created_at": "2026-04-16T09:01:00"
+    },
+    {
+      "id": 4,
+      "type": "warning",
+      "title": "Home insurance upcoming",
+      "body": "\u20ac185.00 scheduled for 2026-06-01. Make sure Main Checking has enough balance.",
+      "related_entity": "recurring:7",
+      "is_read": true,
+      "created_at": "2026-04-01T08:00:00"
+    },
+    {
+      "id": 5,
+      "type": "info",
+      "title": "Salary received",
+      "body": "\u20ac2,815.00 credited to Main Checking.",
+      "related_entity": "recurring:2",
+      "is_read": true,
+      "created_at": "2026-04-05T09:00:00"
+    }
+  ],
+  "settings": [
+    {
+      "id": 1,
+      "locale": "en",
+      "date_format": "dd/mm/yyyy",
+      "base_currency": "EUR",
+      "theme": "light",
+      "hide_net_worth": false,
+      "last_source_id": 1,
+      "mobile_nav_mode": "bottom_tabs",
+      "lan_access": false,
+      "created_at": "2025-01-01T00:00:00",
+      "updated_at": "2026-04-17T10:30:00"
+    }
+  ],
+  "whims": [
+    {
+      "id": 1,
+      "name": "Mechanical keyboard",
+      "amount": 180.0,
+      "currency": "EUR",
+      "priority": "high",
+      "source_id": null,
+      "status": "pending",
+      "note": "Split ergonomic, Kailh Box Brown",
+      "url": "https://example.com/kbd",
+      "purchased_at": null,
+      "created_at": "2026-02-10T11:12:00",
+      "updated_at": "2026-02-10T11:12:00"
+    },
+    {
+      "id": 2,
+      "name": "Kindle Paperwhite",
+      "amount": 150.0,
+      "currency": "EUR",
+      "priority": "medium",
+      "source_id": null,
+      "status": "pending",
+      "note": "Wait for a sale",
+      "url": null,
+      "purchased_at": null,
+      "created_at": "2026-01-22T19:40:00",
+      "updated_at": "2026-01-22T19:40:00"
+    },
+    {
+      "id": 3,
+      "name": "Hiking boots",
+      "amount": 210.0,
+      "currency": "EUR",
+      "priority": "low",
+      "source_id": null,
+      "status": "pending",
+      "note": "Goretex, Salomon or Scarpa",
+      "url": null,
+      "purchased_at": null,
+      "created_at": "2026-03-02T20:15:00",
+      "updated_at": "2026-03-02T20:15:00"
+    },
+    {
+      "id": 4,
+      "name": "Noise cancelling headphones",
+      "amount": 290.0,
+      "currency": "EUR",
+      "priority": "medium",
+      "source_id": 1,
+      "status": "purchased",
+      "note": "Bought during Black Friday",
+      "url": null,
+      "purchased_at": "2025-11-28T16:05:00",
+      "created_at": "2025-10-15T21:10:00",
+      "updated_at": "2025-11-28T16:05:00"
+    },
+    {
+      "id": 5,
+      "name": "New desk chair",
+      "amount": 350.0,
+      "currency": "EUR",
+      "priority": "low",
+      "source_id": null,
+      "status": "dismissed",
+      "note": "Not worth it, current chair is fine",
+      "url": null,
+      "purchased_at": null,
+      "created_at": "2026-01-05T12:00:00",
+      "updated_at": "2026-02-01T09:00:00"
+    }
+  ],
+  "savings": [
+    {
+      "id": 1,
+      "amount": 300.0,
+      "currency": "EUR",
+      "date": "2025-11-25",
+      "description": "Monthly leftover",
+      "note": "Auto transfer",
+      "created_at": "2025-11-25T18:00:00",
+      "updated_at": "2025-11-25T18:00:00"
+    },
+    {
+      "id": 2,
+      "amount": 300.0,
+      "currency": "EUR",
+      "date": "2025-12-25",
+      "description": "Monthly leftover",
+      "note": null,
+      "created_at": "2025-12-25T18:00:00",
+      "updated_at": "2025-12-25T18:00:00"
+    },
+    {
+      "id": 3,
+      "amount": 150.0,
+      "currency": "EUR",
+      "date": "2025-12-31",
+      "description": "Year-end bonus stash",
+      "note": "Kept from Christmas gift",
+      "created_at": "2025-12-31T22:30:00",
+      "updated_at": "2025-12-31T22:30:00"
+    },
+    {
+      "id": 4,
+      "amount": 300.0,
+      "currency": "EUR",
+      "date": "2026-01-25",
+      "description": "Monthly leftover",
+      "note": null,
+      "created_at": "2026-01-25T18:00:00",
+      "updated_at": "2026-01-25T18:00:00"
+    },
+    {
+      "id": 5,
+      "amount": 485.2,
+      "currency": "EUR",
+      "date": "2026-02-12",
+      "description": "Tax refund",
+      "note": "All of it",
+      "created_at": "2026-02-12T10:00:00",
+      "updated_at": "2026-02-12T10:00:00"
+    },
+    {
+      "id": 6,
+      "amount": 300.0,
+      "currency": "EUR",
+      "date": "2026-02-25",
+      "description": "Monthly leftover",
+      "note": null,
+      "created_at": "2026-02-25T18:00:00",
+      "updated_at": "2026-02-25T18:00:00"
+    },
+    {
+      "id": 7,
+      "amount": 300.0,
+      "currency": "EUR",
+      "date": "2026-03-25",
+      "description": "Monthly leftover",
+      "note": null,
+      "created_at": "2026-03-25T18:00:00",
+      "updated_at": "2026-03-25T18:00:00"
+    }
+  ],
+  "saving_tag": [
+    {
+      "saving_id": 1,
+      "tag_id": 11
+    },
+    {
+      "saving_id": 2,
+      "tag_id": 11
+    },
+    {
+      "saving_id": 3,
+      "tag_id": 11
+    },
+    {
+      "saving_id": 3,
+      "tag_id": 13
+    },
+    {
+      "saving_id": 4,
+      "tag_id": 11
+    },
+    {
+      "saving_id": 5,
+      "tag_id": 11
+    },
+    {
+      "saving_id": 6,
+      "tag_id": 11
+    },
+    {
+      "saving_id": 7,
+      "tag_id": 11
+    }
+  ],
+  "_export_mode": "core"
+}

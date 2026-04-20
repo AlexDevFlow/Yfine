@@ -1,0 +1,78 @@
+<h5>Savings</h5>
+<p class="yn-help-lead">The Savings page tracks how much you've actually set aside. Each saving entry moves money from one of your accounts into the <strong>Savings Fund</strong> — an auto-created source (one per currency): the account balance drops, the fund's grows. <strong>Net worth is conserved</strong> — it's the same money, just moved from one pocket to another.</p>
+
+<h6>What you see</h6>
+<ul>
+  <li>Four summary cards on top: <strong>fund balance</strong>, <strong>saved this month</strong>, <strong>last month</strong>, <strong>total ever</strong>.</li>
+  <li>Two main tabs: <strong>Trend</strong> (chart + entries list) and <strong>Goals</strong>.</li>
+  <li>Chart has two modes:
+    <ul>
+      <li><strong>Contributions</strong>: how much you added to the fund each month. Never drops.</li>
+      <li><strong>Fund balance</strong>: actual fund value at each month end (accounts for withdrawals too).</li>
+    </ul>
+  </li>
+  <li>Entries are grouped by month with totals per currency.</li>
+</ul>
+
+<h6>Savings Fund</h6>
+<p>The first time you save in a currency, Yfine creates a dedicated fund ("Savings Fund (EUR)", etc.). It's a first-class source: show the balance in the Accounts page, transfer money in/out, filter it in Movements.</p>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-gear"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Manage funds</span>
+      <span class="yn-help-action-desc">Button above the chart. Opens a small panel where you can hide the fund from the Accounts page (still usable everywhere else) or bring it back.</span>
+    </div>
+  </div>
+</div>
+
+<h6>Main actions</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-plus-lg"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">New Saving</span>
+      <span class="yn-help-action-desc">Pick the source account, amount and date. Yfine moves the money into the matching-currency fund as a real transfer.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon info"><i class="bi bi-trophy"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">New Goal</span>
+      <span class="yn-help-action-desc">Inside the Goals tab. Set a target (e.g. 1,500€ by August) and allocate money toward it over time from any account.</span>
+    </div>
+  </div>
+</div>
+
+<h6>Goals (Goals tab)</h6>
+<p>Goals are savings targets with an amount and optional deadline. Each goal accumulates money into an account (the fund by default, but you can pick any same-currency source).</p>
+<ul>
+  <li><strong>Allocate</strong>: move money from one of your accounts into the goal's account. It's a real transfer; if the source goes negative, Yfine warns but doesn't block (consistent with regular transfers).</li>
+  <li><strong>Close</strong>: all allocated money is refunded to a source you pick as a single transfer; the goal becomes "Completed".</li>
+  <li><strong>Delete</strong>: allocations auto-reverse to their origin accounts, then the goal is removed.</li>
+  <li>You can go <strong>over 100%</strong> — no cap on the target.</li>
+  <li>A goal can be linked to a <strong>whim</strong>: when you purchase that whim, the goal's allocations become the purchase funding.</li>
+</ul>
+
+<h6>Whim ↔ Goal link</h6>
+<p>On any pending whim you'll see a <span class="yn-help-chip"><i class="bi bi-piggy-bank"></i> Save</span> button: it creates a goal with the same name and amount, linked back to the whim. The whim card shows the progress bar while you save. When you buy the whim, the money you've saved is used automatically.</p>
+
+<h6>Migrating historical savings</h6>
+<p>If you're upgrading from an older Yfine, a <strong>wizard</strong> shows up the first time you open this page. Three choices:</p>
+<ol>
+  <li><strong>Import each entry as a historical contribution</strong> (default): one transfer per past saving. You can pick a single origin account to apply to all of them.</li>
+  <li><strong>Collapse into the fund's starting balance</strong>: fast but loses per-entry detail.</li>
+  <li><strong>Discard everything</strong>: wipe the old log and start fresh.</li>
+</ol>
+
+<h6>Filters and calendar</h6>
+<ul>
+  <li>Date range with presets <strong>all periods</strong>, <strong>current month</strong>, <strong>last 30 days</strong>.</li>
+  <li>Filters for <strong>tag</strong> and <strong>currency</strong>.</li>
+  <li>Click the "Total" card to open the calendar: drill from months → days → individual savings.</li>
+</ul>
+
+<div class="yn-help-tip">
+  <i class="bi bi-info-circle-fill"></i>
+  <div>Savings are real transfers, so they also show up in Movements. Deleting the transfer there removes the saving from this page too — it's the same entry.</div>
+</div>

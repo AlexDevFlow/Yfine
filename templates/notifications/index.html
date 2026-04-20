@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% set active_page = "notifications" %}
+
+{% block title %}{{ _('notifications') }}{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h5 class="card-title mb-0">{{ _('notifications') }}</h5>
+    <div class="d-flex gap-2">
+      <button class="btn btn-sm btn-outline-danger" onclick="deleteAllRead()">
+        <i class="bi bi-trash me-1"></i>{{ _('delete_all_read') }}
+      </button>
+      <button class="btn btn-sm btn-outline-primary" onclick="markAllRead()">
+        <i class="bi bi-check-all me-1"></i>{{ _('mark_all_read') }}
+      </button>
+    </div>
+  </div>
+  <div class="card-body">
+    <!-- Filter Tabs -->
+    <ul class="nav nav-pills mb-3" role="tablist">
+      <li class="nav-item"><a class="nav-link {% if not filter_type %}active{% endif %}" href="/notifications">{{ _('all') }}</a></li>
+      <li class="nav-item"><a class="nav-link {% if filter_type == 'unread' %}active{% endif %}" href="/notifications?filter=unread">{{ _('unread') }}</a></li>
+      <li class="nav-item"><a class="nav-link {% if filter_type == 'alert' %}active{% endif %}" href="/notifications?filter=alert">{{ _('alert') }}</a></li>
+      <li class="nav-item"><a class="nav-link {% if filter_type == 'info' %}active{% endif %}" href="/notifications?filter=info">{{ _('info') }}</a></li>
+      <li class="nav-item"><a class="nav-link {% if filter_type == 'warning' %}active{% endif %}" href="/notifications?filter=warning">{{ _('warning') }}</a></li>
+    </ul>
+
+    <ul class="list-group">
+      {% for n in notifications %}
+      <li class="list-group-item d-flex justify-content-between align-items-start {% if not n.is_read %}list-group-item-light{% endif %}" id="notif-{{ n.id }}">
+        <div class="d-flex align-items-start">
+          <div class="me-3 mt-1">
+            {% if n.type == 'alert' %}
+            <span class="yn-icon-box rounded-circle bg-label-danger p-2"><i class="bi bi-exclamation-circle"></i></span>
+            {% elif n.type == 'warning' %}
+            <span class="yn-icon-box rounded-circle bg-label-warning p-2"><i class="bi bi-exclamation-triangle"></i></span>
+            {% else %}
+            <span class="yn-icon-box rounded-circle bg-label-info p-2"><i class="bi bi-info-circle"></i></span>
+            {% endif %}
+          </div>
+          <div>
+            <h6 class="mb-1 {% if not n.is_read %}fw-bold{% endif %}">{{ n.title }}</h6>
+            <p class="mb-1 text-body">{{ n.body }}</p>
+            <small class="text-muted notif-time" data-ts="{{ n.created_at.isoformat() }}">{{ n.created_at|fdate }}</small>
+          </div>
+        </div>
+        <div class="d-flex gap-1">
+          {% if not n.is_read %}
+          <button class="btn btn-sm btn-outline-success" onclick="markRead({{ n.id }})" title="{{ _('confirm') }}">
+            <i class="bi bi-check-lg"></i>
+          </button>
+          {% endif %}
+          <button class="btn btn-sm btn-outline-danger" onclick="deleteNotif({{ n.id }})">
+            <i class="bi bi-trash"></i>
+          </button>
+        </div>
+      </li>
+      {% else %}
+      <li class="list-group-item text-center py-5">
+        <i class="bi bi-bell-slash text-muted mb-2" style="font-size:2.5rem"></i>
+        <p class="text-muted mb-0">{{ _('no_notifications') }}</p>
+      </li>
+      {% endfor %}
+    </ul>
+
+    <!-- Pagination -->
+    {% if total_pages > 1 %}
+    <div class="d-flex justify-content-between align-items-center mt-3">
+      <small class="text-muted">
+        {{ _('showing_of').replace('{start}', ((page - 1) * per_page + 1)|string).replace('{end}', [page * per_page, total_count]|min|string).replace('{total}', total_count|string) }}
+      </small>
+      <nav>
+        <ul class="pagination pagination-sm mb-0">
+          <li class="page-item {% if page <= 1 %}disabled{% endif %}">
+            <a class="page-link" href="javascript:void(0)" onclick="goToPage({{ page - 1 }})">{{ _('previous') }}</a>
+          </li>
+          {% for p in range(1, total_pages + 1) %}
+          {% if p == page or (p >= page - 2 and p <= page + 2) or p == 1 or p == total_pages %}
+          <li class="page-item {% if p == page %}active{% endif %}">
+            <a class="page-link" href="javascript:void(0)" onclick="goToPage({{ p }})">{{ p }}</a>
+          </li>
+          {% elif p == page - 3 or p == page + 3 %}
+          <li class="page-item disabled"><span class="page-link">...</span></li>
+          {% endif %}
+          {% endfor %}
+          <li class="page-item {% if page >= total_pages %}disabled{% endif %}">
+            <a class="page-link" href="javascript:void(0)" onclick="goToPage({{ page + 1 }})">{{ _('next') }}</a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block page_js %}
+<script>
+  async function markRead(id) {
+    const resp = await fetch(`/api/notifications/${id}/read`, { method: 'PUT' });
+    if (resp.ok) {
+      location.reload();
+    }
+  }
+
+  async function markAllRead() {
+    const resp = await fetch('/api/notifications/read-all', { method: 'POST' });
+    if (resp.ok) {
+      showToast('{{ _("success") }}', 'success');
+      location.reload();
+    }
+  }
+
+  async function deleteNotif(id) {
+    const resp = await fetch(`/api/notifications/${id}`, { method: 'DELETE' });
+    if (resp.ok) {
+      document.getElementById(`notif-${id}`).remove();
+      showToast('{{ _("deleted_successfully") }}', 'success');
+    }
+  }
+
+  async function deleteAllRead() {
+    if (!(await confirmDialog('{{ _("delete_all_read") }}?', {icon: 'warning', confirmColor: 'danger', confirmText: '{{ _("delete") }}'}))) return;
+    const resp = await fetch('/api/notifications/read', { method: 'DELETE' });
+    if (resp.ok) {
+      showToast('{{ _("deleted_successfully") }}', 'success');
+      location.reload();
+    }
+  }
+
+  function goToPage(p) {
+    var params = new URLSearchParams(window.location.search);
+    if (p > 1) params.set('page', p); else params.delete('page');
+    window.location.href = '/notifications' + (params.toString() ? '?' + params.toString() : '');
+  }
+
+  // Relative time for notification timestamps
+  document.querySelectorAll('.notif-time').forEach(function(el) {
+    var ts = el.dataset.ts;
+    if (ts) el.textContent = relativeTime(ts);
+  });
+</script>
+{% endblock %}

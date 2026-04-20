@@ -1,0 +1,649 @@
+{% extends "base.html" %}
+{% set active_page = "tags" %}
+
+{% block title %}{{ _('tags') }}{% endblock %}
+
+{% block page_css %}
+<style>
+  .emoji-picker-wrapper {
+    position: relative;
+    display: inline-block;
+  }
+  .emoji-grid {
+    position: absolute;
+    z-index: 1050;
+    top: 100%;
+    right: 0;
+    display: none;
+    background: var(--bs-body-bg, #fff);
+    border: 1px solid var(--bs-border-color, #ddd);
+    border-radius: 0.5rem;
+    padding: 0.5rem;
+    width: 340px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  .emoji-grid.show { display: block; }
+  .emoji-grid input {
+    width: 100%;
+    border: 1px solid var(--bs-border-color, #ddd);
+    border-radius: 0.25rem;
+    padding: 0.3rem 0.5rem;
+    margin-bottom: 0.4rem;
+    font-size: 0.85rem;
+    outline: none;
+  }
+  .emoji-tabs {
+    display: flex;
+    gap: 2px;
+    margin-bottom: 0.4rem;
+    overflow-x: auto;
+  }
+  .emoji-tabs button {
+    border: none;
+    background: none;
+    font-size: 1.1rem;
+    padding: 2px 4px;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .emoji-tabs button.active {
+    background: rgba(105, 108, 255, 0.12);
+  }
+  .emoji-tabs button:hover {
+    background: rgba(105, 108, 255, 0.08);
+  }
+  .emoji-list-container {
+    height: 220px;
+    overflow-y: auto;
+  }
+  .emoji-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1px;
+  }
+  .emoji-list span {
+    cursor: pointer;
+    font-size: 1.3rem;
+    width: 2rem;
+    height: 2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.25rem;
+  }
+  .emoji-list span:hover {
+    background: rgba(105, 108, 255, 0.1);
+  }
+  /* Clickable tag row */
+  .tag-clickable-row { cursor: pointer; }
+  .tag-clickable-row:hover td:first-child .badge { opacity: .85; }
+
+  /* Color picker */
+  .color-picker-wrapper {
+    position: relative;
+    display: inline-flex;
+  }
+  .color-picker-wrapper > button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+  .color-preview {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.3rem;
+    height: 1.3rem;
+    border-radius: 50%;
+    border: 1px solid rgba(0,0,0,0.15);
+    line-height: 1;
+  }
+  .color-preview.has-color { background-image: none; }
+  .color-preview.empty {
+    background-color: transparent;
+    border: none;
+    color: transparent;
+    background-image: linear-gradient(135deg, #ef4444, #f59e0b, #22c55e, #06b6d4, #6366f1, #ec4899);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .color-preview.empty i {
+    font-size: 1.2rem;
+    line-height: 1;
+  }
+  .color-picker-popup {
+    position: absolute;
+    z-index: 1050;
+    top: 100%;
+    right: 0;
+    display: none;
+    background: var(--bs-body-bg, #fff);
+    border: 1px solid var(--bs-border-color, #ddd);
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    width: 240px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  .color-picker-popup.show { display: block; }
+  .color-swatches {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0.35rem;
+    margin-bottom: 0.5rem;
+  }
+  .color-swatch {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    padding: 0;
+    transition: transform 0.12s;
+  }
+  .color-swatch:hover { transform: scale(1.15); }
+  .color-swatch.selected {
+    border-color: var(--bs-body-color, #333);
+    box-shadow: inset 0 0 0 2px var(--bs-body-bg, #fff);
+  }
+  .color-picker-footer {
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+    margin-top: 0.25rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--bs-border-color, #e5e7eb);
+  }
+  .color-picker-footer input[type="color"] {
+    width: 2.25rem;
+    height: 2.25rem;
+    border: 1px solid var(--bs-border-color, #ddd);
+    border-radius: 0.35rem;
+    padding: 2px;
+    cursor: pointer;
+    background: var(--bs-body-bg, #fff);
+  }
+  .color-picker-footer input[type="text"] {
+    flex: 1;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.82rem;
+    padding: 0.3rem 0.5rem;
+    border: 1px solid var(--bs-border-color, #ddd);
+    border-radius: 0.3rem;
+    outline: none;
+    background: var(--bs-body-bg, #fff);
+    color: var(--bs-body-color, #333);
+    min-width: 0;
+  }
+  .color-picker-footer input[type="text"]:focus {
+    border-color: rgba(105,108,255,.5);
+    box-shadow: 0 0 0 2px rgba(105,108,255,.15);
+  }
+  .color-picker-clear {
+    background: none;
+    border: 1px solid var(--bs-border-color, #ddd);
+    border-radius: 0.3rem;
+    padding: 0.35rem 0.5rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+    color: var(--bs-secondary, #6c757d);
+    line-height: 1;
+  }
+  .color-picker-clear:hover {
+    color: var(--bs-danger, #dc3545);
+    border-color: var(--bs-danger, #dc3545);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <h5 class="card-title mb-0">{{ _('tags') }}</h5>
+  </div>
+  <div class="card-body">
+    <!-- Add Tag Form -->
+    <form id="add-tag-form" class="mb-4">
+      <div class="input-group">
+        <input type="text" class="form-control" id="new-tag-name" placeholder="{{ _('name') }}" required>
+        <div class="color-picker-wrapper">
+          <button class="btn btn-outline-secondary" type="button" id="color-btn-new" data-color="" title="{{ _('color') }}" onclick="toggleColorPicker('color-new')">
+            <span class="color-preview empty"><i class="bi bi-palette-fill"></i></span>
+          </button>
+          <div class="color-picker-popup" id="color-new"></div>
+        </div>
+        <div class="emoji-picker-wrapper">
+          <button class="btn btn-outline-secondary" type="button" onclick="togglePicker('picker-new')">
+            😀
+          </button>
+          <div class="emoji-grid" id="picker-new"></div>
+        </div>
+        <button type="submit" class="btn btn-primary">
+          <i class="bi bi-plus me-1"></i>{{ _('add_tag') }}
+        </button>
+      </div>
+    </form>
+
+    <!-- Tags Table -->
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>{{ _('name') }}</th>
+            <th style="width: 120px" class="text-center">{{ _('movements') }}</th>
+            <th style="width: 200px">{{ _('actions') }}</th>
+          </tr>
+        </thead>
+        <tbody id="tags-table">
+          {% for t in tags %}
+          <tr id="tag-row-{{ t.id }}" class="tag-clickable-row" data-href="/movements?tag_id={{ t.id }}">
+            <td>
+              <span class="tag-name" id="tag-name-{{ t.id }}">
+                {% if t.color %}
+                <span class="badge me-1" style="background-color:{{ t.color }};color:#fff">{{ t.name }}</span>
+                {% else %}
+                <span class="badge bg-label-secondary me-1">{{ t.name }}</span>
+                {% endif %}
+              </span>
+              <div class="d-none tag-edit-group" id="tag-edit-group-{{ t.id }}">
+                <div class="input-group input-group-sm">
+                  <input type="text" class="form-control form-control-sm tag-edit" id="tag-edit-{{ t.id }}" value="{{ t.name }}">
+                  <div class="color-picker-wrapper">
+                    <button class="btn btn-sm btn-outline-secondary" type="button" id="color-btn-{{ t.id }}" data-color="{{ t.color or '' }}" title="{{ _('color') }}" onclick="toggleColorPicker('color-edit-{{ t.id }}')">
+                      <span class="color-preview {% if t.color %}has-color{% else %}empty{% endif %}" {% if t.color %}style="background-color: {{ t.color }}"{% endif %}>{% if not t.color %}<i class="bi bi-palette-fill"></i>{% endif %}</span>
+                    </button>
+                    <div class="color-picker-popup" id="color-edit-{{ t.id }}"></div>
+                  </div>
+                  <div class="emoji-picker-wrapper">
+                    <button class="btn btn-sm btn-outline-secondary" type="button" onclick="togglePicker('picker-edit-{{ t.id }}')" style="font-size:0.9rem;">😀</button>
+                    <div class="emoji-grid" id="picker-edit-{{ t.id }}"></div>
+                  </div>
+                </div>
+              </div>
+            </td>
+            <td class="text-center">
+              <span class="badge bg-label-secondary">{{ t.usage_count }}</span>
+            </td>
+            <td>
+              <button class="btn btn-sm btn-outline-warning me-1 btn-edit" onclick="editTag({{ t.id }})"><i class="bi bi-pencil"></i></button>
+              <button class="btn btn-sm btn-outline-success me-1 d-none btn-save" id="btn-save-{{ t.id }}" onclick="saveTag({{ t.id }})"><i class="bi bi-check-lg"></i></button>
+              <button class="btn btn-sm btn-outline-danger" onclick="deleteTag({{ t.id }})"><i class="bi bi-trash"></i></button>
+            </td>
+          </tr>
+          {% else %}
+          <tr id="no-tags"><td colspan="3" class="text-center text-muted py-4">{{ _('no_tags') }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block page_js %}
+<script>
+  // --- Clickable tag rows ---
+  document.addEventListener('click', function(e) {
+    var row = e.target.closest('.tag-clickable-row');
+    if (!row) return;
+    // Don't navigate if clicking on a button, input, or edit group
+    if (e.target.closest('button, input, .tag-edit-group, .emoji-picker-wrapper')) return;
+    var href = row.dataset.href;
+    if (href) window.location.href = href;
+  });
+
+  // --- Emoji Picker (loads all emojis from emoji-data.json) ---
+  var _emojiData = null; // loaded once
+  var _activePicker = null;
+  var _groupIcons = ['😀','👋','🏻','🐵','🍇','🌍','🎃','👓','🏧','🏁'];
+  var _groupNames = ['Smileys','People','Skin','Animals','Food','Travel','Activities','Objects','Symbols','Flags'];
+
+  function loadEmojiData(cb) {
+    if (_emojiData) return cb(_emojiData);
+    fetch('/static/js/emoji-data.json')
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        // Skip skin tone modifiers (group 2)
+        _emojiData = data.filter(function(e) { return e.group !== 2; });
+        cb(_emojiData);
+      })
+      .catch(function() { cb([]); });
+  }
+
+  function buildPickerContent(container) {
+    if (container._built) return;
+    container._built = true;
+
+    var searchInput = document.createElement('input');
+    searchInput.type = 'text';
+    searchInput.placeholder = '{{ _("search") }}...';
+    container.appendChild(searchInput);
+
+    var tabs = document.createElement('div');
+    tabs.className = 'emoji-tabs';
+    container.appendChild(tabs);
+
+    var listContainer = document.createElement('div');
+    listContainer.className = 'emoji-list-container';
+    var list = document.createElement('div');
+    list.className = 'emoji-list';
+    listContainer.appendChild(list);
+    container.appendChild(listContainer);
+
+    loadEmojiData(function(data) {
+      // Build group tabs
+      var groups = [];
+      data.forEach(function(e) { if (groups.indexOf(e.group) === -1) groups.push(e.group); });
+      groups.sort(function(a,b) { return a - b; });
+
+      groups.forEach(function(g) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = _groupIcons[g] || '❓';
+        btn.title = _groupNames[g] || 'Group ' + g;
+        btn.addEventListener('click', function() {
+          searchInput.value = '';
+          showGroup(g);
+          tabs.querySelectorAll('button').forEach(function(b) { b.classList.remove('active'); });
+          btn.classList.add('active');
+        });
+        tabs.appendChild(btn);
+      });
+
+      // Click handler for emoji
+      function onEmojiClick(em) {
+        var wrapper = container.closest('.input-group');
+        var input = wrapper ? wrapper.querySelector('input[type="text"]') : null;
+        if (input) {
+          var start = input.selectionStart || input.value.length;
+          var end = input.selectionEnd || input.value.length;
+          input.value = input.value.substring(0, start) + em + input.value.substring(end);
+          input.focus();
+          var pos = start + em.length;
+          input.setSelectionRange(pos, pos);
+        }
+        container.classList.remove('show');
+        _activePicker = null;
+      }
+
+      function renderEmojis(emojis) {
+        list.innerHTML = '';
+        emojis.forEach(function(e) {
+          var span = document.createElement('span');
+          span.textContent = e.emoji;
+          span.title = e.annotation;
+          span.addEventListener('click', function() { onEmojiClick(e.emoji); });
+          list.appendChild(span);
+        });
+        listContainer.scrollTop = 0;
+      }
+
+      function showGroup(g) {
+        renderEmojis(data.filter(function(e) { return e.group === g; }));
+      }
+
+      // Search
+      searchInput.addEventListener('input', function() {
+        var q = searchInput.value.toLowerCase().trim();
+        if (!q) {
+          // Show active group or first
+          var active = tabs.querySelector('.active');
+          var g = active ? groups[Array.from(tabs.children).indexOf(active)] : groups[0];
+          showGroup(g);
+          return;
+        }
+        var results = data.filter(function(e) {
+          if (e.annotation.toLowerCase().indexOf(q) !== -1) return true;
+          if (e.tags && e.tags.some(function(t) { return t.toLowerCase().indexOf(q) !== -1; })) return true;
+          if (e.shortcodes && e.shortcodes.some(function(s) { return s.toLowerCase().indexOf(q) !== -1; })) return true;
+          return false;
+        });
+        renderEmojis(results.slice(0, 200));
+        tabs.querySelectorAll('button').forEach(function(b) { b.classList.remove('active'); });
+      });
+
+      // Show first group by default
+      if (groups.length > 0) {
+        showGroup(groups[0]);
+        tabs.children[0].classList.add('active');
+      }
+    });
+  }
+
+  function togglePicker(pickerId) {
+    var popup = document.getElementById(pickerId);
+    if (!popup) return;
+
+    if (_activePicker && _activePicker !== popup) {
+      _activePicker.classList.remove('show');
+    }
+    if (_activeColorPicker) {
+      _activeColorPicker.classList.remove('show');
+      _activeColorPicker = null;
+    }
+
+    popup.classList.toggle('show');
+    _activePicker = popup.classList.contains('show') ? popup : null;
+    buildPickerContent(popup);
+  }
+
+  document.addEventListener('click', function(e) {
+    if (!_activePicker) return;
+    if (_activePicker.contains(e.target)) return;
+    if (e.target.closest('.emoji-picker-wrapper')) return;
+    _activePicker.classList.remove('show');
+    _activePicker = null;
+  });
+
+  // --- Color Picker ---
+  var COLOR_PALETTE = [
+    '#ef4444', '#f97316', '#f59e0b', '#eab308', '#84cc16', '#22c55e',
+    '#10b981', '#14b8a6', '#06b6d4', '#0ea5e9', '#3b82f6', '#6366f1',
+    '#8b5cf6', '#a855f7', '#d946ef', '#ec4899', '#f43f5e', '#6b7280'
+  ];
+  var _activeColorPicker = null;
+
+  function _setTagColor(button, color) {
+    button.dataset.color = color || '';
+    var preview = button.querySelector('.color-preview');
+    if (color) {
+      preview.style.backgroundColor = color;
+      preview.classList.add('has-color');
+      preview.classList.remove('empty');
+      preview.innerHTML = '';
+    } else {
+      preview.style.backgroundColor = '';
+      preview.classList.remove('has-color');
+      preview.classList.add('empty');
+      if (!preview.querySelector('i')) {
+        preview.innerHTML = '<i class="bi bi-palette-fill"></i>';
+      }
+    }
+  }
+
+  function _validHex(v) {
+    return /^#[0-9a-fA-F]{3}$/.test(v) || /^#[0-9a-fA-F]{6}$/.test(v) || /^#[0-9a-fA-F]{8}$/.test(v);
+  }
+
+  function buildColorPickerContent(popup, button) {
+    if (popup._built) {
+      // Refresh selection state when reopening
+      var current = button.dataset.color || '';
+      popup.querySelectorAll('.color-swatch').forEach(function(s) {
+        s.classList.toggle('selected', s.dataset.color.toLowerCase() === current.toLowerCase());
+      });
+      var hexInput = popup.querySelector('.hex-input');
+      if (hexInput) hexInput.value = current;
+      return;
+    }
+    popup._built = true;
+
+    var grid = document.createElement('div');
+    grid.className = 'color-swatches';
+    COLOR_PALETTE.forEach(function(c) {
+      var sw = document.createElement('button');
+      sw.type = 'button';
+      sw.className = 'color-swatch';
+      sw.style.backgroundColor = c;
+      sw.dataset.color = c;
+      sw.title = c;
+      sw.addEventListener('click', function() {
+        _setTagColor(button, c);
+        popup.querySelectorAll('.color-swatch').forEach(function(s) { s.classList.remove('selected'); });
+        sw.classList.add('selected');
+        hex.value = c;
+        native.value = c;
+        popup.classList.remove('show');
+        _activeColorPicker = null;
+      });
+      grid.appendChild(sw);
+    });
+    popup.appendChild(grid);
+
+    var footer = document.createElement('div');
+    footer.className = 'color-picker-footer';
+
+    var native = document.createElement('input');
+    native.type = 'color';
+    native.title = '{{ _("custom_color") }}';
+    native.value = button.dataset.color && _validHex(button.dataset.color) ? button.dataset.color : '#696cff';
+    native.addEventListener('input', function() {
+      _setTagColor(button, native.value);
+      hex.value = native.value;
+      popup.querySelectorAll('.color-swatch').forEach(function(s) {
+        s.classList.toggle('selected', s.dataset.color.toLowerCase() === native.value.toLowerCase());
+      });
+    });
+    footer.appendChild(native);
+
+    var hex = document.createElement('input');
+    hex.type = 'text';
+    hex.className = 'hex-input';
+    hex.placeholder = '#RRGGBB';
+    hex.maxLength = 9;
+    hex.value = button.dataset.color || '';
+    hex.addEventListener('input', function() {
+      var v = hex.value.trim();
+      if (_validHex(v)) {
+        _setTagColor(button, v);
+        if (v.length === 7) native.value = v;
+        popup.querySelectorAll('.color-swatch').forEach(function(s) {
+          s.classList.toggle('selected', s.dataset.color.toLowerCase() === v.toLowerCase());
+        });
+      } else if (!v) {
+        _setTagColor(button, '');
+        popup.querySelectorAll('.color-swatch').forEach(function(s) { s.classList.remove('selected'); });
+      }
+    });
+    footer.appendChild(hex);
+
+    var clear = document.createElement('button');
+    clear.type = 'button';
+    clear.className = 'color-picker-clear';
+    clear.title = '{{ _("clear_color") }}';
+    clear.innerHTML = '<i class="bi bi-x-lg"></i>';
+    clear.addEventListener('click', function() {
+      _setTagColor(button, '');
+      hex.value = '';
+      popup.querySelectorAll('.color-swatch').forEach(function(s) { s.classList.remove('selected'); });
+    });
+    footer.appendChild(clear);
+
+    popup.appendChild(footer);
+
+    // Initial selection highlight
+    var current = button.dataset.color || '';
+    popup.querySelectorAll('.color-swatch').forEach(function(s) {
+      s.classList.toggle('selected', s.dataset.color.toLowerCase() === current.toLowerCase());
+    });
+  }
+
+  function toggleColorPicker(popupId) {
+    var popup = document.getElementById(popupId);
+    if (!popup) return;
+    var button = popup.closest('.color-picker-wrapper').querySelector('button');
+
+    if (_activeColorPicker && _activeColorPicker !== popup) {
+      _activeColorPicker.classList.remove('show');
+    }
+    if (_activePicker) {
+      _activePicker.classList.remove('show');
+      _activePicker = null;
+    }
+    popup.classList.toggle('show');
+    _activeColorPicker = popup.classList.contains('show') ? popup : null;
+    buildColorPickerContent(popup, button);
+  }
+
+  document.addEventListener('click', function(e) {
+    if (!_activeColorPicker) return;
+    if (_activeColorPicker.contains(e.target)) return;
+    if (e.target.closest('.color-picker-wrapper')) return;
+    _activeColorPicker.classList.remove('show');
+    _activeColorPicker = null;
+  });
+
+  // --- Tag CRUD ---
+  document.getElementById('add-tag-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('new-tag-name').value.trim();
+    if (!name) return;
+    const color = document.getElementById('color-btn-new').dataset.color || null;
+
+    const body = color ? { name, color } : { name };
+    const resp = await fetch('/api/tags', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    if (resp.ok) {
+      showToast('{{ _("created_successfully") }}', 'success');
+      location.reload();
+    } else {
+      await handleApiError(resp);
+    }
+  });
+
+  function editTag(id) {
+    document.getElementById(`tag-name-${id}`).classList.add('d-none');
+    document.getElementById(`tag-edit-group-${id}`).classList.remove('d-none');
+    document.getElementById(`tag-edit-${id}`).focus();
+    document.getElementById(`btn-save-${id}`).classList.remove('d-none');
+    // Disable row click while editing
+    document.getElementById(`tag-row-${id}`).classList.remove('tag-clickable-row');
+  }
+
+  async function saveTag(id) {
+    const name = document.getElementById(`tag-edit-${id}`).value.trim();
+    if (!name) return;
+    const color = document.getElementById(`color-btn-${id}`).dataset.color || null;
+
+    const resp = await fetch(`/api/tags/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, color })
+    });
+
+    if (resp.ok) {
+      showToast('{{ _("updated_successfully") }}', 'success');
+      location.reload();
+    } else {
+      await handleApiError(resp);
+    }
+  }
+
+  async function deleteTag(id) {
+    if (!(await confirmDialog('{{ _("delete") }}?', {icon: 'warning', confirmColor: 'danger', confirmText: '{{ _("delete") }}'}))) return;
+    const resp = await fetch(`/api/tags/${id}`, { method: 'DELETE' });
+    if (resp.ok) {
+      document.getElementById(`tag-row-${id}`).remove();
+      showToast('{{ _("deleted_successfully") }}', 'success');
+    } else {
+      await handleApiError(resp);
+    }
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,137 @@
+<h5>Portafogli</h5>
+<p class="yn-help-lead">I portafogli tengono traccia degli investimenti: crypto, azioni, ETF o un mix. Ogni portafoglio è collegato a una fonte e contiene una o più posizioni. I prezzi possono essere recuperati in tempo reale da internet o gestiti manualmente.</p>
+
+<h6>Come si collegano portafogli e fonti</h6>
+<p>Un portafoglio <strong>non</strong> è un conto separato. È un registro aggiuntivo collegato a una fonte esistente.</p>
+<p>Pensa a una fonte come a un singolo conto presso una banca o un broker. Quel conto può tenere <strong>liquidità</strong> (euro, dollari, qualunque sia la valuta della fonte) e <strong>investimenti</strong> (azioni, token, fondi). Yfine traccia i due lati separatamente:</p>
+<ul>
+  <li>Il <strong>saldo della fonte</strong> (liquidità) cambia quando registri movimenti: entrate, uscite, trasferimenti.</li>
+  <li>Il <strong>valore del portafoglio</strong> (investimenti) cambia quando aggiungi, modifichi o rimuovi posizioni, e quando si muovono i prezzi.</li>
+</ul>
+<p>Nella pagina Fonti, una fonte con un portafoglio collegato mostra entrambi nella stessa scheda:</p>
+<div class="yn-help-mock">
+  <div class="yn-help-mock-row"><span class="yn-help-mock-label">Conto principale · EUR</span><span class="yn-help-mock-value">12.700,00</span></div>
+  <div class="yn-help-mock-row"><span class="yn-help-mock-label">&nbsp;&nbsp;Liquidità</span><span class="yn-help-mock-value">2.700,00</span></div>
+  <div class="yn-help-mock-row"><span class="yn-help-mock-label">&nbsp;&nbsp;Investimenti</span><span class="yn-help-mock-value">10.000,00</span></div>
+</div>
+<p>Il numero in alto è il totale combinato. Somma solo i portafogli che hanno la stessa valuta della fonte. Investimenti in una valuta diversa appaiono come badge a parte, perché mescolare valute in un'unica somma sarebbe fuorviante.</p>
+
+<div class="yn-help-tip warn">
+  <i class="bi bi-exclamation-triangle-fill"></i>
+  <div>Aggiungere una posizione <strong>non</strong> riduce il saldo liquido della fonte. I due registri sono indipendenti. Se compri delle azioni con denaro proveniente dal tuo conto in banca e vuoi che il saldo rifletta l'acquisto, registra un movimento di uscita dello stesso importo sulla stessa fonte.</div>
+</div>
+
+<h6>Un acquisto tipico, passo passo</h6>
+<ol class="yn-help-steps">
+  <li>Compri 0,5 BTC per 15.000 EUR, pagando dalla fonte "Conto principale".</li>
+  <li>Apri <strong>Movimenti</strong>. Registra un'<strong>uscita</strong> di 15.000 EUR sul Conto principale con una nota tipo "Comprato 0,5 BTC". Questo riduce il saldo liquido della fonte.</li>
+  <li>Apri il portafoglio collegato al Conto principale. Clicca <span class="yn-help-chip primary"><i class="bi bi-plus"></i> Aggiungi Posizione</span>.</li>
+  <li>Inserisci simbolo BTC, quantità 0,5, prezzo medio 30.000 EUR. Salva.</li>
+  <li>La scheda della fonte ora mostra liquidità <strong>meno 15.000</strong> e investimenti <strong>più il valore di mercato del BTC</strong>. Il patrimonio totale su quella fonte resta invariato, ma la composizione riflette lo spostamento da liquidità a crypto.</li>
+</ol>
+<p>Facendolo così i conti tornano: i soldi spesi sono soldi andati, e il valore di mercato dell'investimento è tracciato a parte e aggiornato con i prezzi.</p>
+
+<h6>Cosa vedi</h6>
+<ul>
+  <li>Un interruttore <strong>Prezzi live</strong> in alto. Quando è attivo, i prezzi si aggiornano automaticamente ogni 30 minuti. Quando è spento, Yfine mostra solo il costo di acquisto.</li>
+  <li>Un pulsante <strong>Aggiorna</strong> per forzare subito un aggiornamento dei prezzi (disattivato quando Prezzi Live è spento).</li>
+  <li>Portafogli raggruppati per <strong>fonte</strong> collegata, con un totale investimenti mostrato per ogni fonte.</li>
+  <li>Ogni scheda portafoglio: nome, <strong>badge del tipo</strong> (crypto, azioni, misto), valore totale, costo investito, <strong>profitto o perdita</strong> con percentuale, numero di posizioni e una sparkline a 30 giorni.</li>
+</ul>
+
+<h6>Azioni principali</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-plus-lg"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Nuovo Portafoglio</span>
+      <span class="yn-help-action-desc">Crea un portafoglio. Scegli nome, tipo, valuta base e fonte a cui appartiene.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon info"><i class="bi bi-toggle-on"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Interruttore Prezzi Live</span>
+      <span class="yn-help-action-desc">Attivalo per recuperare i prezzi da internet ogni 30 minuti. Spento significa gestione manuale.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-arrow-clockwise"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Aggiorna Prezzi</span>
+      <span class="yn-help-action-desc">Forza un aggiornamento immediato. Attivo solo con Prezzi Live acceso.</span>
+    </div>
+  </div>
+</div>
+
+<h6>Azioni per portafoglio</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon info"><i class="bi bi-eye"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Visualizza</span>
+      <span class="yn-help-action-desc">Apre la pagina di dettaglio del portafoglio con la lista delle posizioni.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-pencil"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Modifica</span>
+      <span class="yn-help-action-desc">Cambia nome, tipo, valuta base, fonte o nota del portafoglio.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon danger"><i class="bi bi-trash"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Elimina</span>
+      <span class="yn-help-action-desc">Rimuove il portafoglio e tutte le sue posizioni.</span>
+    </div>
+  </div>
+</div>
+
+<h6>Tipo di portafoglio</h6>
+<ul>
+  <li><strong>Crypto</strong>: le posizioni sono token. La quantità è chiamata "numero di token".</li>
+  <li><strong>Azioni</strong>: le posizioni sono azioni. La quantità è chiamata "numero di azioni".</li>
+  <li><strong>Misto</strong>: ogni posizione sceglie il proprio tipo di asset. Utile per un singolo portafoglio che contiene sia azioni sia crypto.</li>
+</ul>
+
+<h6>Valuta base</h6>
+<p>La valuta base è quella in cui il portafoglio riporta i totali. Le singole posizioni possono essere prezzate in qualsiasi valuta, e Yfine le converte nella valuta base. La valuta della fonte è la scelta naturale, ma puoi sceglierne un'altra.</p>
+
+<h6>Prezzi live e privacy</h6>
+<p>I prezzi live recuperano dati da API pubbliche. Tenerli spenti significa che non vengono fatte chiamate di rete per i portafogli e inserisci ogni prezzo a mano. Un banner di avviso ricorda quando i prezzi sono spenti, perché i totali che vedi sono il costo di acquisto, non il valore di mercato.</p>
+
+<h6>Passo passo: creare un portafoglio con una posizione</h6>
+<ol class="yn-help-steps">
+  <li>Assicurati di avere una fonte (creane una in Fonti se manca).</li>
+  <li>In questa pagina clicca <span class="yn-help-chip primary"><i class="bi bi-plus-lg"></i> Nuovo Portafoglio</span>.</li>
+  <li>Inserisci un <strong>nome</strong> (per esempio "Crypto lungo termine").</li>
+  <li>Scegli il <strong>tipo</strong> (crypto, azioni o misto).</li>
+  <li>Scegli la <strong>valuta base</strong> (di solito quella della fonte).</li>
+  <li>Scegli la <strong>fonte</strong> a cui il portafoglio è collegato.</li>
+  <li>Salva. Arrivi sulla pagina di dettaglio.</li>
+  <li>Clicca <span class="yn-help-chip primary"><i class="bi bi-plus"></i> Aggiungi Posizione</span>.</li>
+  <li>Inserisci il <strong>simbolo</strong> (BTC, ETH, AAPL). Per i portafogli misti, scegli prima il tipo di asset.</li>
+  <li>Inserisci <strong>quantità</strong>, <strong>prezzo medio</strong> e <strong>valuta</strong>.</li>
+  <li>Opzionale: attiva <strong>prezzo manuale</strong> se non vuoi che Yfine lo scarichi.</li>
+  <li>Salva. La posizione compare in tabella e i totali del portafoglio si aggiornano.</li>
+</ol>
+
+<h6>Profitto e perdita</h6>
+<p>Yfine confronta quanto vale ora ogni posizione (quantità × prezzo corrente) con quanto hai pagato (quantità × prezzo medio). La differenza è il profitto o la perdita non realizzato:</p>
+<div class="yn-help-mock">
+  <div class="yn-help-mock-row"><span class="yn-help-mock-label">BTC · 0,5 × 30.000 costo</span><span class="yn-help-mock-value">15.000,00</span></div>
+  <div class="yn-help-mock-row"><span class="yn-help-mock-label">BTC · 0,5 × 40.000 ora</span><span class="yn-help-mock-value">20.000,00</span></div>
+  <div class="yn-help-mock-row"><span class="yn-help-mock-label"><strong>P/L non realizzato</strong></span><span class="yn-help-mock-value income">+5.000,00 (+33%)</span></div>
+</div>
+
+<div class="yn-help-tip">
+  <i class="bi bi-info-circle-fill"></i>
+  <div>Il costo investito è la media ponderata di quanto hai pagato. Se aggiungi altre unità in seguito a un prezzo diverso, aggiorna il prezzo medio per riflettere il nuovo valore combinato.</div>
+</div>
+
+<div class="yn-help-tip warn">
+  <i class="bi bi-exclamation-triangle-fill"></i>
+  <div>I prezzi live dipendono da servizi esterni. Possono essere limitati, ritardati o temporaneamente sbagliati. Per decisioni importanti verifica i prezzi altrove.</div>
+</div>

@@ -1,0 +1,99 @@
+<h5>Джерела</h5>
+<p class="yn-help-lead">Джерела, це ваші рахунки: банківський рахунок, готівковий гаманець, картка, платіжний застосунок. Кожен рух, переказ, повторюваний елемент і портфель прив'язується до джерела.</p>
+
+<h6>Що ви бачите</h6>
+<ul>
+  <li>Джерела, згруповані за валютою. Якщо тримаєте EUR і USD, кожна група має свій розділ.</li>
+  <li>Для кожного джерела: <strong>назва</strong>, <strong>поточний баланс</strong>, <strong>початковий баланс</strong>, <strong>кількість рухів</strong> і невеликий <strong>графік балансу за 30 днів</strong>.</li>
+  <li>Якщо до джерела прив'язані портфелі, картка розділяється на <strong>Готівку</strong> та <strong>Інвестиції</strong> з комбінованим підсумком згори.</li>
+  <li>Значення портфелів в інших валютах з'являються як окремі мітки (вони не додаються до готівки, щоб не змішувати валюти).</li>
+</ul>
+
+<h6>Основні дії</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-plus-lg"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Нове джерело</span>
+      <span class="yn-help-action-desc">Створіть новий рахунок. Введіть назву, валюту та початковий баланс.</span>
+    </div>
+  </div>
+</div>
+
+<h6>Дії для джерела</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon info"><i class="bi bi-eye"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Переглянути</span>
+      <span class="yn-help-action-desc">Відкриває сторінку деталей джерела з повною історією та графіком балансу.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon success"><i class="bi bi-plus"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Новий рух</span>
+      <span class="yn-help-action-desc">Записати рух з уже обраним цим джерелом.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-pencil"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Редагувати</span>
+      <span class="yn-help-action-desc">Змінити назву, валюту або початковий баланс.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon warning"><i class="bi bi-arrows-collapse"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Об'єднати</span>
+      <span class="yn-help-action-desc">Об'єднує це джерело з іншим. Як ціль пропонуються лише джерела з такою самою валютою.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon danger"><i class="bi bi-trash"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Видалити</span>
+      <span class="yn-help-action-desc">Видаляє джерело. Вікно пропонує три варіанти (див. нижче).</span>
+    </div>
+  </div>
+</div>
+
+<h6>Початковий баланс</h6>
+<p>Початковий баланс, це сума на рахунку на момент додавання до Yfine. Він є опорною точкою для поточного балансу. Кожен записаний рух зсуває його вгору або вниз.</p>
+<div class="yn-help-mock">
+  <div class="yn-help-mock-row"><span class="yn-help-mock-label">Початковий баланс</span><span class="yn-help-mock-value">1 500,00</span></div>
+  <div class="yn-help-mock-row"><span class="yn-help-mock-label">+ Зарплата (дохід)</span><span class="yn-help-mock-value income">+2 000,00</span></div>
+  <div class="yn-help-mock-row"><span class="yn-help-mock-label">- Оренда (витрата)</span><span class="yn-help-mock-value expense">-800,00</span></div>
+  <div class="yn-help-mock-row"><span class="yn-help-mock-label"><strong>Поточний баланс</strong></span><span class="yn-help-mock-value">2 700,00</span></div>
+</div>
+
+<h6>Видалення джерела</h6>
+<p>Під час видалення джерела вікно питає, що робити з його даними. Три варіанти:</p>
+<ul>
+  <li><strong>Видалити все</strong>: джерело та всі його рухи, перекази й повторювані елементи видаляються.</li>
+  <li><strong>Перенести дані в інше джерело</strong>: усі рухи та повторювані переходять до обраного джерела. Пропонуються лише цілі з такою самою валютою.</li>
+  <li><strong>Зробити зовнішніми</strong>: рухи залишаються в базі, але втрачають прив'язку до джерела. У списках з'являться як "зовнішні".</li>
+</ul>
+
+<h6>Об'єднання джерел</h6>
+<p>Об'єднання зберігає всі дані: кожен рух джерела переходить до цільового, а обидва готівкові баланси додаються. Корисно, коли ви припиняєте використовувати рахунок і хочете зібрати його до активного.</p>
+
+<h6>Крок за кроком: перше джерело</h6>
+<ol class="yn-help-steps">
+  <li>Натисніть <span class="yn-help-chip primary"><i class="bi bi-plus-lg"></i> Нове джерело</span>.</li>
+  <li>Введіть <strong>назву</strong> (наприклад, "Основний банк" або "Готівковий гаманець").</li>
+  <li>Оберіть <strong>валюту</strong> у випадаючому списку. Поряд з кожним варіантом відображаються прапори.</li>
+  <li>Введіть <strong>початковий баланс</strong>: суму, що зараз на рахунку.</li>
+  <li>Збережіть. Джерело з'явиться на цій сторінці та стане доступним у всіх інших розділах.</li>
+</ol>
+
+<div class="yn-help-tip">
+  <i class="bi bi-info-circle-fill"></i>
+  <div>Валюту можна змінити пізніше, але вже записані рухи збережуть початкову суму. Змінюйте валюту до того, як запишете багато записів.</div>
+</div>
+
+<div class="yn-help-tip warn">
+  <i class="bi bi-exclamation-triangle-fill"></i>
+  <div>Видалення джерела варіантом "Видалити все" незворотне. Експортуйте дані з Налаштувань, якщо не впевнені.</div>
+</div>

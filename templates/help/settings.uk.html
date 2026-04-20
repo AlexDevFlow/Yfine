@@ -1,0 +1,115 @@
+<h5>Налаштування</h5>
+<p class="yn-help-lead">Усі налаштування Yfine зібрані тут, розділені на вкладки. Ліва бічна панель, це навігатор вкладок на десктопі, і горизонтальна смуга з прокруткою на мобільному.</p>
+
+<h6>Огляд вкладок</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-palette"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Тема</span>
+      <span class="yn-help-action-desc">Світла, темна або системна (слідує за операційною системою). Також стиль мобільної навігації.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon info"><i class="bi bi-translate"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Мова</span>
+      <span class="yn-help-action-desc">Мова інтерфейсу, формат дати та базова валюта для підсумків.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon success"><i class="bi bi-briefcase"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Портфелі</span>
+      <span class="yn-help-action-desc">Увімкнути чи вимкнути отримання цін у реальному часі.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon warning"><i class="bi bi-wifi"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Мережа</span>
+      <span class="yn-help-action-desc">Увімкнути доступ із локальної мережі, щоб відкривати Yfine з інших пристроїв удома. Змінити порт сервера.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon danger"><i class="bi bi-shield-lock"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Безпека</span>
+      <span class="yn-help-action-desc">Встановити або змінити пароль, що шифрує базу даних.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon info"><i class="bi bi-download"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Дані</span>
+      <span class="yn-help-action-desc">Експортувати дані, імпортувати копію, завантажити або очистити журнал, видалити всі дані.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon muted"><i class="bi bi-file-earmark-arrow-up"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Імпорт</span>
+      <span class="yn-help-action-desc">Імпортувати рухи з банківських виписок та інших фінансових застосунків. Пресети для поширених форматів.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-puzzle"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Плагіни</span>
+      <span class="yn-help-action-desc">Завантажити користувацькі плагіни. Звіт сканування позначає потенційно небезпечне.</span>
+    </div>
+  </div>
+</div>
+
+<h6>Тема</h6>
+<p>Три кнопки згори: <span class="yn-help-chip"><i class="bi bi-sun"></i> Світла</span>, <span class="yn-help-chip"><i class="bi bi-moon"></i> Темна</span>, <span class="yn-help-chip"><i class="bi bi-laptop"></i> Системна</span>. "Системна" слідує за налаштуванням операційної системи і перемикається автоматично зі зміною системи.</p>
+<p>Нижче: стиль <strong>мобільної навігації</strong>. Оберіть "Бічна панель", щоб залишити лівий висувний список на телефонах, або "Нижня", щоб мати нижню панель як у нативних застосунків.</p>
+
+<h6>Мова</h6>
+<ul>
+  <li><strong>Мова</strong>: українська, англійська, італійська, іспанська. Інтерфейс перезавантажується в новій мові після збереження.</li>
+  <li><strong>Формат дати</strong>: дд/мм/рррр, мм/дд/рррр або рррр-мм-дд. Впливає на кожну дату, показану в застосунку.</li>
+  <li><strong>Базова валюта</strong>: типова, що використовується при створенні джерела чи заощадження без обраної валюти.</li>
+</ul>
+
+<h6>Мережа</h6>
+<p>Yfine за замовчуванням слухає лише на localhost. Увімкнення <strong>доступу до локальної мережі</strong> робить його доступним з інших пристроїв вашої домашньої мережі (зручно відкривати застосунок на телефоні, поки комп'ютер працює). Yfine показує URL для набору на іншому пристрої.</p>
+<p><strong>Порт сервера</strong> можна змінити, якщо типовий уже зайнятий. Після збереження з'являється напис "потрібен перезапуск".</p>
+
+<h6>Безпека</h6>
+<p>Встановлення пароля вмикає шифрування <strong>AES-256-GCM</strong> файлу бази даних. Ключ виводиться з вашого пароля і ніколи не зберігається.</p>
+<ul>
+  <li>З паролем: застосунок запитує його при запуску. База розшифровується в пам'яті та знову шифрується при виході.</li>
+  <li>Без пароля: база даних, звичайний SQLite файл.</li>
+</ul>
+
+<h6>Дані: експорт, імпорт, скидання</h6>
+<ul>
+  <li><strong>Експорт</strong>: завантажити копію JSON (лише основні дані) або повний архів <code>.yfine</code> (основні дані + плагіни + налаштування).</li>
+  <li><strong>Експорт Excel / PDF</strong>: форматовано для друку чи розсилки.</li>
+  <li><strong>Імпорт</strong>: оберіть експортований файл. Вікно попереднього перегляду показує, що буде імпортовано, перед підтвердженням.</li>
+  <li><strong>Журнал</strong>: завантажити або очистити журнал застосунку.</li>
+  <li><strong>Видалити всі дані</strong>: стирає всі джерела, рухи, портфелі, теги, повторювані, заощадження, бажання та сповіщення. Налаштування не чіпає.</li>
+</ul>
+
+<h6>Вкладка "Імпорт"</h6>
+<p>Вкладка "Імпорт", це покроковий майстер. Оберіть цільове джерело, оберіть пресет формату (наприклад, "CSV банківська виписка"), завантажте файл, зіставте колонки за потреби та перегляньте список рухів, що будуть створені. Виявлення дублікатів запускається на кроці перегляду.</p>
+
+<h6>Плагіни</h6>
+<p>Плагіни розширюють Yfine новими сторінками, пунктами меню або логікою. Щоб встановити один:</p>
+<ol class="yn-help-steps">
+  <li>Натисніть кнопку завантаження та оберіть архів плагіна.</li>
+  <li>Yfine запускає статичне сканування коду. Критичні знахідки блокують встановлення. Попередження дозволяють продовжити на ваш розсуд.</li>
+  <li>Після сканування підтвердьте встановлення.</li>
+  <li>Перезапустіть застосунок. Пункт меню плагіна з'явиться на бічній панелі.</li>
+</ol>
+
+<div class="yn-help-tip">
+  <i class="bi bi-info-circle-fill"></i>
+  <div>Експортуйте дані перед будь-яким "Видалити всі дані" чи ризикованим встановленням плагіна. Архів <code>.yfine</code> містить усе необхідне, щоб повернути застосунок у поточний стан.</div>
+</div>
+
+<div class="yn-help-tip warn">
+  <i class="bi bi-exclamation-triangle-fill"></i>
+  <div>Плагіни працюють з тими ж правами, що й Yfine. Сканер позначає очевидні проблеми, але не може виявити все. Встановлюйте лише плагіни з довірених джерел.</div>
+</div>

@@ -1,0 +1,23 @@
+{
+  "id": "paypal",
+  "display_name": "PayPal",
+  "bank": "PayPal",
+  "format": "csv",
+  "currency_hint": null,
+  "source_hint": "PayPal",
+  "detect": {
+    "headers": ["date", "time", "time zone", "name", "type", "status", "currency", "gross", "fee", "net"]
+  },
+  "options": {
+    "encoding": "utf-8",
+    "delimiter": ",",
+    "decimal_separator": ",",
+    "date_format": "%d/%m/%Y",
+    "column_map": {
+      "date": "Date",
+      "amount": "Net",
+      "note": "Name",
+      "currency": "Currency"
+    }
+  }
+}

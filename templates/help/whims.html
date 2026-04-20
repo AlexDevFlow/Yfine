@@ -1,0 +1,107 @@
+<h5>Whims</h5>
+<p class="yn-help-lead">A whim is something you want to buy but have not bought yet. Think of this page as a wishlist with priorities. When you decide to purchase (or drop) an item, you move it off the list.</p>
+
+<h6>What you see</h6>
+<ul>
+  <li>Two tabs: <strong>To achieve</strong> (pending whims you still want) and <strong>Achieved</strong> (items you bought).</li>
+  <li>Each pending whim is a card showing the <strong>name</strong>, the <strong>amount</strong>, a <strong>priority badge</strong>, an optional <strong>link icon</strong> if you added a URL, and any <strong>note</strong>.</li>
+  <li>At the bottom, a collapsible <strong>dismissed</strong> section holds whims you decided against, with their names crossed out.</li>
+  <li>The Achieved tab is a table: icon, name, purchase date, amount.</li>
+</ul>
+
+<h6>Priorities</h6>
+<p>Priorities help you decide what is worth buying first:</p>
+<ul>
+  <li><span class="yn-help-chip danger">High</span>: things you really want, or that would noticeably improve something you use every day.</li>
+  <li><span class="yn-help-chip warning">Medium</span>: nice to have, but not urgent. The default.</li>
+  <li><span class="yn-help-chip info">Low</span>: would be fun, but you are unsure. Useful to keep on the list without committing.</li>
+</ul>
+
+<h6>Main actions</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-plus-lg"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">New Whim</span>
+      <span class="yn-help-action-desc">Add an item to the wishlist. Fill in name, amount, priority, optional URL and note.</span>
+    </div>
+  </div>
+</div>
+
+<h6>Per-whim actions</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon success"><i class="bi bi-cart"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Buy</span>
+      <span class="yn-help-action-desc">Open the purchase dialog. Pick the source to pay from and confirm. An expense movement is created and the whim moves to the Achieved tab.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon muted"><i class="bi bi-x-lg"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Dismiss</span>
+      <span class="yn-help-action-desc">Move the whim to the dismissed section. No movement is created. You can still see it, with a strikethrough name.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-pencil"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Edit</span>
+      <span class="yn-help-action-desc">Change the name, amount, priority, URL, or note.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon danger"><i class="bi bi-trash"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Delete</span>
+      <span class="yn-help-action-desc">Remove the whim permanently. Use this when you want to forget the item entirely.</span>
+    </div>
+  </div>
+</div>
+
+<h6>Buy vs Dismiss vs Delete</h6>
+<p>The three ways to clear a whim from the pending list do different things:</p>
+<ul>
+  <li><strong>Buy</strong>: you actually bought it. Records an expense and keeps the whim as history.</li>
+  <li><strong>Dismiss</strong>: you changed your mind. No expense is recorded. Kept at the bottom for later reference.</li>
+  <li><strong>Delete</strong>: remove the entry entirely from the database. No history.</li>
+</ul>
+
+<h6>Filters and sort</h6>
+<ul>
+  <li><strong>Priority</strong>: show only high, medium, or low.</li>
+  <li><strong>Sort</strong>: amount ascending or descending, newest or oldest, or by name.</li>
+  <li><strong>Reset</strong> clears filters.</li>
+</ul>
+
+<h6>Step by step: add a whim</h6>
+<ol class="yn-help-steps">
+  <li>Click <span class="yn-help-chip primary"><i class="bi bi-plus-lg"></i> New Whim</span>.</li>
+  <li>Enter the <strong>name</strong> (for example "Noise-cancelling headphones").</li>
+  <li>Enter the <strong>amount</strong> and <strong>currency</strong>.</li>
+  <li>Pick a <strong>priority</strong>. Medium is the default.</li>
+  <li>Optional: pick a <strong>source</strong> (where you plan to buy from), paste a <strong>URL</strong> to the product, and write a <strong>note</strong>.</li>
+  <li>Save. The card appears under "To achieve".</li>
+</ol>
+
+<h6>Step by step: buy a whim</h6>
+<ol class="yn-help-steps">
+  <li>Find the card and click <span class="yn-help-chip success"><i class="bi bi-cart"></i> Buy</span>.</li>
+  <li>Pick the source you paid from.</li>
+  <li>Confirm. Yfine creates an expense movement and moves the whim to the Achieved tab.</li>
+</ol>
+
+<h6>Save up for a whim</h6>
+<p>Every pending whim has a <span class="yn-help-chip"><i class="bi bi-piggy-bank"></i> Save</span> button. It spins up a <strong>savings goal</strong> tied to that whim — same name, same target. A progress bar appears on the whim card as you allocate money.</p>
+<ul>
+  <li>The goal shows up in the <strong>Goals</strong> tab on the Savings page, where you can allocate money from any account over time.</li>
+  <li>When you click <span class="yn-help-chip success"><i class="bi bi-cart"></i> Buy</span>, Yfine <strong>auto-closes</strong> the goal: the saved money is moved to the source you pick for the purchase, then the outgoing movement is created on top.</li>
+  <li>Deleting the whim keeps its linked goal (you can still finish saving).</li>
+  <li>Deleting the goal unlinks the whim, which can then be purchased normally.</li>
+</ul>
+
+<div class="yn-help-tip">
+  <i class="bi bi-info-circle-fill"></i>
+  <div>Adding a URL lets you come back to the product page later. A small link icon appears on the card.</div>
+</div>

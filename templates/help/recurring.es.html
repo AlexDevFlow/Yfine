@@ -1,0 +1,105 @@
+<h5>Recurrentes</h5>
+<p class="yn-help-lead">Los elementos recurrentes son pagos o ingresos que se repiten con una frecuencia: nómina, alquiler, suscripciones, facturas. Los configuras una vez y Yfine sigue la pista de cuándo toca pagarlos.</p>
+
+<h6>Qué ves</h6>
+<ul>
+  <li>Una cuadrícula de tarjetas, una por cada elemento recurrente. Cada tarjeta tiene una franja superior de color: verde para ingresos, rojo para gastos.</li>
+  <li>Cada tarjeta muestra el <strong>nombre</strong>, el <strong>importe</strong> en su moneda, la <strong>frecuencia</strong>, el <strong>modo de aplicación</strong> y la <strong>fuente</strong>.</li>
+  <li>Una <strong>próxima fecha</strong> con un distintivo de color: rojo si vence hoy, amarillo si vence dentro de tres días, gris en otro caso.</li>
+  <li>Una línea de información: "vencido", "hoy", "mañana" o "en N días".</li>
+  <li>Botones de acción por tarjeta: Aplicar Ahora, Editar, Eliminar.</li>
+</ul>
+
+<h6>Acciones principales</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-plus-lg"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Nuevo Recurrente</span>
+      <span class="yn-help-action-desc">Crea un elemento recurrente. Rellena nombre, importe, frecuencia, fecha de inicio.</span>
+    </div>
+  </div>
+</div>
+
+<h6>Acciones por tarjeta</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon success"><i class="bi bi-check-lg"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Aplicar Ahora</span>
+      <span class="yn-help-action-desc">Abre un diálogo para confirmar el importe y crear un movimiento real para este ciclo.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-pencil"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Editar</span>
+      <span class="yn-help-action-desc">Cambia cualquier campo. Afecta a los ciclos futuros.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon danger"><i class="bi bi-trash"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Eliminar</span>
+      <span class="yn-help-action-desc">Borra el elemento recurrente. Los movimientos pasados que creó se conservan.</span>
+    </div>
+  </div>
+</div>
+
+<h6>Cómo funcionan los recurrentes</h6>
+<p>Un elemento recurrente es una plantilla, no un movimiento. Describe cuándo y cuánto. Cada vez que toca, Yfine crea un movimiento automáticamente o te pide confirmación, según su <strong>modo de aplicación</strong>.</p>
+
+<h6>Frecuencia</h6>
+<ul>
+  <li><strong>Diaria</strong>: se repite todos los días.</li>
+  <li><strong>Semanal</strong>: cada siete días, contando desde la fecha de inicio.</li>
+  <li><strong>Mensual</strong>: el mismo día cada mes. Si ese día no existe en un mes más corto (el 31 en febrero), se usa el último día del mes.</li>
+  <li><strong>Anual</strong>: misma fecha cada año.</li>
+</ul>
+
+<h6>Modo de aplicación</h6>
+<ul>
+  <li><strong>Automático</strong>: cuando pasa la fecha de vencimiento, Yfine crea el movimiento por su cuenta.</li>
+  <li><strong>Confirmación manual</strong>: Yfine te avisa cuando toca. Revisas el importe, lo ajustas si hace falta y pulsas Aplicar Ahora para crear el movimiento.</li>
+</ul>
+<p>Usa confirmación manual para elementos cuyo importe varía (facturas de luz, suscripciones variables). Usa automático para los fijos (alquiler, suscripciones con precio cerrado, nómina).</p>
+
+<h6>Avisos</h6>
+<p>En el formulario puedes configurar:</p>
+<ul>
+  <li><strong>Avisar N días antes</strong>: con cuántos días de antelación quieres el recordatorio. Aparece una notificación y queda bajo el icono de la campana.</li>
+  <li><strong>Avisar si no hay fondos suficientes</strong>: si está marcado, Yfine compara el importe con el saldo actual de la fuente y avisa si el saldo no llega.</li>
+</ul>
+
+<h6>Filtros</h6>
+<ul>
+  <li><strong>Frecuencia</strong>: acota a diaria, semanal, mensual o anual.</li>
+  <li><strong>Dirección</strong>: muestra solo ingresos o solo gastos.</li>
+</ul>
+
+<h6>Paso a paso: configurar una suscripción</h6>
+<ol class="yn-help-steps">
+  <li>Pulsa <span class="yn-help-chip primary"><i class="bi bi-plus-lg"></i> Nuevo Recurrente</span>.</li>
+  <li>Introduce el <strong>nombre</strong> (por ejemplo, "Netflix").</li>
+  <li>Introduce el <strong>importe</strong> y elige la <strong>moneda</strong>.</li>
+  <li>Elige <strong>Gasto</strong>.</li>
+  <li>Elige <strong>Mensual</strong> como frecuencia.</li>
+  <li>Pon la <strong>fecha de inicio</strong> en la próxima fecha de cobro. Deja <strong>fecha de fin</strong> vacía.</li>
+  <li>Elige la <strong>fuente</strong> de la que sale el pago.</li>
+  <li>Elige <strong>Automático</strong> si el importe no cambia nunca.</li>
+  <li>Guarda. La tarjeta aparece aquí y en el panel bajo "Próximos".</li>
+</ol>
+
+<h6>Paso a paso: aplicar manualmente un elemento vencido</h6>
+<ol class="yn-help-steps">
+  <li>Encuentra la tarjeta con el distintivo rojo o amarillo.</li>
+  <li>Pulsa <span class="yn-help-chip success"><i class="bi bi-check-lg"></i> Aplicar Ahora</span>.</li>
+  <li>Confirma el importe en el diálogo. Ajústalo si la factura es diferente este mes.</li>
+  <li>Opcional: añade una nota.</li>
+  <li>Confirma. Se crea un movimiento, el saldo de la fuente se actualiza y la próxima fecha avanza.</li>
+</ol>
+
+<div class="yn-help-tip">
+  <i class="bi bi-info-circle-fill"></i>
+  <div>Si te saltas aplicar un recurrente durante varios ciclos, Aplicar Ahora te pregunta si quieres recuperar todos los ciclos perdidos o solo el más reciente.</div>
+</div>

@@ -1,0 +1,99 @@
+<h5>Sources</h5>
+<p class="yn-help-lead">Sources are your accounts: a bank account, a cash wallet, a card, a payment app. Every movement, transfer, recurring item, and portfolio connects to one.</p>
+
+<h6>What you see</h6>
+<ul>
+  <li>Sources grouped by currency. If you hold EUR and USD, each group has its own section.</li>
+  <li>For each source: <strong>name</strong>, <strong>current balance</strong>, <strong>starting balance</strong>, <strong>movement count</strong>, and a small <strong>30-day balance chart</strong>.</li>
+  <li>If the source has linked portfolios, the card splits into <strong>Cash</strong> and <strong>Investments</strong> subtotals, with a combined total above.</li>
+  <li>Portfolio values in other currencies appear as badges (they are not added to the cash total to avoid mixing currencies).</li>
+</ul>
+
+<h6>Main actions</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-plus-lg"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">New Source</span>
+      <span class="yn-help-action-desc">Create a new account. Enter name, currency, and starting balance.</span>
+    </div>
+  </div>
+</div>
+
+<h6>Per-source actions</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon info"><i class="bi bi-eye"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">View</span>
+      <span class="yn-help-action-desc">Open the source detail page with full history and balance chart.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon success"><i class="bi bi-plus"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">New movement</span>
+      <span class="yn-help-action-desc">Record a movement with this source already selected.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-pencil"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Edit</span>
+      <span class="yn-help-action-desc">Change name, currency, or starting balance.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon warning"><i class="bi bi-arrows-collapse"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Merge</span>
+      <span class="yn-help-action-desc">Combine this source into another. Only sources with the same currency are offered as targets.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon danger"><i class="bi bi-trash"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Delete</span>
+      <span class="yn-help-action-desc">Remove the source. The dialog offers three options (see below).</span>
+    </div>
+  </div>
+</div>
+
+<h6>Starting balance</h6>
+<p>The starting balance is the amount in the account when you add it to Yfine. It anchors the running balance. Every movement you record adjusts it up or down.</p>
+<div class="yn-help-mock">
+  <div class="yn-help-mock-row"><span class="yn-help-mock-label">Starting balance</span><span class="yn-help-mock-value">1,500.00</span></div>
+  <div class="yn-help-mock-row"><span class="yn-help-mock-label">+ Salary (income)</span><span class="yn-help-mock-value income">+2,000.00</span></div>
+  <div class="yn-help-mock-row"><span class="yn-help-mock-label">- Rent (expense)</span><span class="yn-help-mock-value expense">-800.00</span></div>
+  <div class="yn-help-mock-row"><span class="yn-help-mock-label"><strong>Current balance</strong></span><span class="yn-help-mock-value">2,700.00</span></div>
+</div>
+
+<h6>Deleting a source</h6>
+<p>When you delete a source, the dialog asks what to do with its data. The three options:</p>
+<ul>
+  <li><strong>Delete everything</strong>: the source and all its movements, transfers, and recurring items are removed.</li>
+  <li><strong>Move data to another source</strong>: all movements and recurring items are reassigned to a chosen source. Only same-currency targets are offered.</li>
+  <li><strong>Make external</strong>: movements stay in the database but lose their source link. They will show as "external" in lists.</li>
+</ul>
+
+<h6>Merging sources</h6>
+<p>Merging keeps all the data: every movement from the merged source moves over to the target, and both cash balances add up. Useful when you stop using an account and want to fold it into an active one.</p>
+
+<h6>Step by step: first source</h6>
+<ol class="yn-help-steps">
+  <li>Click <span class="yn-help-chip primary"><i class="bi bi-plus-lg"></i> New Source</span>.</li>
+  <li>Enter a <strong>name</strong> (for example "Main bank" or "Cash wallet").</li>
+  <li>Pick the <strong>currency</strong> from the dropdown. Flags appear next to each option.</li>
+  <li>Enter the <strong>starting balance</strong>: the amount currently in the account.</li>
+  <li>Save. The source appears on this page and becomes available in every other section.</li>
+</ol>
+
+<div class="yn-help-tip">
+  <i class="bi bi-info-circle-fill"></i>
+  <div>You can change currency later, but movements already in that source will keep their original amount. Change currency before recording lots of entries.</div>
+</div>
+
+<div class="yn-help-tip warn">
+  <i class="bi bi-exclamation-triangle-fill"></i>
+  <div>Deleting a source with "Delete everything" is permanent. Export your data from Settings first if you are not sure.</div>
+</div>

@@ -1,0 +1,272 @@
+{% extends "base.html" %}
+{% set active_page = "recurring" %}
+
+{% block title %}{{ _('recurring') }}{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2 mb-3">
+      <h5 class="card-title mb-0">{{ _('recurring') }}</h5>
+      <a href="/recurring/new" class="btn btn-sm btn-primary flex-shrink-0">
+        <i class="bi bi-plus me-1"></i>{{ _('new_recurring') }}
+      </a>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+      <select class="form-select form-select-sm" id="filter-frequency" style="width:auto">
+        <option value="">{{ _('frequency') }}</option>
+        <option value="daily" {% if filter_frequency == 'daily' %}selected{% endif %}>{{ _('daily') }}</option>
+        <option value="weekly" {% if filter_frequency == 'weekly' %}selected{% endif %}>{{ _('weekly') }}</option>
+        <option value="monthly" {% if filter_frequency == 'monthly' %}selected{% endif %}>{{ _('monthly') }}</option>
+        <option value="yearly" {% if filter_frequency == 'yearly' %}selected{% endif %}>{{ _('yearly') }}</option>
+      </select>
+      <select class="form-select form-select-sm" id="filter-direction" style="width:auto">
+        <option value="">{{ _('direction') }}</option>
+        <option value="in" {% if filter_direction == 'in' %}selected{% endif %}>{{ _('income') }}</option>
+        <option value="out" {% if filter_direction == 'out' %}selected{% endif %}>{{ _('expense') }}</option>
+      </select>
+      {% if filter_frequency or filter_direction %}
+      <a href="/recurring" class="btn btn-sm btn-outline-danger"><i class="bi bi-arrow-counterclockwise me-1"></i>{{ _('reset_filters') }}</a>
+      {% endif %}
+    </div>
+  </div>
+  <div class="card-body">
+    {% if items %}
+    <div class="row g-3">
+      {% for r in items %}
+      <div class="col-12 col-sm-6 col-lg-4" id="recurring-card-{{ r.id }}">
+        <div class="card h-100 border-0 shadow-sm position-relative overflow-hidden">
+          {# Color accent stripe #}
+          <div class="position-absolute top-0 start-0 w-100" style="height:4px;background:{% if r.direction == 'in' %}var(--yn-success, #71dd37){% else %}var(--yn-danger, #ff3e1d){% endif %}"></div>
+          <div class="card-body pt-4 pb-3 px-3">
+            {# Header: name + amount #}
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h6 class="card-title mb-0 text-truncate me-2">{{ r.name }}</h6>
+              <span class="{% if r.direction == 'in' %}text-success{% else %}text-danger{% endif %} fw-bold flex-shrink-0" style="font-size:1.05rem">
+                {% if r.direction == 'in' %}+{% else %}-{% endif %}{{ "%.2f"|format(r.amount) }} {{ r.currency }}
+              </span>
+            </div>
+            {# Badges row #}
+            <div class="d-flex flex-wrap gap-1 mb-3">
+              <span class="badge bg-label-primary">{{ _(r.frequency) }}</span>
+              <span class="badge bg-label-{% if r.apply_mode == 'auto' %}success{% else %}warning{% endif %}">
+                {% if r.apply_mode == 'auto' %}{{ _('automatic') }}{% else %}{{ _('manual_confirm') }}{% endif %}
+              </span>
+              {% if r.source_name %}
+              <span class="badge bg-label-secondary"><i class="bi bi-wallet2 me-1"></i>{{ r.source_name }}</span>
+              {% endif %}
+            </div>
+            {# Due date #}
+            <div class="d-flex align-items-center mb-3">
+              <i class="bi bi-calendar-event text-muted me-2"></i>
+              <div>
+                <small class="d-block">{{ r.next_due_date|fdate }}</small>
+                {% if r.days_until is not none %}
+                  {% if r.days_until < 0 %}
+                  <small class="text-danger fw-bold">{{ _('overdue').replace('{n}', (-r.days_until)|string) }}</small>
+                  {% elif r.days_until == 0 %}
+                  <small class="text-warning fw-bold">{{ _('due_today') }}</small>
+                  {% elif r.days_until == 1 %}
+                  <small class="text-warning">{{ _('due_tomorrow') }}</small>
+                  {% else %}
+                  <small class="text-muted">{{ _('days_due').replace('{n}', r.days_until|string) }}</small>
+                  {% endif %}
+                {% endif %}
+              </div>
+            </div>
+            {# Actions #}
+            <div class="d-flex gap-1">
+              <button class="btn btn-sm btn-outline-success flex-fill apply-btn"
+                      data-id="{{ r.id }}" data-name="{{ r.name }}" data-amount="{{ r.amount }}" data-currency="{{ r.currency }}" data-direction="{{ r.direction }}"
+                      title="{{ _('apply_now') }}">
+                <i class="bi bi-check-lg me-1"></i>{{ _('apply_now') }}
+              </button>
+              <a href="/recurring/{{ r.id }}/edit" class="btn btn-sm btn-outline-warning" title="{{ _('edit') }}"><i class="bi bi-pencil"></i></a>
+              <button class="btn btn-sm btn-outline-danger" onclick="deleteRecurring({{ r.id }})" title="{{ _('delete') }}"><i class="bi bi-trash"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+      <i class="bi bi-arrow-repeat text-muted mb-2" style="font-size:2.5rem"></i>
+      <p class="text-muted mb-3">{{ _('no_recurring') }}</p>
+      <a href="/recurring/new" class="btn btn-sm btn-primary"><i class="bi bi-plus me-1"></i>{{ _('new_recurring') }}</a>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Pagination -->
+  {% if total_pages > 1 %}
+  <div class="card-footer d-flex justify-content-between align-items-center">
+    <small class="text-muted">
+      {{ _('showing_of').replace('{start}', ((page - 1) * per_page + 1)|string).replace('{end}', [page * per_page, total_count]|min|string).replace('{total}', total_count|string) }}
+    </small>
+    <nav>
+      <ul class="pagination pagination-sm mb-0">
+        <li class="page-item {% if page <= 1 %}disabled{% endif %}">
+          <a class="page-link" href="javascript:void(0)" onclick="goToPage({{ page - 1 }})">{{ _('previous') }}</a>
+        </li>
+        {% for p in range(1, total_pages + 1) %}
+        {% if p == page or (p >= page - 2 and p <= page + 2) or p == 1 or p == total_pages %}
+        <li class="page-item {% if p == page %}active{% endif %}">
+          <a class="page-link" href="javascript:void(0)" onclick="goToPage({{ p }})">{{ p }}</a>
+        </li>
+        {% elif p == page - 3 or p == page + 3 %}
+        <li class="page-item disabled"><span class="page-link">...</span></li>
+        {% endif %}
+        {% endfor %}
+        <li class="page-item {% if page >= total_pages %}disabled{% endif %}">
+          <a class="page-link" href="javascript:void(0)" onclick="goToPage({{ page + 1 }})">{{ _('next') }}</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Apply Modal -->
+<div class="modal fade" id="applyModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ _('apply_now') }}: <span id="apply-modal-name"></span></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted mb-3" id="apply-modal-description"></p>
+        <div class="mb-3">
+          <label for="apply-amount" class="form-label fw-bold">{{ _('amount') }}</label>
+          <div class="input-group">
+            <input type="number" step="0.01" min="0.01" inputmode="decimal" class="form-control form-control-lg" id="apply-amount">
+            <span class="input-group-text" id="apply-currency"></span>
+          </div>
+          <small class="text-muted mt-1 d-block" id="apply-base-hint"></small>
+        </div>
+        <div class="mb-3">
+          <label for="apply-note" class="form-label">{{ _('note') }} ({{ _('optional') }})</label>
+          <input type="text" class="form-control" id="apply-note" placeholder="{{ _('apply_note_placeholder') }}">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ _('cancel') }}</button>
+        <button type="button" class="btn btn-success" onclick="confirmApply()">
+          <i class="bi bi-check-lg me-1"></i>{{ _('confirm_and_apply') }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block page_js %}
+<script>
+  let applyRecurringId = null;
+  let applyBaseAmount = 0;
+
+  document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.apply-btn');
+    if (btn) openApplyModal(parseInt(btn.dataset.id), btn.dataset.name, parseFloat(btn.dataset.amount), btn.dataset.currency, btn.dataset.direction);
+  });
+
+  function openApplyModal(id, name, amount, currency, direction) {
+    applyRecurringId = id;
+    applyBaseAmount = amount;
+    document.getElementById('apply-modal-name').textContent = name;
+    document.getElementById('apply-amount').value = amount.toFixed(2);
+    document.getElementById('apply-currency').textContent = currency;
+    document.getElementById('apply-base-hint').textContent =
+      `{{ _("base_amount") }}: ${amount.toFixed(2)} ${currency}. {{ _("adjust_if_needed") }}`;
+    document.getElementById('apply-modal-description').textContent =
+      `${direction === 'in' ? '{{ _("income") }}' : '{{ _("expense") }}'} — {{ _("adjust_amount_hint") }}`;
+    document.getElementById('apply-note').value = '';
+
+    const modal = new bootstrap.Modal(document.getElementById('applyModal'));
+    modal.show();
+
+    // Focus on amount field for quick editing
+    setTimeout(() => {
+      const input = document.getElementById('apply-amount');
+      input.focus();
+      input.select();
+    }, 300);
+  }
+
+  async function confirmApply() {
+    const amount = parseFloat(document.getElementById('apply-amount').value);
+    const note = document.getElementById('apply-note').value.trim() || null;
+
+    if (!amount || amount <= 0) {
+      showToast('{{ _("error") }}', 'error');
+      return;
+    }
+
+    const body = {};
+    // Only send amount if it differs from base
+    if (Math.abs(amount - applyBaseAmount) > 0.001) {
+      body.amount = amount;
+    }
+    if (note) {
+      body.note = note;
+    }
+
+    const resp = await fetch(`/api/recurring/${applyRecurringId}/apply`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    if (resp.ok) {
+      bootstrap.Modal.getInstance(document.getElementById('applyModal')).hide();
+      showToast('{{ _("applied_successfully") }}', 'success');
+      location.reload();
+    } else {
+      await handleApiError(resp);
+    }
+  }
+
+  // Allow Enter key to confirm in the modal
+  document.getElementById('apply-amount').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); confirmApply(); }
+  });
+  document.getElementById('apply-note').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); confirmApply(); }
+  });
+
+  // --- Filters ---
+  function getRecurringParams() {
+    var params = new URLSearchParams();
+    var freq = document.getElementById('filter-frequency').value;
+    var dir = document.getElementById('filter-direction').value;
+    if (freq) params.set('frequency', freq);
+    if (dir) params.set('direction', dir);
+    return params;
+  }
+
+  ['filter-frequency', 'filter-direction'].forEach(function(id) {
+    document.getElementById(id).addEventListener('change', function() {
+      window.location.href = '/recurring' + (getRecurringParams().toString() ? '?' + getRecurringParams().toString() : '');
+    });
+  });
+
+  function goToPage(p) {
+    var params = getRecurringParams();
+    if (p > 1) params.set('page', p);
+    window.location.href = '/recurring' + (params.toString() ? '?' + params.toString() : '');
+  }
+
+  async function deleteRecurring(id) {
+    if (!(await confirmDialog('{{ _("delete") }}?', {icon: 'warning', confirmColor: 'danger', confirmText: '{{ _("delete") }}'}))) return;
+    const resp = await fetch(`/api/recurring/${id}`, { method: 'DELETE' });
+    if (resp.ok) {
+      var card = document.getElementById(`recurring-card-${id}`);
+      if (card) card.remove();
+      showToast('{{ _("deleted_successfully") }}', 'success');
+    } else {
+      await handleApiError(resp);
+    }
+  }
+</script>
+{% endblock %}

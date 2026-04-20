@@ -1,0 +1,370 @@
+{% extends "base.html" %}
+{% set active_page = "sources" %}
+
+{% block title %}{{ _('sources') }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h5 class="mb-0">{{ _('sources') }}</h5>
+  <a href="/sources/new" class="btn btn-primary">
+    <i class="bi bi-plus me-1"></i>{{ _('new_source') }}
+  </a>
+</div>
+
+{% if sources %}
+{% set ns = namespace(currencies=[]) %}
+{% for s in sources %}
+  {% if s.currency not in ns.currencies %}
+    {% set ns.currencies = ns.currencies + [s.currency] %}
+  {% endif %}
+{% endfor %}
+
+{% for currency in ns.currencies %}
+{% set currency_sources = sources|selectattr('currency', 'equalto', currency)|list %}
+{% set currency_total = currency_sources|map(attribute='total_with_portfolios')|sum %}
+<div class="mb-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex align-items-center">
+      <span class="badge bg-primary me-2">{{ currency }}</span>
+      <small class="text-muted">({{ currency_sources|length }})</small>
+    </div>
+    <span class="fw-bold {% if currency_total >= 0 %}text-success{% else %}text-danger{% endif %}">{{ "%.2f"|format(currency_total) }} {{ currency }}</span>
+  </div>
+  <div class="row g-4">
+    {% for s in currency_sources %}
+    <div class="col-md-6 col-lg-4" id="source-card-{{ s.id }}">
+      <div class="card h-100">
+        <div class="card-body pb-2 d-flex flex-column">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <a href="/sources/{{ s.id }}" class="text-decoration-none">
+              <h5 class="card-title mb-0">{{ s.name }}</h5>
+            </a>
+          </div>
+          {% set has_portfolios = s.portfolio_value_same_ccy or s.portfolio_value_other_ccy %}
+          {% set displayed = s.total_with_portfolios if has_portfolios else s.current_balance %}
+          <div class="d-flex align-items-baseline gap-2 mb-2">
+            <h3 class="mb-0 {% if displayed >= 0 %}text-success{% else %}text-danger{% endif %}">
+              {{ "%.2f"|format(displayed) }}
+            </h3>
+            <span class="text-muted small">{{ s.currency }}</span>
+          </div>
+          {% if has_portfolios %}
+          <div class="row g-2 mb-2">
+            <div class="col-6">
+              <div class="border rounded px-2 py-1">
+                <div class="d-flex align-items-center gap-1 text-muted" style="font-size:.72rem">
+                  <i class="bi bi-cash-stack"></i><span>{{ _('cash') }}</span>
+                </div>
+                <div class="fw-semibold" style="font-size:.95rem">{{ "%.2f"|format(s.current_balance) }}</div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="border rounded px-2 py-1">
+                <div class="d-flex align-items-center gap-1 text-muted" style="font-size:.72rem">
+                  <i class="bi bi-graph-up"></i><span>{{ _('investments') }}</span>
+                </div>
+                <div class="fw-semibold" style="font-size:.95rem">{{ "%.2f"|format(s.portfolio_value_same_ccy) }}</div>
+              </div>
+            </div>
+          </div>
+          {% if s.portfolio_value_other_ccy %}
+          <div class="d-flex flex-wrap gap-1 mb-2">
+            {% for cur, val in s.portfolio_value_other_ccy.items() %}
+            <span class="badge bg-label-info" title="{{ _('investments') }}"><i class="bi bi-graph-up me-1"></i>{{ "%.2f"|format(val) }} {{ cur }}</span>
+            {% endfor %}
+          </div>
+          {% endif %}
+          {% endif %}
+          <div class="d-flex justify-content-between align-items-center text-muted" style="font-size:.78rem">
+            <span><i class="bi bi-clock-history me-1"></i>{{ _('starting_balance') }}: {{ "%.2f"|format(s.starting_balance) }}</span>
+            <span><i class="bi bi-arrow-left-right me-1"></i>{{ s.movement_count }}</span>
+          </div>
+          <div class="mt-auto pt-2 position-relative" style="min-height:80px">
+            <canvas id="sparkline-{{ s.id }}"></canvas>
+          </div>
+        </div>
+        <div class="card-footer d-flex justify-content-end flex-wrap gap-1 pt-0">
+          <a href="/sources/{{ s.id }}" class="btn btn-sm btn-outline-primary" title="{{ _('view_all') }}"><i class="bi bi-eye"></i></a>
+          <a href="/movements/new?source_id={{ s.id }}" class="btn btn-sm btn-outline-success" title="{{ _('new_movement') }}"><i class="bi bi-plus"></i></a>
+          <a href="/sources/{{ s.id }}/edit" class="btn btn-sm btn-outline-warning" title="{{ _('edit') }}"><i class="bi bi-pencil"></i></a>
+          <button class="btn btn-sm btn-outline-info merge-btn" data-id="{{ s.id }}" data-name="{{ s.name }}" data-currency="{{ s.currency }}" title="{{ _('merge') }}"><i class="bi bi-arrows-collapse"></i></button>
+          <button class="btn btn-sm btn-outline-danger delete-btn" data-id="{{ s.id }}" data-name="{{ s.name }}" title="{{ _('delete') }}"><i class="bi bi-trash"></i></button>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endfor %}
+{% else %}
+<div class="card">
+  <div class="card-body text-center py-5">
+    <i class="bi bi-wallet2 text-muted mb-3" style="font-size:3rem"></i>
+    <p class="text-muted mb-3">{{ _('no_sources') }}</p>
+    <a href="/sources/new" class="btn btn-primary"><i class="bi bi-plus me-1"></i>{{ _('new_source') }}</a>
+  </div>
+</div>
+{% endif %}
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title"><i class="bi bi-trash me-2"></i>{{ _('delete') }}: <span id="delete-source-name"></span></h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-warning" id="delete-deps-info"></div>
+        <div class="alert alert-danger d-none" id="delete-portfolio-warning"></div>
+        <div class="mb-3">
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="radio" name="delete_action" id="action-delete-all" value="delete_all" checked>
+            <label class="form-check-label" for="action-delete-all">
+              <strong>{{ _('delete_all_data') }}</strong>
+              <small class="d-block text-muted">{{ _('delete_all_data_hint') }}</small>
+            </label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="radio" name="delete_action" id="action-move-to" value="move_to">
+            <label class="form-check-label" for="action-move-to">
+              <strong>{{ _('move_to_source') }}</strong>
+              <small class="d-block text-muted">{{ _('move_to_source_hint') }}</small>
+            </label>
+            <select class="form-select form-select-sm mt-1 ms-4" id="delete-target-source" style="width: auto;" disabled>
+              {% for s in sources %}
+              <option value="{{ s.id }}">{{ s.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="radio" name="delete_action" id="action-make-external" value="make_external">
+            <label class="form-check-label" for="action-make-external">
+              <strong>{{ _('make_external') }}</strong>
+              <small class="d-block text-muted">{{ _('make_external_hint') }}</small>
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ _('cancel') }}</button>
+        <button type="button" class="btn btn-danger" onclick="confirmDelete()">
+          <i class="bi bi-trash me-1"></i>{{ _('confirm') }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Merge Modal -->
+<div class="modal fade" id="mergeModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-info text-white">
+        <h5 class="modal-title"><i class="bi bi-arrows-collapse me-2"></i>{{ _('merge') }}: <span id="merge-source-name"></span></h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted">{{ _('merge_hint') }}</p>
+        <div class="mb-3">
+          <label for="merge-target" class="form-label fw-bold">{{ _('merge_into') }}</label>
+          <select class="form-select" id="merge-target"></select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ _('cancel') }}</button>
+        <button type="button" class="btn btn-info" onclick="confirmMerge()">
+          <i class="bi bi-arrows-collapse me-1"></i>{{ _('confirm') }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block page_js %}
+<script src="/static/vendor/chartjs/chart.umd.min.js"></script>
+<script>
+  // --- Sparkline charts ---
+  const sparklineColors = { positive: '#71dd37', negative: '#ff3e1d' };
+
+  async function loadSparkline(sourceId, balance) {
+    try {
+      const resp = await fetch(`/api/sources/${sourceId}/history?range=30d`);
+      if (!resp.ok) return;
+      const points = await resp.json();
+      if (!points || points.length < 2) return;
+
+      const canvas = document.getElementById(`sparkline-${sourceId}`);
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const color = balance >= 0 ? sparklineColors.positive : sparklineColors.negative;
+
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: points.map(p => p.date),
+          datasets: [{
+            data: points.map(p => p.balance),
+            borderColor: color,
+            backgroundColor: color + '20',
+            fill: true,
+            tension: 0.4,
+            pointRadius: 0,
+            pointHoverRadius: 5,
+            pointHoverBackgroundColor: color,
+            pointHoverBorderColor: '#fff',
+            pointHoverBorderWidth: 2,
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          resizeDelay: 200,
+          interaction: { intersect: false, mode: 'index' },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              enabled: true,
+              backgroundColor: 'rgba(0,0,0,0.8)',
+              titleFont: { size: 11 },
+              bodyFont: { size: 12, weight: 'bold' },
+              padding: 8,
+              cornerRadius: 6,
+              displayColors: false,
+              callbacks: {
+                title: function(items) { return fmtDate(items[0].label); },
+                label: function(ctx) { return ctx.parsed.y.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}); }
+              }
+            }
+          },
+          scales: {
+            x: { display: false },
+            y: { display: false }
+          },
+          animation: { duration: 500 }
+        }
+      });
+    } catch (e) { /* silently fail */ }
+  }
+
+  // Load all sparklines
+  document.addEventListener('DOMContentLoaded', function() {
+    {% for s in sources %}
+    loadSparkline({{ s.id }}, {{ s.current_balance }});
+    {% endfor %}
+  });
+
+  document.addEventListener('click', function(e) {
+    const mergeBtn = e.target.closest('.merge-btn');
+    if (mergeBtn) openMergeModal(parseInt(mergeBtn.dataset.id), mergeBtn.dataset.name, mergeBtn.dataset.currency);
+    const delBtn = e.target.closest('.delete-btn');
+    if (delBtn) openDeleteModal(parseInt(delBtn.dataset.id), delBtn.dataset.name);
+  });
+
+  let deleteSourceId = null;
+  let mergeSourceId = null;
+
+  // --- Delete ---
+  document.querySelectorAll('input[name="delete_action"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+      document.getElementById('delete-target-source').disabled = radio.value !== 'move_to';
+    });
+  });
+
+  async function openDeleteModal(id, name) {
+    deleteSourceId = id;
+    document.getElementById('delete-source-name').textContent = name;
+    // Hide own source from target dropdown
+    const targetSelect = document.getElementById('delete-target-source');
+    Array.from(targetSelect.options).forEach(opt => {
+      opt.style.display = parseInt(opt.value) === id ? 'none' : '';
+    });
+    // Fetch dependencies
+    const resp = await fetch(`/api/sources/${id}/dependencies`);
+    const deps = await resp.json();
+    const depsEl = document.getElementById('delete-deps-info');
+    depsEl.textContent = '';
+    const b1 = document.createElement('strong'); b1.textContent = name;
+    const b2 = document.createElement('strong'); b2.textContent = deps.movement_count;
+    const b3 = document.createElement('strong'); b3.textContent = deps.recurring_count;
+    depsEl.appendChild(b1);
+    depsEl.append(' {{ _("has") }} ');
+    depsEl.appendChild(b2);
+    depsEl.append(' {{ _("movements").lower() }} {{ _("and") }} ');
+    depsEl.appendChild(b3);
+    depsEl.append(' {{ _("recurring").lower() }}.');
+    // Show portfolio-specific warning if any
+    const pfWarn = document.getElementById('delete-portfolio-warning');
+    const pfMakeExternal = document.getElementById('action-make-external');
+    if (deps.portfolio_count && deps.portfolio_count > 0) {
+      pfWarn.textContent = '{{ _("source_has_portfolios_warning") }}'.replace('{n}', deps.portfolio_count);
+      pfWarn.classList.remove('d-none');
+      if (pfMakeExternal) pfMakeExternal.disabled = true;
+    } else {
+      pfWarn.classList.add('d-none');
+      if (pfMakeExternal) pfMakeExternal.disabled = false;
+    }
+    // Reset to default
+    document.getElementById('action-delete-all').checked = true;
+    document.getElementById('delete-target-source').disabled = true;
+    new bootstrap.Modal(document.getElementById('deleteModal')).show();
+  }
+
+  async function confirmDelete() {
+    const action = document.querySelector('input[name="delete_action"]:checked').value;
+    let queryAction = action;
+    if (action === 'move_to') {
+      const targetId = document.getElementById('delete-target-source').value;
+      queryAction = `move_to:${targetId}`;
+    }
+    const resp = await fetch(`/api/sources/${deleteSourceId}?action=${encodeURIComponent(queryAction)}`, { method: 'DELETE' });
+    if (resp.ok) {
+      bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
+      showToast('{{ _("deleted_successfully") }}', 'success');
+      location.reload();
+    } else {
+      await handleApiError(resp);
+    }
+  }
+
+  // --- Merge ---
+  function openMergeModal(id, name, currency) {
+    mergeSourceId = id;
+    document.getElementById('merge-source-name').textContent = name;
+    const targetSelect = document.getElementById('merge-target');
+    targetSelect.innerHTML = '';
+    // Populate with same-currency sources, excluding self
+    {% for s in sources %}
+    if ({{ s.id }} !== id && '{{ s.currency }}' === currency) {
+      const opt = document.createElement('option');
+      opt.value = {{ s.id }};
+      opt.textContent = '{{ s.name }} ({{ s.currency }})';
+      targetSelect.appendChild(opt);
+    }
+    {% endfor %}
+    if (targetSelect.options.length === 0) {
+      targetSelect.innerHTML = '<option disabled>{{ _("no_compatible_sources") }}</option>';
+    }
+    new bootstrap.Modal(document.getElementById('mergeModal')).show();
+  }
+
+  async function confirmMerge() {
+    const targetId = parseInt(document.getElementById('merge-target').value);
+    if (!targetId) return;
+    const resp = await fetch('/api/sources/merge', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ from_source_id: mergeSourceId, into_source_id: targetId })
+    });
+    if (resp.ok) {
+      bootstrap.Modal.getInstance(document.getElementById('mergeModal')).hide();
+      showToast('{{ _("merged_successfully") }}', 'success');
+      location.reload();
+    } else {
+      await handleApiError(resp);
+    }
+  }
+</script>
+{% endblock %}

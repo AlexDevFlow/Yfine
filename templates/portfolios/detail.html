@@ -1,0 +1,411 @@
+{% extends "base.html" %}
+{% set active_page = "portfolios" %}
+
+{% block title %}{{ portfolio.name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-2">
+  <div>
+    <div class="d-flex align-items-center gap-2 mb-1">
+      <a href="/portfolios" class="text-muted"><i class="bi bi-arrow-left"></i></a>
+      <h5 class="mb-0">{{ portfolio.name }}</h5>
+      <span class="badge
+        {% if portfolio.kind == 'crypto' %}bg-label-warning
+        {% elif portfolio.kind == 'stocks' %}bg-label-info
+        {% else %}bg-label-secondary{% endif %}">
+        {{ _('portfolio_kind_' ~ portfolio.kind) }}
+      </span>
+    </div>
+    {% if portfolio.note %}<small class="text-muted d-block">{{ portfolio.note }}</small>{% endif %}
+    {% if linked_source %}
+    <small class="text-muted d-block"><i class="bi bi-wallet2 me-1"></i>{{ _('linked_source') }}: <a href="/sources/{{ linked_source.id }}" class="text-muted">{{ linked_source.name }}</a></small>
+    {% endif %}
+  </div>
+  <div class="d-flex gap-2">
+    <button type="button" class="btn btn-outline-primary btn-sm" onclick="refreshAllPrices()" {% if not prices_enabled %}disabled{% endif %}>
+      <i class="bi bi-arrow-clockwise me-1"></i>{{ _('refresh_prices') }}
+    </button>
+    <a href="/portfolios/{{ portfolio.id }}/edit" class="btn btn-outline-warning btn-sm">
+      <i class="bi bi-pencil me-1"></i>{{ _('edit') }}
+    </a>
+  </div>
+</div>
+
+{% if prices_enabled %}
+<div class="small text-muted mb-3"><i class="bi bi-info-circle me-1"></i>{{ _('portfolio_auto_refresh_info') }}</div>
+{% endif %}
+
+<!-- Summary card -->
+<div class="row mb-4">
+  <div class="col-md-4 mb-3">
+    <div class="card h-100">
+      <div class="card-body">
+        <small class="text-muted">{{ _('total_value') }}</small>
+        <h4 class="mb-0 fw-bold">{{ "%.2f"|format(portfolio.total_value) }} <small class="fs-6 text-muted">{{ portfolio.base_currency }}</small></h4>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4 mb-3">
+    <div class="card h-100">
+      <div class="card-body">
+        <small class="text-muted">{{ _('invested') }}</small>
+        <h4 class="mb-0 fw-bold">{{ "%.2f"|format(portfolio.total_cost) }} <small class="fs-6 text-muted">{{ portfolio.base_currency }}</small></h4>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4 mb-3">
+    <div class="card h-100">
+      <div class="card-body">
+        <small class="text-muted">{{ _('unrealized_pnl') }}</small>
+        <h4 class="mb-0 fw-bold {% if portfolio.total_pnl >= 0 %}text-success{% else %}text-danger{% endif %}">
+          {% if portfolio.total_pnl >= 0 %}+{% endif %}{{ "%.2f"|format(portfolio.total_pnl) }}
+          <small class="fs-6">({% if portfolio.total_pnl_pct >= 0 %}+{% endif %}{{ "%.2f"|format(portfolio.total_pnl_pct) }}%)</small>
+        </h4>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Holdings -->
+<div class="card">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h6 class="card-title mb-0">{{ _('holdings') }}</h6>
+    <button type="button" class="btn btn-sm btn-primary" onclick="openHoldingModal()">
+      <i class="bi bi-plus me-1"></i>{{ _('add_holding') }}
+    </button>
+  </div>
+  <div class="card-body p-0">
+    {% if portfolio.holdings %}
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th>{{ _('asset') }}</th>
+            <th class="text-end">{{ _('quantity') }}</th>
+            <th class="text-end">{{ _('avg_cost') }}</th>
+            <th class="text-end">{{ _('last_price') }}</th>
+            <th class="text-end">{{ _('market_value') }}</th>
+            <th class="text-end">{{ _('unrealized_pnl') }}</th>
+            <th class="text-end" style="width:140px"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for h in portfolio.holdings %}
+          <tr>
+            <td>
+              <strong>{{ h.symbol }}</strong>
+              {% if h.display_name %}<small class="text-muted d-block">{{ h.display_name }}</small>{% endif %}
+              <span class="badge {% if h.asset_class == 'crypto' %}bg-label-warning{% else %}bg-label-info{% endif %} mt-1">
+                {{ _(h.asset_class) }}
+              </span>
+              {% if h.manual_price %}<span class="badge bg-label-secondary mt-1">{{ _('manual') }}</span>{% endif %}
+            </td>
+            <td class="text-end">{{ "%.6f"|format(h.quantity) }}</td>
+            <td class="text-end">{{ "%.4f"|format(h.avg_cost) }} {{ h.currency }}</td>
+            <td class="text-end">
+              {% if h.last_price is not none %}
+                {{ "%.4f"|format(h.last_price) }} {{ h.currency }}
+                {% if h.last_price_at %}<small class="d-block text-muted" title="{{ h.last_price_at }}">{{ h.last_price_at[11:16] }}</small>{% endif %}
+              {% else %}
+                <span class="text-muted">—</span>
+              {% endif %}
+            </td>
+            <td class="text-end">
+              {% if h.market_value is not none %}
+                <strong>{{ "%.2f"|format(h.market_value) }}</strong>
+              {% else %}—{% endif %}
+            </td>
+            <td class="text-end">
+              {% if h.unrealized_pnl is not none %}
+                <span class="fw-bold {% if h.unrealized_pnl >= 0 %}text-success{% else %}text-danger{% endif %}">
+                  {% if h.unrealized_pnl >= 0 %}+{% endif %}{{ "%.2f"|format(h.unrealized_pnl) }}
+                  <small>({% if h.unrealized_pnl_pct >= 0 %}+{% endif %}{{ "%.2f"|format(h.unrealized_pnl_pct) }}%)</small>
+                </span>
+              {% else %}—{% endif %}
+            </td>
+            <td class="text-end">
+              <button class="btn btn-sm btn-outline-warning" onclick='editHolding({{ h | tojson }})' title="{{ _('edit') }}"><i class="bi bi-pencil"></i></button>
+              <button class="btn btn-sm btn-outline-danger" onclick="deleteHolding({{ h.id }}, '{{ h.symbol }}')" title="{{ _('delete') }}"><i class="bi bi-trash"></i></button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center text-muted py-5">
+      <i class="bi bi-collection mb-2" style="font-size:2rem"></i>
+      <p class="mb-3">{{ _('no_holdings') }}</p>
+      <button type="button" class="btn btn-primary btn-sm" onclick="openHoldingModal()">
+        <i class="bi bi-plus me-1"></i>{{ _('add_holding') }}
+      </button>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Delete holding confirm modal (Bootstrap — pywebview-safe) -->
+<div class="modal fade" id="deleteHoldingModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title"><i class="bi bi-trash me-2"></i>{{ _('delete') }}: <span id="delete-holding-name"></span></h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-0">{{ _('confirm') }}?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ _('cancel') }}</button>
+        <button type="button" class="btn btn-danger" id="confirm-delete-holding-btn">
+          <i class="bi bi-trash me-1"></i>{{ _('confirm') }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Holding modal -->
+<div class="modal fade" id="holdingModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="holdingModalTitle">{{ _('add_holding') }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="holding-form">
+          <input type="hidden" id="h_id" value="">
+          {% if portfolio.kind == 'mixed' %}
+          <div class="mb-3">
+            <label class="form-label">{{ _('asset_class') }}</label>
+            <div class="d-flex gap-2">
+              <label class="flex-grow-1">
+                <input type="radio" name="asset_class" value="crypto" class="btn-check" id="ac-crypto">
+                <label class="btn btn-sm btn-outline-warning w-100" for="ac-crypto"><i class="bi bi-currency-bitcoin me-1"></i>{{ _('crypto') }}</label>
+              </label>
+              <label class="flex-grow-1">
+                <input type="radio" name="asset_class" value="stock" class="btn-check" id="ac-stock" checked>
+                <label class="btn btn-sm btn-outline-info w-100" for="ac-stock"><i class="bi bi-graph-up me-1"></i>{{ _('stock') }}</label>
+              </label>
+            </div>
+          </div>
+          {% else %}
+          {% set fixed_asset_class = 'crypto' if portfolio.kind == 'crypto' else 'stock' %}
+          <input type="hidden" name="asset_class" id="h_asset_class_fixed" value="{{ fixed_asset_class }}">
+          {% endif %}
+          <div class="row g-2 mb-3">
+            <div class="col-sm-6">
+              <label for="h_symbol" class="form-label">{{ _('symbol') }}</label>
+              <input type="text" class="form-control form-control-sm" id="h_symbol"
+                placeholder="{% if portfolio.kind == 'crypto' %}BTC, ETH, SOL{% elif portfolio.kind == 'stocks' %}AAPL, MSFT, ENI.MI{% else %}BTC, AAPL, ENI.MI{% endif %}" required>
+              <small class="text-muted" id="symbol-hint"></small>
+            </div>
+            <div class="col-sm-6">
+              <label for="h_display_name" class="form-label">{{ _('display_name') }} <small class="text-muted">({{ _('optional') }})</small></label>
+              <input type="text" class="form-control form-control-sm" id="h_display_name">
+            </div>
+          </div>
+          <div class="row g-2 mb-3">
+            <div class="col-sm-4">
+              <label for="h_quantity" class="form-label" id="h_quantity_label">{{ _('quantity') }}</label>
+              <input type="number" step="any" inputmode="decimal" class="form-control form-control-sm" id="h_quantity" value="0" required>
+            </div>
+            <div class="col-sm-4">
+              <label for="h_avg_cost" class="form-label" id="h_avg_cost_label">{{ _('avg_cost') }}</label>
+              <input type="number" step="any" inputmode="decimal" class="form-control form-control-sm" id="h_avg_cost" value="0">
+            </div>
+            <div class="col-sm-4">
+              <label for="h_currency" class="form-label">{{ _('currency') }}</label>
+              <select class="form-select form-select-sm" id="h_currency">
+                {% set currencies = ['EUR', 'USD', 'GBP', 'CHF', 'JPY', 'CAD', 'AUD', 'CNY', 'BTC', 'ETH'] %}
+                {% for c in currencies %}
+                <option value="{{ c }}" {% if c == portfolio.base_currency %}selected{% endif %}>{{ c }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" id="h_manual_price">
+            <label class="form-check-label small" for="h_manual_price">{{ _('manual_price_mode') }}</label>
+            <small class="d-block text-muted">{{ _('manual_price_mode_hint') }}</small>
+          </div>
+          <div class="mb-3" id="manual-price-wrap" style="display:none">
+            <label for="h_last_price" class="form-label">{{ _('price') }}</label>
+            <input type="number" step="any" inputmode="decimal" class="form-control form-control-sm" id="h_last_price">
+          </div>
+          <div class="mb-0">
+            <label for="h_note" class="form-label">{{ _('note') }}</label>
+            <textarea class="form-control form-control-sm" id="h_note" rows="2"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ _('cancel') }}</button>
+        <button type="button" class="btn btn-primary" onclick="saveHolding()">{{ _('save') }}</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block page_js %}
+<script>
+  var PORTFOLIO_ID = {{ portfolio.id }};
+  var PORTFOLIO_KIND = '{{ portfolio.kind }}';
+  var modalEl = document.getElementById('holdingModal');
+  var bsModal = null;
+
+  function _getAssetClass() {
+    var fixed = document.getElementById('h_asset_class_fixed');
+    if (fixed) return fixed.value;
+    var checked = document.querySelector('input[name="asset_class"]:checked');
+    return checked ? checked.value : 'stock';
+  }
+
+  function _setAssetClassRadio(val) {
+    if (PORTFOLIO_KIND !== 'mixed') return;
+    if (val === 'crypto') document.getElementById('ac-crypto').checked = true;
+    else document.getElementById('ac-stock').checked = true;
+  }
+
+  function openHoldingModal() {
+    document.getElementById('holdingModalTitle').textContent = '{{ _("add_holding") }}';
+    document.getElementById('h_id').value = '';
+    document.getElementById('h_symbol').value = '';
+    document.getElementById('h_display_name').value = '';
+    document.getElementById('h_quantity').value = '0';
+    document.getElementById('h_avg_cost').value = '0';
+    document.getElementById('h_last_price').value = '';
+    document.getElementById('h_manual_price').checked = false;
+    document.getElementById('h_note').value = '';
+    if (PORTFOLIO_KIND === 'crypto') _setAssetClassRadio('crypto');
+    else if (PORTFOLIO_KIND === 'stocks') _setAssetClassRadio('stock');
+    else _setAssetClassRadio('stock');
+    updateManualPriceVisibility();
+    updateAssetHints();
+    bsModal = new bootstrap.Modal(modalEl);
+    bsModal.show();
+  }
+
+  function editHolding(h) {
+    document.getElementById('holdingModalTitle').textContent = '{{ _("edit") }}: ' + h.symbol;
+    document.getElementById('h_id').value = h.id;
+    document.getElementById('h_symbol').value = h.symbol;
+    document.getElementById('h_display_name').value = h.display_name || '';
+    document.getElementById('h_quantity').value = h.quantity;
+    document.getElementById('h_avg_cost').value = h.avg_cost;
+    document.getElementById('h_currency').value = h.currency;
+    document.getElementById('h_last_price').value = h.last_price || '';
+    document.getElementById('h_manual_price').checked = !!h.manual_price;
+    document.getElementById('h_note').value = h.note || '';
+    _setAssetClassRadio(h.asset_class);
+    updateManualPriceVisibility();
+    updateAssetHints();
+    bsModal = new bootstrap.Modal(modalEl);
+    bsModal.show();
+  }
+
+  function updateManualPriceVisibility() {
+    var manual = document.getElementById('h_manual_price').checked;
+    document.getElementById('manual-price-wrap').style.display = manual ? '' : 'none';
+  }
+
+  function updateAssetHints() {
+    var isCrypto = _getAssetClass() === 'crypto';
+    document.getElementById('symbol-hint').textContent = isCrypto
+      ? '{{ _("symbol_hint_crypto") }}'
+      : '{{ _("symbol_hint_stock") }}';
+    document.getElementById('h_quantity_label').textContent = isCrypto
+      ? '{{ _("num_tokens") }}'
+      : '{{ _("num_shares") }}';
+    document.getElementById('h_avg_cost_label').textContent = isCrypto
+      ? '{{ _("avg_cost_per_token") }}'
+      : '{{ _("avg_cost_per_share") }}';
+  }
+
+  document.getElementById('h_manual_price').addEventListener('change', updateManualPriceVisibility);
+  {% if portfolio.kind == 'mixed' %}
+  document.getElementById('ac-crypto').addEventListener('change', updateAssetHints);
+  document.getElementById('ac-stock').addEventListener('change', updateAssetHints);
+  {% endif %}
+
+  async function saveHolding() {
+    var id = document.getElementById('h_id').value;
+    var assetClass = _getAssetClass();
+    var manualPrice = document.getElementById('h_manual_price').checked;
+    var lastPriceRaw = document.getElementById('h_last_price').value;
+    var body = {
+      portfolio_id: PORTFOLIO_ID,
+      asset_class: assetClass,
+      symbol: document.getElementById('h_symbol').value,
+      display_name: document.getElementById('h_display_name').value || null,
+      quantity: parseFloat(document.getElementById('h_quantity').value) || 0,
+      avg_cost: parseFloat(document.getElementById('h_avg_cost').value) || 0,
+      currency: document.getElementById('h_currency').value,
+      manual_price: manualPrice,
+      last_price: (manualPrice && lastPriceRaw !== '') ? parseFloat(lastPriceRaw) : null,
+      note: document.getElementById('h_note').value || null,
+    };
+    var resp;
+    if (id) {
+      resp = await fetch('/api/portfolios/holdings/' + id, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+    } else {
+      resp = await fetch('/api/portfolios/' + PORTFOLIO_ID + '/holdings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+    }
+    if (resp.ok) {
+      if (bsModal) bsModal.hide();
+      showToast('{{ _("saved") }}', 'success');
+      setTimeout(() => location.reload(), 400);
+    } else {
+      await handleApiError(resp);
+    }
+  }
+
+  var _pendingDeleteHoldingId = null;
+
+  function deleteHolding(id, sym) {
+    _pendingDeleteHoldingId = id;
+    document.getElementById('delete-holding-name').textContent = sym;
+    new bootstrap.Modal(document.getElementById('deleteHoldingModal')).show();
+  }
+
+  async function _confirmDeleteHolding() {
+    if (_pendingDeleteHoldingId == null) return;
+    var resp = await fetch('/api/portfolios/holdings/' + _pendingDeleteHoldingId, { method: 'DELETE' });
+    var m = bootstrap.Modal.getInstance(document.getElementById('deleteHoldingModal'));
+    if (m) m.hide();
+    if (resp.ok) {
+      showToast('{{ _("deleted_successfully") }}', 'success');
+      setTimeout(() => location.reload(), 400);
+    } else {
+      await handleApiError(resp);
+    }
+  }
+  document.getElementById('confirm-delete-holding-btn').addEventListener('click', _confirmDeleteHolding);
+
+  async function refreshAllPrices() {
+    showToast('{{ _("refreshing_prices") }}...', 'info');
+    var resp = await fetch('/api/portfolios/refresh-prices', { method: 'POST' });
+    if (resp.ok) {
+      var data = await resp.json();
+      if (!data.enabled) {
+        showToast('{{ _("prices_off_title") }}', 'warning');
+        return;
+      }
+      showToast('{{ _("updated") }}: ' + data.updated, 'success');
+      setTimeout(() => location.reload(), 600);
+    } else {
+      await handleApiError(resp);
+    }
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,177 @@
+{# Import from other platforms and banks — partial loaded from settings/index.html #}
+<div class="tab-pane fade" id="tab-imports" role="tabpanel">
+  <div class="card mb-3">
+    <div class="card-body">
+      <h6 class="d-flex align-items-center gap-2 mb-3">
+        <span class="yn-icon-box rounded bg-label-info p-2"><i class="bi bi-cloud-upload"></i></span>
+        {{ _('import_from_bank') }}
+      </h6>
+      <p class="text-muted small mb-3">{{ _('import_from_bank_desc') }}</p>
+
+      {# --- Zona upload --- #}
+      <div id="imp-upload-zone" class="border rounded p-4 text-center position-relative" style="border-style: dashed !important; cursor: pointer;">
+        <input type="file" id="imp-file-input" accept=".csv,.ofx,.qfx,.xlsx" style="display:none">
+        <i class="bi bi-cloud-arrow-up text-info" style="font-size:2.5rem;"></i>
+        <p class="mb-1 mt-2 fw-medium">{{ _('import_drop_or_click') }}</p>
+        <small class="text-muted">{{ _('import_supported_formats') }}</small>
+      </div>
+
+      <div class="mt-3">
+        <a class="small text-decoration-none" href="javascript:void(0)" id="imp-toggle-advanced">
+          <i class="bi bi-chevron-right"></i> {{ _('import_advanced_options') }}
+        </a>
+        <div id="imp-advanced" class="mt-3" style="display:none">
+          <div class="row g-2">
+            <div class="col-md-6">
+              <label class="form-label small mb-1">{{ _('import_format_label') }}</label>
+              <select id="imp-format-select" class="form-select form-select-sm">
+                <option value="">{{ _('import_format_auto') }}</option>
+                {% for fmt in import_formats %}
+                <option value="{{ fmt.key }}">{{ fmt.display_name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small mb-1">{{ _('import_preset_label') }}</label>
+              <select id="imp-preset-select" class="form-select form-select-sm">
+                <option value="">{{ _('import_preset_auto') }}</option>
+                {% for p in import_presets %}
+                <option value="{{ p.id }}" data-format="{{ p.format }}">{{ p.display_name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {# --- Zona preview & conferma --- #}
+      <div id="imp-preview-panel" class="mt-4" style="display:none">
+        <hr>
+        <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+          <i class="bi bi-check-circle text-success"></i>
+          <span class="fw-medium" id="imp-filename"></span>
+          <span id="imp-preset-badge" class="badge bg-success" style="display:none"></span>
+          <span id="imp-format-badge" class="badge bg-secondary"></span>
+        </div>
+
+        <div class="row g-2 small text-muted mb-3">
+          <div class="col-auto"><i class="bi bi-list-ol me-1"></i><span id="imp-row-count">0</span> {{ _('movements') | lower }}</div>
+          <div class="col-auto"><i class="bi bi-arrow-down-circle text-success me-1"></i><span id="imp-total-in">0</span></div>
+          <div class="col-auto"><i class="bi bi-arrow-up-circle text-danger me-1"></i><span id="imp-total-out">0</span></div>
+          <div class="col-auto" id="imp-currency-block" style="display:none"><i class="bi bi-cash me-1"></i><span id="imp-currency"></span></div>
+        </div>
+
+        <div id="imp-dup-summary" class="alert alert-warning py-2 small mb-3" style="display:none">
+          <i class="bi bi-exclamation-triangle me-1"></i>
+          <span id="imp-dup-count">0</span> {{ _('import_duplicates_skipped') }}
+          <a href="javascript:void(0)" class="ms-2" id="imp-dup-review-link">{{ _('import_duplicates_review') }}</a>
+        </div>
+
+        <div id="imp-warnings" class="alert alert-info py-2 small mb-3" style="display:none"></div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label class="form-label small mb-1">{{ _('import_target_source') }}</label>
+            <select id="imp-target-source" class="form-select form-select-sm">
+              {% for s in import_sources %}
+              <option value="{{ s.id }}">{{ s.name }} ({{ s.currency }})</option>
+              {% endfor %}
+              <option value="__new__">+ {{ _('import_create_new_source') }}</option>
+            </select>
+          </div>
+          <div class="col-md-6" id="imp-new-source-form" style="display:none">
+            <label class="form-label small mb-1">{{ _('import_new_source_fields') }}</label>
+            <div class="d-flex gap-2">
+              <input id="imp-new-source-name" class="form-control form-control-sm" placeholder="{{ _('name') }}">
+              <input id="imp-new-source-currency" class="form-control form-control-sm" placeholder="EUR" maxlength="3" style="max-width:85px">
+            </div>
+          </div>
+        </div>
+
+        <a class="small text-decoration-none" href="javascript:void(0)" id="imp-toggle-more">
+          <i class="bi bi-chevron-right"></i> {{ _('import_more_options') }}
+        </a>
+        <div id="imp-more" class="mt-2 mb-3" style="display:none">
+          <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="imp-exclude-stats">
+            <label class="form-check-label small" for="imp-exclude-stats">{{ _('import_exclude_from_stats') }}</label>
+          </div>
+        </div>
+
+        <div class="d-flex gap-2 flex-wrap">
+          <button id="imp-commit-btn" class="btn btn-sm btn-primary">
+            <i class="bi bi-check-lg me-1"></i><span id="imp-commit-btn-label">{{ _('import_confirm_btn') }}</span>
+          </button>
+          <button id="imp-cancel-btn" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-x-lg me-1"></i>{{ _('cancel') }}
+          </button>
+        </div>
+      </div>
+
+      <div id="imp-loading" class="text-center py-4" style="display:none">
+        <div class="dot-wave"><div class="dot-wave__dot"></div><div class="dot-wave__dot"></div><div class="dot-wave__dot"></div><div class="dot-wave__dot"></div></div>
+        <p class="text-muted small mt-2 mb-0">{{ _('import_parsing') }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# --- Modal: rivedi duplicati --- #}
+<div class="modal fade" id="impDuplicatesModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-files me-1 text-warning"></i>{{ _('import_duplicates_title') }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted small mb-2">{{ _('import_duplicates_desc') }}</p>
+        <div class="d-flex gap-2 mb-2 flex-wrap">
+          <button class="btn btn-sm btn-outline-secondary" id="imp-dup-select-all">{{ _('import_select_all') }}</button>
+          <button class="btn btn-sm btn-outline-secondary" id="imp-dup-deselect-all">{{ _('import_deselect_all') }}</button>
+          <button class="btn btn-sm btn-outline-warning" id="imp-dup-skip-duplicates">
+            <i class="bi bi-funnel me-1"></i>{{ _('import_skip_duplicates') }}
+          </button>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-sm align-middle">
+            <thead>
+              <tr>
+                <th style="width:40px"></th>
+                <th>{{ _('date') }}</th>
+                <th>{{ _('amount') }}</th>
+                <th>{{ _('direction') }}</th>
+                <th>{{ _('note') }}</th>
+              </tr>
+            </thead>
+            <tbody id="imp-dup-rows"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ _('cancel') }}</button>
+        <button type="button" class="btn btn-primary" id="imp-dup-confirm">{{ _('import_confirm_selection') }}</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# --- Modal: mapping colonne CSV non riconosciuto --- #}
+<div class="modal fade" id="impMappingModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-diagram-3 me-1 text-info"></i>{{ _('import_mapping_title') }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted small mb-3">{{ _('import_mapping_desc') }}</p>
+        <div id="imp-mapping-fields"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ _('cancel') }}</button>
+        <button type="button" class="btn btn-primary" id="imp-mapping-apply">{{ _('import_mapping_apply') }}</button>
+      </div>
+    </div>
+  </div>
+</div>
