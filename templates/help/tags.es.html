@@ -3,38 +3,38 @@
 
 <h6>Qué ves</h6>
 <ul>
-  <li>Un formulario arriba para añadir una nueva etiqueta: campo <strong>nombre</strong>, selector de <strong>color</strong> y selector de <strong>emoji</strong>.</li>
-  <li>Una tabla con las etiquetas existentes. Cada fila muestra la etiqueta como se verá, un distintivo con el <strong>número de usos</strong> (movimientos + ahorros) y las acciones por fila.</li>
-  <li>Pulsando una fila se abre la página de movimientos filtrada por esa etiqueta.</li>
+  <li>Una cabecera con título, subtítulo y el botón <strong>Añadir Etiqueta</strong> arriba a la derecha.</li>
+  <li>Una cuadrícula de tarjetas, una por etiqueta. Cada tarjeta muestra un <strong>punto de color</strong>, el <strong>nombre</strong>, un menú <strong>"..."</strong> y el número de movimientos en los que se usa.</li>
+  <li>Al hacer clic en el cuerpo de una tarjeta (fuera del menú) se abre la página de Movimientos filtrada por esa etiqueta.</li>
 </ul>
 
-<h6>Acciones por fila</h6>
+<h6>Acciones</h6>
 <div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-plus-lg"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Añadir Etiqueta</span>
+      <span class="yn-help-action-desc">Abre un diálogo para elegir nombre, color y emoji de la nueva etiqueta.</span>
+    </div>
+  </div>
   <div class="yn-help-action">
     <span class="yn-help-action-icon"><i class="bi bi-pencil"></i></span>
     <div class="yn-help-action-body">
       <span class="yn-help-action-label">Editar</span>
-      <span class="yn-help-action-desc">Pasa la fila a modo edición. Puedes cambiar nombre, color o emoji.</span>
-    </div>
-  </div>
-  <div class="yn-help-action">
-    <span class="yn-help-action-icon success"><i class="bi bi-check-lg"></i></span>
-    <div class="yn-help-action-body">
-      <span class="yn-help-action-label">Guardar</span>
-      <span class="yn-help-action-desc">Solo se ve en modo edición. Confirma los cambios a la etiqueta.</span>
+      <span class="yn-help-action-desc">Desde el menú "..." de la tarjeta. Abre el mismo diálogo prellenado; guarda para confirmar.</span>
     </div>
   </div>
   <div class="yn-help-action">
     <span class="yn-help-action-icon danger"><i class="bi bi-trash"></i></span>
     <div class="yn-help-action-body">
       <span class="yn-help-action-label">Eliminar</span>
-      <span class="yn-help-action-desc">Borra la etiqueta. Los movimientos y ahorros asociados conservan sus otras etiquetas.</span>
+      <span class="yn-help-action-desc">Desde el menú "...". Elimina la etiqueta. Los movimientos y ahorros vinculados conservan sus otras etiquetas.</span>
     </div>
   </div>
 </div>
 
 <h6>Color y emoji</h6>
-<p>El selector de color ofrece una paleta de presets y un campo personalizado en formato hex. El selector de emoji está agrupado por categoría (personas, comida, actividades, objetos) con un buscador.</p>
+<p>En el diálogo Añadir/Editar Etiqueta encuentras el selector de color con una paleta de preajustes y un campo hexadecimal personalizado, y el selector de emoji agrupado por categoría (personas, comida, actividades, objetos) con búsqueda por texto.</p>
 <p>Ejemplos:</p>
 <ul>
   <li><span class="yn-help-chip" style="background:rgba(113,221,55,.15);border-color:rgba(113,221,55,.3);color:#4f9b1f">🛒 compra</span></li>
@@ -45,25 +45,27 @@
 
 <h6>Paso a paso: crear una etiqueta</h6>
 <ol class="yn-help-steps">
-  <li>Escribe el <strong>nombre</strong> en el campo de la parte de arriba.</li>
-  <li>Pulsa la muestra de color y elige una, o introduce un valor hex.</li>
-  <li>Pulsa el icono de emoji y elige uno (opcional).</li>
-  <li>Pulsa <span class="yn-help-chip primary"><i class="bi bi-plus"></i> Añadir Etiqueta</span>. La etiqueta aparece en la tabla.</li>
+  <li>Haz clic en <span class="yn-help-chip primary"><i class="bi bi-plus"></i> Añadir Etiqueta</span> arriba a la derecha.</li>
+  <li>Escribe el <strong>nombre</strong> en el diálogo que se abre.</li>
+  <li>Haz clic en la muestra de color y elige un tono, o introduce un valor hex.</li>
+  <li>Haz clic en el icono emoji y elige uno (opcional — se inserta en el nombre).</li>
+  <li>Haz clic en <strong>Guardar</strong>. La tarjeta aparece en la cuadrícula.</li>
 </ol>
 
 <h6>Paso a paso: renombrar o recolorear</h6>
 <ol class="yn-help-steps">
-  <li>Pulsa <span class="yn-help-chip"><i class="bi bi-pencil"></i> Editar</span> en la fila.</li>
-  <li>Cambia nombre, color o emoji.</li>
-  <li>Pulsa <span class="yn-help-chip success"><i class="bi bi-check-lg"></i> Guardar</span>.</li>
+  <li>Haz clic en el menú <strong>"..."</strong> de la tarjeta.</li>
+  <li>Elige <span class="yn-help-chip"><i class="bi bi-pencil"></i> Editar</span>.</li>
+  <li>Cambia el nombre, color o emoji en el diálogo.</li>
+  <li>Haz clic en <strong>Guardar</strong>.</li>
 </ol>
 
 <div class="yn-help-tip">
   <i class="bi bi-info-circle-fill"></i>
-  <div>Pulsa cualquier etiqueta de la tabla (fuera del modo edición) para saltar directamente a los movimientos filtrados por esa etiqueta. Útil para revisar una categoría rápido.</div>
+  <div>Haz clic en el cuerpo de la tarjeta (no en el menú "...") para ir directamente a los movimientos filtrados por esa etiqueta. Útil para revisiones rápidas por categoría.</div>
 </div>
 
 <div class="yn-help-tip warn">
   <i class="bi bi-exclamation-triangle-fill"></i>
-  <div>Eliminar una etiqueta la quita de cada movimiento y ahorro que la usaba. Los movimientos en sí no se borran.</div>
+  <div>Eliminar una etiqueta la quita de todos los movimientos y ahorros que la usaban. Los movimientos en sí no se eliminan.</div>
 </div>

@@ -108,6 +108,12 @@ def dismiss_whim(whim_id: int, session: Session = Depends(get_session)):
     return _to_read(session, whim)
 
 
+@router.post("/{whim_id}/restore", response_model=WhimRead)
+def restore_whim(whim_id: int, session: Session = Depends(get_session)):
+    whim = whim_service.restore_whim(session, whim_id)
+    return _to_read(session, whim)
+
+
 @router.post("/{whim_id}/save-for", response_model=GoalRead, status_code=201)
 def start_saving_for_whim(whim_id: int, session: Session = Depends(get_session)):
     """Create (or reuse) a Goal tied to this Whim so the user can accumulate

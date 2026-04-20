@@ -12,7 +12,48 @@
         <i class="bi bi-plus me-1"></i>{{ _('new_recurring') }}
       </a>
     </div>
-    <div class="d-flex flex-wrap gap-2">
+
+    {# Monthly summary — one row per currency, 3 stat tiles each #}
+    {% if summary and summary.by_currency %}
+      {% for b in summary.by_currency %}
+      <div class="row g-2 mb-3">
+        <div class="col-12 col-md-4">
+          <div class="border rounded-3 p-3 h-100">
+            <div class="text-muted text-uppercase small mb-1" style="letter-spacing:.08em">{{ _('monthly_outflow') }}</div>
+            <div class="fs-4 fw-bold text-danger mb-1 net-worth-value">-{{ "%.2f"|format(b.outflow) }} {{ b.currency }}</div>
+            <small class="text-muted">{{ b.count_out }} {{ _('items_count') if b.count_out != 1 else _('item_count') }}</small>
+          </div>
+        </div>
+        <div class="col-12 col-md-4">
+          <div class="border rounded-3 p-3 h-100">
+            <div class="text-muted text-uppercase small mb-1" style="letter-spacing:.08em">{{ _('monthly_inflow') }}</div>
+            <div class="fs-4 fw-bold text-success mb-1 net-worth-value">+{{ "%.2f"|format(b.inflow) }} {{ b.currency }}</div>
+            <small class="text-muted">{{ b.count_in }} {{ _('items_count') if b.count_in != 1 else _('item_count') }}</small>
+          </div>
+        </div>
+        <div class="col-12 col-md-4">
+          <div class="border rounded-3 p-3 h-100">
+            <div class="text-muted text-uppercase small mb-1" style="letter-spacing:.08em">{{ _('net_monthly') }}</div>
+            <div class="fs-4 fw-bold mb-1 net-worth-value {% if b.net >= 0 %}text-success{% else %}text-danger{% endif %}">
+              {% if b.net >= 0 %}+{% endif %}{{ "%.2f"|format(b.net) }} {{ b.currency }}
+            </div>
+            <small class="text-muted">{{ _('projected') }}{% if summary.currencies|length == 1 %} · {{ b.currency }} {{ _('only') }}{% endif %}</small>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    {% endif %}
+
+    {# Direction tabs (All / Outflows / Inflows) + frequency filter #}
+    <div class="d-flex flex-wrap gap-2 align-items-center">
+      <div class="btn-group btn-group-sm" role="group" aria-label="Direction filter">
+        <a href="/recurring{% if filter_frequency %}?frequency={{ filter_frequency }}{% endif %}"
+           class="btn btn-{% if not filter_direction %}dark{% else %}outline-secondary{% endif %}">{{ _('all') }}</a>
+        <a href="/recurring?direction=out{% if filter_frequency %}&frequency={{ filter_frequency }}{% endif %}"
+           class="btn btn-{% if filter_direction == 'out' %}dark{% else %}outline-secondary{% endif %}">{{ _('outflows') }}</a>
+        <a href="/recurring?direction=in{% if filter_frequency %}&frequency={{ filter_frequency }}{% endif %}"
+           class="btn btn-{% if filter_direction == 'in' %}dark{% else %}outline-secondary{% endif %}">{{ _('inflows') }}</a>
+      </div>
       <select class="form-select form-select-sm" id="filter-frequency" style="width:auto">
         <option value="">{{ _('frequency') }}</option>
         <option value="daily" {% if filter_frequency == 'daily' %}selected{% endif %}>{{ _('daily') }}</option>
@@ -20,14 +61,7 @@
         <option value="monthly" {% if filter_frequency == 'monthly' %}selected{% endif %}>{{ _('monthly') }}</option>
         <option value="yearly" {% if filter_frequency == 'yearly' %}selected{% endif %}>{{ _('yearly') }}</option>
       </select>
-      <select class="form-select form-select-sm" id="filter-direction" style="width:auto">
-        <option value="">{{ _('direction') }}</option>
-        <option value="in" {% if filter_direction == 'in' %}selected{% endif %}>{{ _('income') }}</option>
-        <option value="out" {% if filter_direction == 'out' %}selected{% endif %}>{{ _('expense') }}</option>
-      </select>
-      {% if filter_frequency or filter_direction %}
-      <a href="/recurring" class="btn btn-sm btn-outline-danger"><i class="bi bi-arrow-counterclockwise me-1"></i>{{ _('reset_filters') }}</a>
-      {% endif %}
+      <span class="ms-auto text-muted small">{{ _('sorted_by_next_occurrence') }}</span>
     </div>
   </div>
   <div class="card-body">
@@ -35,10 +69,10 @@
     <div class="row g-3">
       {% for r in items %}
       <div class="col-12 col-sm-6 col-lg-4" id="recurring-card-{{ r.id }}">
-        <div class="card h-100 border-0 shadow-sm position-relative overflow-hidden">
+        <div class="card h-100 border shadow-sm position-relative overflow-hidden">
           {# Color accent stripe #}
           <div class="position-absolute top-0 start-0 w-100" style="height:4px;background:{% if r.direction == 'in' %}var(--yn-success, #71dd37){% else %}var(--yn-danger, #ff3e1d){% endif %}"></div>
-          <div class="card-body pt-4 pb-3 px-3">
+          <div class="card-body pt-4 pb-3 px-3 d-flex flex-column">
             {# Header: name + amount #}
             <div class="d-flex justify-content-between align-items-start mb-2">
               <h6 class="card-title mb-0 text-truncate me-2">{{ r.name }}</h6>
@@ -74,8 +108,8 @@
                 {% endif %}
               </div>
             </div>
-            {# Actions #}
-            <div class="d-flex gap-1">
+            {# Actions — pushed to the bottom so all cards align regardless of content length #}
+            <div class="d-flex gap-1 mt-auto">
               <button class="btn btn-sm btn-outline-success flex-fill apply-btn"
                       data-id="{{ r.id }}" data-name="{{ r.name }}" data-amount="{{ r.amount }}" data-currency="{{ r.currency }}" data-direction="{{ r.direction }}"
                       title="{{ _('apply_now') }}">
@@ -239,16 +273,16 @@
   function getRecurringParams() {
     var params = new URLSearchParams();
     var freq = document.getElementById('filter-frequency').value;
-    var dir = document.getElementById('filter-direction').value;
     if (freq) params.set('frequency', freq);
+    // Preserve current direction tab from server-rendered state
+    var dir = {{ ('"' ~ filter_direction ~ '"') if filter_direction else '""' }};
     if (dir) params.set('direction', dir);
     return params;
   }
 
-  ['filter-frequency', 'filter-direction'].forEach(function(id) {
-    document.getElementById(id).addEventListener('change', function() {
-      window.location.href = '/recurring' + (getRecurringParams().toString() ? '?' + getRecurringParams().toString() : '');
-    });
+  // Frequency filter (direction is handled by tab links in the header)
+  document.getElementById('filter-frequency').addEventListener('change', function() {
+    window.location.href = '/recurring' + (getRecurringParams().toString() ? '?' + getRecurringParams().toString() : '');
   });
 
   function goToPage(p) {

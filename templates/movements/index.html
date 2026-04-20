@@ -5,6 +5,27 @@
 
 {% block page_css %}
 <link rel="stylesheet" href="/static/vendor/flatpickr/flatpickr.min.css" />
+<style>
+  /* Filter chips — fix widths on the parent .dropdown AND the button, AND
+     replicate yfine.css's `.btn-sm.btn-outline-*` padding/border/font sizing
+     on btn-primary too. Without this last bit, the active (primary) chip
+     looks visually thinner/smaller than the outline siblings even at the
+     same box width. */
+  .yn-filter-chip-wrap {
+    width: 160px !important;
+    flex: 0 0 160px !important;
+  }
+  .yn-filter-chip {
+    justify-content: flex-start !important;
+    text-align: left !important;
+    border-width: 2px !important;
+    font-weight: 600 !important;
+    padding: 0.4rem 0.65rem !important;
+    font-size: 0.95rem !important;
+  }
+  .yn-filter-chip i { font-size: 1.1rem !important; }
+  .yn-filter-chip::after { margin-left: auto !important; }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -53,8 +74,8 @@
   <!-- Column filter chips -->
   <div class="card-body pt-0 pb-2">
     <div class="d-flex flex-wrap gap-2">
-      <div class="dropdown">
-        <button class="btn btn-sm {% if filter_source_id %}btn-primary{% else %}btn-outline-secondary{% endif %} dropdown-toggle" data-bs-toggle="dropdown">
+      <div class="dropdown yn-filter-chip-wrap">
+        <button style="width:160px" class="btn btn-sm {% if filter_source_id %}btn-primary{% else %}btn-outline-secondary{% endif %} yn-filter-chip dropdown-toggle d-inline-flex align-items-center" data-bs-toggle="dropdown">
           <i class="bi bi-wallet2 me-1"></i>{{ _('source') }}
         </button>
         <ul class="dropdown-menu">
@@ -65,8 +86,8 @@
           {% endfor %}
         </ul>
       </div>
-      <div class="dropdown">
-        <button class="btn btn-sm {% if filter_direction %}btn-primary{% else %}btn-outline-secondary{% endif %} dropdown-toggle" data-bs-toggle="dropdown">
+      <div class="dropdown yn-filter-chip-wrap">
+        <button style="width:160px" class="btn btn-sm {% if filter_direction %}btn-primary{% else %}btn-outline-secondary{% endif %} yn-filter-chip dropdown-toggle d-inline-flex align-items-center" data-bs-toggle="dropdown">
           <i class="bi bi-filter me-1"></i>{{ _('direction') }}
         </button>
         <ul class="dropdown-menu">
@@ -76,8 +97,8 @@
           <li><a class="dropdown-item {% if filter_direction == 'out' %}active{% endif %}" href="javascript:void(0)" onclick="setColumnFilter('direction','out')">{{ _('out') }}</a></li>
         </ul>
       </div>
-      <div class="dropdown">
-        <button class="btn btn-sm {% if filter_tag_ids %}btn-primary{% else %}btn-outline-secondary{% endif %} dropdown-toggle" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+      <div class="dropdown yn-filter-chip-wrap">
+        <button style="width:160px" class="btn btn-sm {% if filter_tag_ids %}btn-primary{% else %}btn-outline-secondary{% endif %} yn-filter-chip dropdown-toggle d-inline-flex align-items-center" data-bs-toggle="dropdown" data-bs-auto-close="outside">
           <i class="bi bi-tag me-1"></i>{{ _('tags') }}{% if filter_tag_ids %} ({{ filter_tag_ids|length }}){% endif %}
         </button>
         <ul class="dropdown-menu p-0" style="min-width:220px">

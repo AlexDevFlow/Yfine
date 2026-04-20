@@ -7,7 +7,6 @@ from sqlmodel import select
 from models.movement import Movement
 from models.notification import Notification
 from models.recurring import RecurringItem
-from models.saving import Saving
 from models.source import Source
 from services.dashboard import (
     get_dashboard_stats,
@@ -151,8 +150,12 @@ class TestDashboardStats:
         assert "Sub2" in names
 
     def test_month_savings(self, session):
-        saving = Saving(amount=200, currency="EUR", date=date.today())
-        session.add(saving)
+        s = _src(session, "Bank", "EUR", 1000)
+        m = Movement(
+            source_id=s.id, amount=200, direction="out",
+            date=date.today(), is_savings_contribution=True,
+        )
+        session.add(m)
         session.commit()
         stats = get_dashboard_stats(session)
         assert stats["month_savings"].get("EUR", 0) == 200.0

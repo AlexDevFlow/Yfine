@@ -48,6 +48,58 @@ def count_recurring(
     return int(session.exec(query).one())
 
 
+# Frequency → monthly multiplier (365.25/12 for daily, 52.1786/12 for weekly).
+_FREQ_TO_MONTHLY = {
+    "daily": 365.25 / 12,
+    "weekly": 52.1785714 / 12,
+    "monthly": 1.0,
+    "yearly": 1.0 / 12,
+}
+
+
+def monthly_summary(session: Session) -> dict:
+    """Aggregate all recurring items into projected monthly totals per currency.
+
+    Returns a dict with:
+      - by_currency: list of {currency, outflow, inflow, net, count_out, count_in}
+      - total_count: total recurring items
+      - currencies: list of currencies present
+    """
+    items = list(session.exec(select(RecurringItem)).all())
+    buckets: dict[str, dict] = {}
+    for it in items:
+        cur = (it.currency or "").upper()
+        mult = _FREQ_TO_MONTHLY.get(it.frequency, 1.0)
+        monthly = float(it.amount or 0) * mult
+        b = buckets.setdefault(cur, {
+            "currency": cur, "outflow": 0.0, "inflow": 0.0,
+            "count_out": 0, "count_in": 0,
+        })
+        if it.direction == "out":
+            b["outflow"] += monthly
+            b["count_out"] += 1
+        else:
+            b["inflow"] += monthly
+            b["count_in"] += 1
+
+    by_currency = []
+    for cur, b in sorted(buckets.items()):
+        by_currency.append({
+            "currency": cur,
+            "outflow": round(b["outflow"], 2),
+            "inflow": round(b["inflow"], 2),
+            "net": round(b["inflow"] - b["outflow"], 2),
+            "count_out": b["count_out"],
+            "count_in": b["count_in"],
+        })
+
+    return {
+        "by_currency": by_currency,
+        "total_count": len(items),
+        "currencies": [b["currency"] for b in by_currency],
+    }
+
+
 def get_recurring(session: Session, recurring_id: int) -> RecurringItem:
     item = session.get(RecurringItem, recurring_id)
     if not item:

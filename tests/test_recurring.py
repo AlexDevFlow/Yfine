@@ -19,6 +19,7 @@ from services.recurring import (
     enrich_recurring_items,
     get_recurring,
     list_recurring,
+    monthly_summary,
     update_recurring,
 )
 
@@ -335,3 +336,80 @@ class TestRecurringEnrichment:
 
         enriched = enrich_recurring_items(session, [r])
         assert enriched[0]["days_until"] == -5
+
+
+# ── Monthly Summary ──────────────────────────────────────────────
+
+class TestMonthlySummary:
+    def test_empty_returns_zero_buckets(self, session):
+        summary = monthly_summary(session)
+        assert summary["total_count"] == 0
+        assert summary["by_currency"] == []
+        assert summary["currencies"] == []
+
+    def test_monthly_items_not_multiplied(self, session):
+        s = _src(session)
+        _recurring(session, source_id=s.id, amount=500, direction="out", frequency="monthly")
+        _recurring(session, source_id=s.id, amount=2000, direction="in", frequency="monthly")
+        summary = monthly_summary(session)
+        assert summary["total_count"] == 2
+        assert len(summary["by_currency"]) == 1
+        bucket = summary["by_currency"][0]
+        assert bucket["currency"] == "EUR"
+        assert bucket["outflow"] == 500.0
+        assert bucket["inflow"] == 2000.0
+        assert bucket["net"] == 1500.0
+        assert bucket["count_out"] == 1
+        assert bucket["count_in"] == 1
+
+    def test_yearly_divided_by_twelve(self, session):
+        s = _src(session)
+        # 1200 EUR/year → 100 EUR/month
+        _recurring(session, source_id=s.id, amount=1200, direction="out", frequency="yearly")
+        summary = monthly_summary(session)
+        assert summary["by_currency"][0]["outflow"] == 100.0
+
+    def test_daily_uses_30_44_days_per_month(self, session):
+        s = _src(session)
+        # 10/day → ~304.38/month
+        _recurring(session, source_id=s.id, amount=10, direction="out", frequency="daily")
+        summary = monthly_summary(session)
+        # 365.25 / 12 ≈ 30.4375, * 10 = 304.375 → rounded to 304.38
+        assert summary["by_currency"][0]["outflow"] == 304.38
+
+    def test_weekly_uses_52_weeks_per_year(self, session):
+        s = _src(session)
+        # 50/week → ~217.41/month (52.1786/12 * 50)
+        _recurring(session, source_id=s.id, amount=50, direction="out", frequency="weekly")
+        summary = monthly_summary(session)
+        assert summary["by_currency"][0]["outflow"] == 217.41
+
+    def test_grouped_by_currency(self, session):
+        eur = Source(name="EUR bank", currency="EUR", starting_balance=0)
+        usd = Source(name="USD bank", currency="USD", starting_balance=0)
+        session.add_all([eur, usd])
+        session.commit()
+        session.refresh(eur); session.refresh(usd)
+
+        create_recurring(session, RecurringCreate(
+            name="EUR rent", amount=500, direction="out", currency="EUR",
+            frequency="monthly", start_date=date.today(), source_id=eur.id,
+        ))
+        create_recurring(session, RecurringCreate(
+            name="USD sub", amount=20, direction="out", currency="USD",
+            frequency="monthly", start_date=date.today(), source_id=usd.id,
+        ))
+
+        summary = monthly_summary(session)
+        assert len(summary["by_currency"]) == 2
+        currencies = {b["currency"]: b for b in summary["by_currency"]}
+        assert currencies["EUR"]["outflow"] == 500.0
+        assert currencies["USD"]["outflow"] == 20.0
+        assert set(summary["currencies"]) == {"EUR", "USD"}
+
+    def test_net_can_be_negative(self, session):
+        s = _src(session)
+        _recurring(session, source_id=s.id, amount=1000, direction="out", frequency="monthly")
+        _recurring(session, source_id=s.id, amount=100, direction="in", frequency="monthly")
+        bucket = monthly_summary(session)["by_currency"][0]
+        assert bucket["net"] == -900.0

@@ -5,143 +5,68 @@
 
 {% block page_css %}
 <style>
-  .emoji-picker-wrapper {
-    position: relative;
-    display: inline-block;
-  }
+  .emoji-picker-wrapper { position: relative; display: inline-block; }
   .emoji-grid {
-    position: absolute;
-    z-index: 1050;
-    top: 100%;
-    right: 0;
-    display: none;
-    background: var(--bs-body-bg, #fff);
-    border: 1px solid var(--bs-border-color, #ddd);
-    border-radius: 0.5rem;
-    padding: 0.5rem;
-    width: 340px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    position: absolute; z-index: 1050; top: 100%; right: 0;
+    display: none; background: var(--bs-body-bg, #fff);
+    border: 1px solid var(--bs-border-color, #ddd); border-radius: 0.5rem;
+    padding: 0.5rem; width: 340px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   }
   .emoji-grid.show { display: block; }
   .emoji-grid input {
-    width: 100%;
-    border: 1px solid var(--bs-border-color, #ddd);
-    border-radius: 0.25rem;
-    padding: 0.3rem 0.5rem;
-    margin-bottom: 0.4rem;
-    font-size: 0.85rem;
-    outline: none;
+    width: 100%; border: 1px solid var(--bs-border-color, #ddd);
+    border-radius: 0.25rem; padding: 0.3rem 0.5rem; margin-bottom: 0.4rem;
+    font-size: 0.85rem; outline: none;
   }
-  .emoji-tabs {
-    display: flex;
-    gap: 2px;
-    margin-bottom: 0.4rem;
-    overflow-x: auto;
-  }
+  .emoji-tabs { display: flex; gap: 2px; margin-bottom: 0.4rem; overflow-x: auto; }
   .emoji-tabs button {
-    border: none;
-    background: none;
-    font-size: 1.1rem;
-    padding: 2px 4px;
-    border-radius: 0.25rem;
-    cursor: pointer;
-    flex-shrink: 0;
+    border: none; background: none; font-size: 1.1rem; padding: 2px 4px;
+    border-radius: 0.25rem; cursor: pointer; flex-shrink: 0;
   }
-  .emoji-tabs button.active {
-    background: rgba(105, 108, 255, 0.12);
-  }
-  .emoji-tabs button:hover {
-    background: rgba(105, 108, 255, 0.08);
-  }
-  .emoji-list-container {
-    height: 220px;
-    overflow-y: auto;
-  }
-  .emoji-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1px;
-  }
+  .emoji-tabs button.active { background: rgba(105, 108, 255, 0.12); }
+  .emoji-tabs button:hover { background: rgba(105, 108, 255, 0.08); }
+  .emoji-list-container { height: 220px; overflow-y: auto; }
+  .emoji-list { display: flex; flex-wrap: wrap; gap: 1px; }
   .emoji-list span {
-    cursor: pointer;
-    font-size: 1.3rem;
-    width: 2rem;
-    height: 2rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 0.25rem;
+    cursor: pointer; font-size: 1.3rem; width: 2rem; height: 2rem;
+    display: inline-flex; align-items: center; justify-content: center; border-radius: 0.25rem;
   }
-  .emoji-list span:hover {
-    background: rgba(105, 108, 255, 0.1);
-  }
-  /* Clickable tag row */
-  .tag-clickable-row { cursor: pointer; }
-  .tag-clickable-row:hover td:first-child .badge { opacity: .85; }
+  .emoji-list span:hover { background: rgba(105, 108, 255, 0.1); }
 
   /* Color picker */
-  .color-picker-wrapper {
-    position: relative;
-    display: inline-flex;
-  }
+  .color-picker-wrapper { position: relative; display: inline-flex; }
   .color-picker-wrapper > button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1;
+    display: inline-flex; align-items: center; justify-content: center; line-height: 1;
   }
   .color-preview {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 1.3rem;
-    height: 1.3rem;
-    border-radius: 50%;
-    border: 1px solid rgba(0,0,0,0.15);
-    line-height: 1;
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 1.3rem; height: 1.3rem; border-radius: 50%;
+    border: 1px solid rgba(0,0,0,0.15); line-height: 1;
   }
   .color-preview.has-color { background-image: none; }
   .color-preview.empty {
-    background-color: transparent;
-    border: none;
-    color: transparent;
+    background-color: transparent; border: none; color: transparent;
     background-image: linear-gradient(135deg, #ef4444, #f59e0b, #22c55e, #06b6d4, #6366f1, #ec4899);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
   }
-  .color-preview.empty i {
-    font-size: 1.2rem;
-    line-height: 1;
-  }
+  .color-preview.empty i { font-size: 1.2rem; line-height: 1; }
   .color-picker-popup {
-    position: absolute;
-    z-index: 1050;
-    top: 100%;
-    right: 0;
-    display: none;
-    background: var(--bs-body-bg, #fff);
-    border: 1px solid var(--bs-border-color, #ddd);
-    border-radius: 0.5rem;
-    padding: 0.75rem;
-    width: 240px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    position: absolute; z-index: 1050; top: 100%; right: 0;
+    display: none; background: var(--bs-body-bg, #fff);
+    border: 1px solid var(--bs-border-color, #ddd); border-radius: 0.5rem;
+    padding: 0.75rem; width: 240px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   }
   .color-picker-popup.show { display: block; }
   .color-swatches {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 0.35rem;
-    margin-bottom: 0.5rem;
+    display: flex; flex-wrap: wrap;
+    gap: 0.4rem; margin-bottom: 0.5rem;
+    justify-content: flex-start;
   }
   .color-swatch {
-    width: 100%;
-    aspect-ratio: 1;
-    border-radius: 50%;
-    border: 2px solid transparent;
-    cursor: pointer;
-    padding: 0;
-    transition: transform 0.12s;
+    width: 26px; height: 26px; border-radius: 50%;
+    border: 2px solid transparent; cursor: pointer; padding: 0;
+    flex: 0 0 26px; transition: transform 0.12s;
+    line-height: 0;
   }
   .color-swatch:hover { transform: scale(1.15); }
   .color-swatch.selected {
@@ -149,134 +74,164 @@
     box-shadow: inset 0 0 0 2px var(--bs-body-bg, #fff);
   }
   .color-picker-footer {
-    display: flex;
-    gap: 0.4rem;
-    align-items: center;
-    margin-top: 0.25rem;
-    padding-top: 0.5rem;
+    display: flex; gap: 0.4rem; align-items: center;
+    margin-top: 0.25rem; padding-top: 0.5rem;
     border-top: 1px solid var(--bs-border-color, #e5e7eb);
   }
   .color-picker-footer input[type="color"] {
-    width: 2.25rem;
-    height: 2.25rem;
-    border: 1px solid var(--bs-border-color, #ddd);
-    border-radius: 0.35rem;
-    padding: 2px;
-    cursor: pointer;
-    background: var(--bs-body-bg, #fff);
+    width: 2.25rem; height: 2.25rem; border: 1px solid var(--bs-border-color, #ddd);
+    border-radius: 0.35rem; padding: 2px; cursor: pointer; background: var(--bs-body-bg, #fff);
   }
   .color-picker-footer input[type="text"] {
-    flex: 1;
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 0.82rem;
-    padding: 0.3rem 0.5rem;
-    border: 1px solid var(--bs-border-color, #ddd);
-    border-radius: 0.3rem;
-    outline: none;
-    background: var(--bs-body-bg, #fff);
-    color: var(--bs-body-color, #333);
-    min-width: 0;
+    flex: 1; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.82rem; padding: 0.3rem 0.5rem;
+    border: 1px solid var(--bs-border-color, #ddd); border-radius: 0.3rem;
+    outline: none; background: var(--bs-body-bg, #fff);
+    color: var(--bs-body-color, #333); min-width: 0;
   }
   .color-picker-footer input[type="text"]:focus {
-    border-color: rgba(105,108,255,.5);
-    box-shadow: 0 0 0 2px rgba(105,108,255,.15);
+    border-color: rgba(105,108,255,.5); box-shadow: 0 0 0 2px rgba(105,108,255,.15);
   }
   .color-picker-clear {
-    background: none;
-    border: 1px solid var(--bs-border-color, #ddd);
-    border-radius: 0.3rem;
-    padding: 0.35rem 0.5rem;
-    font-size: 0.85rem;
-    cursor: pointer;
-    color: var(--bs-secondary, #6c757d);
-    line-height: 1;
+    background: none; border: 1px solid var(--bs-border-color, #ddd);
+    border-radius: 0.3rem; padding: 0.35rem 0.5rem;
+    font-size: 0.85rem; cursor: pointer; color: var(--bs-secondary, #6c757d); line-height: 1;
   }
   .color-picker-clear:hover {
-    color: var(--bs-danger, #dc3545);
-    border-color: var(--bs-danger, #dc3545);
+    color: var(--bs-danger, #dc3545); border-color: var(--bs-danger, #dc3545);
   }
+
+  /* Tag cards */
+  .tag-card {
+    border: 1px solid var(--bs-border-color, #e5e7eb);
+    border-radius: 0.5rem;
+    padding: 0.85rem 1rem;
+    cursor: pointer;
+    transition: border-color .15s ease, box-shadow .15s ease;
+    background: var(--bs-body-bg, #fff);
+    height: 100%;
+  }
+  .tag-card:hover {
+    border-color: rgba(105,108,255,.35);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .tag-card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 0.5rem; margin-bottom: 0.5rem;
+  }
+  .tag-dot-title { display: flex; align-items: center; gap: 0.5rem; min-width: 0; }
+  .tag-dot {
+    width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0;
+    background-color: var(--bs-secondary, #9ca3af);
+  }
+  .tag-card-name {
+    font-weight: 600; color: var(--bs-body-color, #1f2937);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .tag-usage-text {
+    font-size: 0.82rem; color: var(--bs-secondary, #6b7280);
+  }
+  .tag-menu-btn {
+    background: transparent; border: 0; color: var(--bs-secondary, #9ca3af);
+    padding: 0 .35rem; border-radius: .25rem; line-height: 1;
+  }
+  .tag-menu-btn:hover { background: rgba(0,0,0,.04); color: var(--bs-body-color, #333); }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="card">
-  <div class="card-header">
-    <h5 class="card-title mb-0">{{ _('tags') }}</h5>
+<div class="mb-3 d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
+  <div>
+    <h4 class="mb-1">{{ _('tags') }}</h4>
+    <p class="text-muted mb-0">{{ _('tags_page_subtitle') }}</p>
   </div>
-  <div class="card-body">
-    <!-- Add Tag Form -->
-    <form id="add-tag-form" class="mb-4">
-      <div class="input-group">
-        <input type="text" class="form-control" id="new-tag-name" placeholder="{{ _('name') }}" required>
-        <div class="color-picker-wrapper">
-          <button class="btn btn-outline-secondary" type="button" id="color-btn-new" data-color="" title="{{ _('color') }}" onclick="toggleColorPicker('color-new')">
-            <span class="color-preview empty"><i class="bi bi-palette-fill"></i></span>
-          </button>
-          <div class="color-picker-popup" id="color-new"></div>
-        </div>
-        <div class="emoji-picker-wrapper">
-          <button class="btn btn-outline-secondary" type="button" onclick="togglePicker('picker-new')">
-            😀
-          </button>
-          <div class="emoji-grid" id="picker-new"></div>
-        </div>
-        <button type="submit" class="btn btn-primary">
-          <i class="bi bi-plus me-1"></i>{{ _('add_tag') }}
-        </button>
-      </div>
-    </form>
+  <button class="btn btn-dark" onclick="openTagModal()">
+    <i class="bi bi-plus me-1"></i>{{ _('add_tag') }}
+  </button>
+</div>
+<hr class="mb-4">
 
-    <!-- Tags Table -->
-    <div class="table-responsive">
-      <table class="table table-hover">
-        <thead>
-          <tr>
-            <th>{{ _('name') }}</th>
-            <th style="width: 120px" class="text-center">{{ _('movements') }}</th>
-            <th style="width: 200px">{{ _('actions') }}</th>
-          </tr>
-        </thead>
-        <tbody id="tags-table">
-          {% for t in tags %}
-          <tr id="tag-row-{{ t.id }}" class="tag-clickable-row" data-href="/movements?tag_id={{ t.id }}">
-            <td>
-              <span class="tag-name" id="tag-name-{{ t.id }}">
-                {% if t.color %}
-                <span class="badge me-1" style="background-color:{{ t.color }};color:#fff">{{ t.name }}</span>
-                {% else %}
-                <span class="badge bg-label-secondary me-1">{{ t.name }}</span>
-                {% endif %}
-              </span>
-              <div class="d-none tag-edit-group" id="tag-edit-group-{{ t.id }}">
-                <div class="input-group input-group-sm">
-                  <input type="text" class="form-control form-control-sm tag-edit" id="tag-edit-{{ t.id }}" value="{{ t.name }}">
-                  <div class="color-picker-wrapper">
-                    <button class="btn btn-sm btn-outline-secondary" type="button" id="color-btn-{{ t.id }}" data-color="{{ t.color or '' }}" title="{{ _('color') }}" onclick="toggleColorPicker('color-edit-{{ t.id }}')">
-                      <span class="color-preview {% if t.color %}has-color{% else %}empty{% endif %}" {% if t.color %}style="background-color: {{ t.color }}"{% endif %}>{% if not t.color %}<i class="bi bi-palette-fill"></i>{% endif %}</span>
-                    </button>
-                    <div class="color-picker-popup" id="color-edit-{{ t.id }}"></div>
-                  </div>
-                  <div class="emoji-picker-wrapper">
-                    <button class="btn btn-sm btn-outline-secondary" type="button" onclick="togglePicker('picker-edit-{{ t.id }}')" style="font-size:0.9rem;">😀</button>
-                    <div class="emoji-grid" id="picker-edit-{{ t.id }}"></div>
-                  </div>
-                </div>
+{% if tags %}
+<div class="row g-3">
+  {% for t in tags %}
+  <div class="col-6 col-md-4 col-lg-3" id="tag-card-wrap-{{ t.id }}">
+    <div class="tag-card" data-href="/movements?tag_id={{ t.id }}">
+      <div class="tag-card-header">
+        <div class="tag-dot-title">
+          <span class="tag-dot" {% if t.color %}style="background-color:{{ t.color }}"{% endif %}></span>
+          <span class="tag-card-name">{{ t.name }}</span>
+        </div>
+        <div class="dropdown">
+          <button class="tag-menu-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Actions">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li>
+              <button class="dropdown-item tag-edit-btn" type="button"
+                      data-id="{{ t.id }}"
+                      data-name="{{ t.name }}"
+                      data-color="{{ t.color or '' }}">
+                <i class="bi bi-pencil me-2"></i>{{ _('edit') }}
+              </button>
+            </li>
+            <li>
+              <button class="dropdown-item text-danger tag-delete-btn" type="button" data-id="{{ t.id }}">
+                <i class="bi bi-trash me-2"></i>{{ _('delete') }}
+              </button>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="tag-usage-text mb-0">
+        {{ _('used_in_n_movements').replace('{n}', t.usage_count|string) }}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="text-center py-5">
+  <i class="bi bi-tag text-muted mb-2" style="font-size:2.5rem"></i>
+  <p class="text-muted mb-3">{{ _('no_tags') }}</p>
+  <button class="btn btn-sm btn-primary" onclick="openTagModal()">
+    <i class="bi bi-plus me-1"></i>{{ _('add_tag') }}
+  </button>
+</div>
+{% endif %}
+
+<!-- Add/Edit Tag Modal -->
+<div class="modal fade" id="tagModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form id="tag-form" onsubmit="event.preventDefault(); submitTag();">
+        <div class="modal-header">
+          <h5 class="modal-title" id="tag-modal-title">{{ _('add_tag') }}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="tag-form-id" value="">
+          <div class="mb-3">
+            <label for="tag-form-name" class="form-label">{{ _('name') }}</label>
+            <div class="input-group">
+              <input type="text" class="form-control" id="tag-form-name" required autocomplete="off">
+              <div class="color-picker-wrapper">
+                <button class="btn btn-outline-secondary" type="button" id="color-btn-new" data-color="" title="{{ _('color') }}" onclick="toggleColorPicker('color-new')">
+                  <span class="color-preview empty"><i class="bi bi-palette-fill"></i></span>
+                </button>
+                <div class="color-picker-popup" id="color-new"></div>
               </div>
-            </td>
-            <td class="text-center">
-              <span class="badge bg-label-secondary">{{ t.usage_count }}</span>
-            </td>
-            <td>
-              <button class="btn btn-sm btn-outline-warning me-1 btn-edit" onclick="editTag({{ t.id }})"><i class="bi bi-pencil"></i></button>
-              <button class="btn btn-sm btn-outline-success me-1 d-none btn-save" id="btn-save-{{ t.id }}" onclick="saveTag({{ t.id }})"><i class="bi bi-check-lg"></i></button>
-              <button class="btn btn-sm btn-outline-danger" onclick="deleteTag({{ t.id }})"><i class="bi bi-trash"></i></button>
-            </td>
-          </tr>
-          {% else %}
-          <tr id="no-tags"><td colspan="3" class="text-center text-muted py-4">{{ _('no_tags') }}</td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
+              <div class="emoji-picker-wrapper">
+                <button class="btn btn-outline-secondary" type="button" onclick="togglePicker('picker-new')">😀</button>
+                <div class="emoji-grid" id="picker-new"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ _('cancel') }}</button>
+          <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i>{{ _('save') }}</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
@@ -284,18 +239,30 @@
 
 {% block page_js %}
 <script>
-  // --- Clickable tag rows ---
+  // --- Card click navigation ---
   document.addEventListener('click', function(e) {
-    var row = e.target.closest('.tag-clickable-row');
-    if (!row) return;
-    // Don't navigate if clicking on a button, input, or edit group
-    if (e.target.closest('button, input, .tag-edit-group, .emoji-picker-wrapper')) return;
-    var href = row.dataset.href;
+    var card = e.target.closest('.tag-card');
+    if (!card) return;
+    if (e.target.closest('button, .dropdown, .dropdown-menu')) return;
+    var href = card.dataset.href;
     if (href) window.location.href = href;
   });
 
+  // --- Delegated listeners for Edit / Delete (avoid inline onclick with tojson issues) ---
+  document.addEventListener('click', function(e) {
+    var editBtn = e.target.closest('.tag-edit-btn');
+    if (editBtn) {
+      openTagModal(parseInt(editBtn.dataset.id), editBtn.dataset.name, editBtn.dataset.color || '');
+      return;
+    }
+    var delBtn = e.target.closest('.tag-delete-btn');
+    if (delBtn) {
+      deleteTag(parseInt(delBtn.dataset.id));
+    }
+  });
+
   // --- Emoji Picker (loads all emojis from emoji-data.json) ---
-  var _emojiData = null; // loaded once
+  var _emojiData = null;
   var _activePicker = null;
   var _groupIcons = ['😀','👋','🏻','🐵','🍇','🌍','🎃','👓','🏧','🏁'];
   var _groupNames = ['Smileys','People','Skin','Animals','Food','Travel','Activities','Objects','Symbols','Flags'];
@@ -305,7 +272,6 @@
     fetch('/static/js/emoji-data.json')
       .then(function(r) { return r.json(); })
       .then(function(data) {
-        // Skip skin tone modifiers (group 2)
         _emojiData = data.filter(function(e) { return e.group !== 2; });
         cb(_emojiData);
       })
@@ -333,7 +299,6 @@
     container.appendChild(listContainer);
 
     loadEmojiData(function(data) {
-      // Build group tabs
       var groups = [];
       data.forEach(function(e) { if (groups.indexOf(e.group) === -1) groups.push(e.group); });
       groups.sort(function(a,b) { return a - b; });
@@ -352,7 +317,6 @@
         tabs.appendChild(btn);
       });
 
-      // Click handler for emoji
       function onEmojiClick(em) {
         var wrapper = container.closest('.input-group');
         var input = wrapper ? wrapper.querySelector('input[type="text"]') : null;
@@ -384,11 +348,9 @@
         renderEmojis(data.filter(function(e) { return e.group === g; }));
       }
 
-      // Search
       searchInput.addEventListener('input', function() {
         var q = searchInput.value.toLowerCase().trim();
         if (!q) {
-          // Show active group or first
           var active = tabs.querySelector('.active');
           var g = active ? groups[Array.from(tabs.children).indexOf(active)] : groups[0];
           showGroup(g);
@@ -404,7 +366,6 @@
         tabs.querySelectorAll('button').forEach(function(b) { b.classList.remove('active'); });
       });
 
-      // Show first group by default
       if (groups.length > 0) {
         showGroup(groups[0]);
         tabs.children[0].classList.add('active');
@@ -415,15 +376,8 @@
   function togglePicker(pickerId) {
     var popup = document.getElementById(pickerId);
     if (!popup) return;
-
-    if (_activePicker && _activePicker !== popup) {
-      _activePicker.classList.remove('show');
-    }
-    if (_activeColorPicker) {
-      _activeColorPicker.classList.remove('show');
-      _activeColorPicker = null;
-    }
-
+    if (_activePicker && _activePicker !== popup) _activePicker.classList.remove('show');
+    if (_activeColorPicker) { _activeColorPicker.classList.remove('show'); _activeColorPicker = null; }
     popup.classList.toggle('show');
     _activePicker = popup.classList.contains('show') ? popup : null;
     buildPickerContent(popup);
@@ -450,16 +404,12 @@
     var preview = button.querySelector('.color-preview');
     if (color) {
       preview.style.backgroundColor = color;
-      preview.classList.add('has-color');
-      preview.classList.remove('empty');
+      preview.classList.add('has-color'); preview.classList.remove('empty');
       preview.innerHTML = '';
     } else {
       preview.style.backgroundColor = '';
-      preview.classList.remove('has-color');
-      preview.classList.add('empty');
-      if (!preview.querySelector('i')) {
-        preview.innerHTML = '<i class="bi bi-palette-fill"></i>';
-      }
+      preview.classList.remove('has-color'); preview.classList.add('empty');
+      if (!preview.querySelector('i')) preview.innerHTML = '<i class="bi bi-palette-fill"></i>';
     }
   }
 
@@ -469,7 +419,6 @@
 
   function buildColorPickerContent(popup, button) {
     if (popup._built) {
-      // Refresh selection state when reopening
       var current = button.dataset.color || '';
       popup.querySelectorAll('.color-swatch').forEach(function(s) {
         s.classList.toggle('selected', s.dataset.color.toLowerCase() === current.toLowerCase());
@@ -484,19 +433,14 @@
     grid.className = 'color-swatches';
     COLOR_PALETTE.forEach(function(c) {
       var sw = document.createElement('button');
-      sw.type = 'button';
-      sw.className = 'color-swatch';
-      sw.style.backgroundColor = c;
-      sw.dataset.color = c;
-      sw.title = c;
+      sw.type = 'button'; sw.className = 'color-swatch';
+      sw.style.backgroundColor = c; sw.dataset.color = c; sw.title = c;
       sw.addEventListener('click', function() {
         _setTagColor(button, c);
         popup.querySelectorAll('.color-swatch').forEach(function(s) { s.classList.remove('selected'); });
         sw.classList.add('selected');
-        hex.value = c;
-        native.value = c;
-        popup.classList.remove('show');
-        _activeColorPicker = null;
+        hex.value = c; native.value = c;
+        popup.classList.remove('show'); _activeColorPicker = null;
       });
       grid.appendChild(sw);
     });
@@ -519,10 +463,8 @@
     footer.appendChild(native);
 
     var hex = document.createElement('input');
-    hex.type = 'text';
-    hex.className = 'hex-input';
-    hex.placeholder = '#RRGGBB';
-    hex.maxLength = 9;
+    hex.type = 'text'; hex.className = 'hex-input';
+    hex.placeholder = '#RRGGBB'; hex.maxLength = 9;
     hex.value = button.dataset.color || '';
     hex.addEventListener('input', function() {
       var v = hex.value.trim();
@@ -540,20 +482,17 @@
     footer.appendChild(hex);
 
     var clear = document.createElement('button');
-    clear.type = 'button';
-    clear.className = 'color-picker-clear';
+    clear.type = 'button'; clear.className = 'color-picker-clear';
     clear.title = '{{ _("clear_color") }}';
     clear.innerHTML = '<i class="bi bi-x-lg"></i>';
     clear.addEventListener('click', function() {
-      _setTagColor(button, '');
-      hex.value = '';
+      _setTagColor(button, ''); hex.value = '';
       popup.querySelectorAll('.color-swatch').forEach(function(s) { s.classList.remove('selected'); });
     });
     footer.appendChild(clear);
 
     popup.appendChild(footer);
 
-    // Initial selection highlight
     var current = button.dataset.color || '';
     popup.querySelectorAll('.color-swatch').forEach(function(s) {
       s.classList.toggle('selected', s.dataset.color.toLowerCase() === current.toLowerCase());
@@ -564,14 +503,8 @@
     var popup = document.getElementById(popupId);
     if (!popup) return;
     var button = popup.closest('.color-picker-wrapper').querySelector('button');
-
-    if (_activeColorPicker && _activeColorPicker !== popup) {
-      _activeColorPicker.classList.remove('show');
-    }
-    if (_activePicker) {
-      _activePicker.classList.remove('show');
-      _activePicker = null;
-    }
+    if (_activeColorPicker && _activeColorPicker !== popup) _activeColorPicker.classList.remove('show');
+    if (_activePicker) { _activePicker.classList.remove('show'); _activePicker = null; }
     popup.classList.toggle('show');
     _activeColorPicker = popup.classList.contains('show') ? popup : null;
     buildColorPickerContent(popup, button);
@@ -585,50 +518,41 @@
     _activeColorPicker = null;
   });
 
-  // --- Tag CRUD ---
-  document.getElementById('add-tag-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const name = document.getElementById('new-tag-name').value.trim();
+  // --- Tag modal (create / edit) ---
+  function openTagModal(id, name, color) {
+    document.getElementById('tag-form-id').value = id != null ? String(id) : '';
+    document.getElementById('tag-form-name').value = name || '';
+    document.getElementById('tag-modal-title').textContent = id != null
+      ? ('{{ _("edit") }} — ' + (name || ''))
+      : '{{ _("add_tag") }}';
+    var btn = document.getElementById('color-btn-new');
+    _setTagColor(btn, color || '');
+    // Reset color picker popup state so it rebuilds selection from the new color
+    var popup = document.getElementById('color-new');
+    if (popup) { popup._built = false; popup.innerHTML = ''; }
+    // Show the modal programmatically (Edit is inside a dropdown so data-bs-toggle can clash)
+    var modalEl = document.getElementById('tagModal');
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+    setTimeout(function() { document.getElementById('tag-form-name').focus(); }, 300);
+  }
+
+  async function submitTag() {
+    const id = document.getElementById('tag-form-id').value;
+    const name = document.getElementById('tag-form-name').value.trim();
     if (!name) return;
     const color = document.getElementById('color-btn-new').dataset.color || null;
-
     const body = color ? { name, color } : { name };
-    const resp = await fetch('/api/tags', {
-      method: 'POST',
+
+    const url = id ? `/api/tags/${id}` : '/api/tags';
+    const method = id ? 'PUT' : 'POST';
+    const resp = await fetch(url, {
+      method,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     });
 
     if (resp.ok) {
-      showToast('{{ _("created_successfully") }}', 'success');
-      location.reload();
-    } else {
-      await handleApiError(resp);
-    }
-  });
-
-  function editTag(id) {
-    document.getElementById(`tag-name-${id}`).classList.add('d-none');
-    document.getElementById(`tag-edit-group-${id}`).classList.remove('d-none');
-    document.getElementById(`tag-edit-${id}`).focus();
-    document.getElementById(`btn-save-${id}`).classList.remove('d-none');
-    // Disable row click while editing
-    document.getElementById(`tag-row-${id}`).classList.remove('tag-clickable-row');
-  }
-
-  async function saveTag(id) {
-    const name = document.getElementById(`tag-edit-${id}`).value.trim();
-    if (!name) return;
-    const color = document.getElementById(`color-btn-${id}`).dataset.color || null;
-
-    const resp = await fetch(`/api/tags/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, color })
-    });
-
-    if (resp.ok) {
-      showToast('{{ _("updated_successfully") }}', 'success');
+      showToast(id ? '{{ _("updated_successfully") }}' : '{{ _("created_successfully") }}', 'success');
       location.reload();
     } else {
       await handleApiError(resp);
@@ -639,7 +563,8 @@
     if (!(await confirmDialog('{{ _("delete") }}?', {icon: 'warning', confirmColor: 'danger', confirmText: '{{ _("delete") }}'}))) return;
     const resp = await fetch(`/api/tags/${id}`, { method: 'DELETE' });
     if (resp.ok) {
-      document.getElementById(`tag-row-${id}`).remove();
+      var wrap = document.getElementById(`tag-card-wrap-${id}`);
+      if (wrap) wrap.remove();
       showToast('{{ _("deleted_successfully") }}', 'success');
     } else {
       await handleApiError(resp);

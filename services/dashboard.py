@@ -8,8 +8,8 @@ from i18n import _
 from models.movement import Movement
 from models.notification import Notification
 from models.recurring import RecurringItem
-from models.saving import Saving
 from models.source import Source
+from services import savings as saving_service
 from services.sources import get_balance, get_balances_batch
 
 
@@ -89,13 +89,13 @@ def get_dashboard_stats(session: Session) -> dict:
         .limit(5)
     ).all()
 
-    # Monthly savings
-    month_savings_rows = session.exec(
-        select(Saving.currency, func.coalesce(func.sum(Saving.amount), 0))
-        .where(Saving.date >= first_of_month)
-        .group_by(Saving.currency)
-    ).all()
-    month_savings = {cur: round(float(amt), 2) for cur, amt in month_savings_rows}
+    # Monthly savings — reads from Movement.is_savings_contribution (current model).
+    # The legacy `savings` table is migrated into movements via the wizard.
+    if today.month == 12:
+        last_day_of_month = first_of_month.replace(day=31)
+    else:
+        last_day_of_month = first_of_month.replace(month=first_of_month.month + 1) - timedelta(days=1)
+    month_savings = saving_service.total_saved_period(session, first_of_month, last_day_of_month)
 
     return {
         "net_worth": dict(net_worth),

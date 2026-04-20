@@ -166,3 +166,16 @@ def dismiss_whim(session: Session, whim_id: int) -> Whim:
     session.commit()
     session.refresh(whim)
     return whim
+
+
+def restore_whim(session: Session, whim_id: int) -> Whim:
+    """Restore a dismissed whim back to pending."""
+    whim = get_whim(session, whim_id)
+    if whim.status != "dismissed":
+        raise HTTPException(status_code=422, detail="Only dismissed whims can be restored")
+    whim.status = "pending"
+    whim.updated_at = datetime.utcnow()
+    session.add(whim)
+    session.commit()
+    session.refresh(whim)
+    return whim

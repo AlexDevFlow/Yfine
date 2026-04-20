@@ -92,6 +92,7 @@
         </div>
 
         <ul class="yn-nav">
+          <li class="yn-nav-header">{{ _('nav_ledger') }}</li>
           <li class="yn-nav-item">
             <a href="/" class="yn-nav-link {% if active_page == 'dashboard' %}active{% endif %}">
               <i class="bi bi-house"></i>
@@ -122,16 +123,12 @@
               <span>{{ _('tags') }}</span>
             </a>
           </li>
+
+          <li class="yn-nav-header">{{ _('nav_planning') }}</li>
           <li class="yn-nav-item">
             <a href="/recurring" class="yn-nav-link {% if active_page == 'recurring' %}active{% endif %}">
               <i class="bi bi-arrow-repeat"></i>
               <span>{{ _('recurring') }}</span>
-            </a>
-          </li>
-          <li class="yn-nav-item">
-            <a href="/whims" class="yn-nav-link {% if active_page == 'whims' %}active{% endif %}">
-              <i class="bi bi-star"></i>
-              <span>{{ _('whims') }}</span>
             </a>
           </li>
           <li class="yn-nav-item">
@@ -140,6 +137,14 @@
               <span>{{ _('savings') }}</span>
             </a>
           </li>
+          <li class="yn-nav-item">
+            <a href="/whims" class="yn-nav-link {% if active_page == 'whims' %}active{% endif %}">
+              <i class="bi bi-star"></i>
+              <span>{{ _('whims') }}</span>
+            </a>
+          </li>
+
+          <li class="yn-nav-header">{{ _('nav_system') }}</li>
           <li class="yn-nav-item">
             <a href="/notifications" class="yn-nav-link {% if active_page == 'notifications' %}active{% endif %}">
               <i class="bi bi-bell"></i>

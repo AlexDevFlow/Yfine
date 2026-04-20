@@ -380,6 +380,7 @@ def recurring_index(
     total_pages = max(1, math.ceil(total_count / per_page))
     items = recurring_service.list_recurring(session, skip=skip, limit=per_page, frequency=frequency, direction=direction)
     enriched = recurring_service.enrich_recurring_items(session, items)
+    summary = recurring_service.monthly_summary(session)
     return _templates().TemplateResponse("recurring/index.html", {
         "request": request,
         "items": enriched,
@@ -389,6 +390,7 @@ def recurring_index(
         "total_pages": total_pages,
         "total_count": total_count,
         "per_page": per_page,
+        "summary": summary,
     })
 
 

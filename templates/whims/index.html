@@ -163,6 +163,7 @@
                   <td class="text-muted"><s>{{ w.name }}</s></td>
                   <td class="text-muted">{{ "%.2f"|format(w.amount) }} {{ w.currency }}</td>
                   <td class="text-end">
+                    <button class="btn btn-sm btn-outline-success me-1" onclick="restoreWhim({{ w.id }})" title="{{ _('whim_restore') }}"><i class="bi bi-arrow-counterclockwise"></i></button>
                     <button class="btn btn-sm btn-outline-danger" onclick="deleteWhim({{ w.id }})"><i class="bi bi-trash"></i></button>
                   </td>
                 </tr>
@@ -414,6 +415,16 @@
     var resp = await fetch('/api/whims/' + id + '/dismiss', { method: 'POST' });
     if (resp.ok) {
       showToast('{{ _("success") }}', 'success');
+      location.reload();
+    } else {
+      await handleApiError(resp);
+    }
+  }
+
+  async function restoreWhim(id) {
+    var resp = await fetch('/api/whims/' + id + '/restore', { method: 'POST' });
+    if (resp.ok) {
+      showToast('{{ _("whim_restored") }}', 'success');
       location.reload();
     } else {
       await handleApiError(resp);
