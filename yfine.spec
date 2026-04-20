@@ -149,3 +149,24 @@ coll = COLLECT(
     upx_exclude=[],
     name="yfine",
 )
+
+import os as _os
+import sys as _sys
+
+if _sys.platform == "darwin":
+    _icon = "static/icon.icns" if _os.path.exists("static/icon.icns") else "static/icon.png"
+    app = BUNDLE(
+        coll,
+        name="Yfine.app",
+        icon=_icon,
+        bundle_identifier="com.alexdevflow.yfine",
+        info_plist={
+            "CFBundleName": "Yfine",
+            "CFBundleDisplayName": "Yfine",
+            "CFBundleShortVersionString": "1.0.0",
+            "CFBundleVersion": "1",
+            "NSHighResolutionCapable": True,
+            "LSMinimumSystemVersion": "11.0",
+            "LSApplicationCategoryType": "public.app-category.finance",
+        },
+    )

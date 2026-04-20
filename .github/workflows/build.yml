@@ -9,20 +9,21 @@ on:
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: ubuntu-22.04
             artifact: Yfine-Linux
-            zip_name: Yfine-Linux.tar.gz
+            asset_name: Yfine-Linux.tar.gz
           - os: macos-13
             artifact: Yfine-macOS-Intel
-            zip_name: Yfine-macOS-Intel.zip
+            asset_name: Yfine-macOS-Intel.zip
           - os: macos-14
             artifact: Yfine-macOS-AppleSilicon
-            zip_name: Yfine-macOS-AppleSilicon.zip
+            asset_name: Yfine-macOS-AppleSilicon.zip
           - os: windows-latest
             artifact: Yfine-Windows
-            zip_name: Yfine-Windows.zip
+            asset_name: Yfine-Windows.zip
 
     runs-on: ${{ matrix.os }}
 
@@ -46,29 +47,45 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pywebview pyinstaller
+          pip install pyinstaller
+
+      - name: Generate .icns icon (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          set -e
+          mkdir -p static/icon.iconset
+          for entry in "16 icon_16x16" "32 icon_16x16@2x" "32 icon_32x32" \
+                       "64 icon_32x32@2x" "128 icon_128x128" "256 icon_128x128@2x" \
+                       "256 icon_256x256" "512 icon_256x256@2x" "512 icon_512x512"; do
+            sz="${entry%% *}"; name="${entry#* }"
+            sips -z "$sz" "$sz" static/icon.png --out "static/icon.iconset/${name}.png" >/dev/null
+          done
+          iconutil -c icns static/icon.iconset -o static/icon.icns
+          rm -rf static/icon.iconset
 
       - name: Build with PyInstaller
         run: pyinstaller yfine.spec --noconfirm
 
       - name: Package (Linux)
         if: runner.os == 'Linux'
-        run: tar -czf ${{ matrix.zip_name }} -C dist yfine
+        run: tar -czf ${{ matrix.asset_name }} -C dist yfine
 
       - name: Package (macOS)
         if: runner.os == 'macOS'
-        run: cd dist && zip -r ../${{ matrix.zip_name }} yfine
+        run: |
+          # ditto preserves extended attributes and symlinks that .app bundles need
+          ditto -c -k --sequesterRsrc --keepParent dist/Yfine.app ${{ matrix.asset_name }}
 
       - name: Package (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
-        run: Compress-Archive -Path dist\yfine -DestinationPath ${{ matrix.zip_name }}
+        run: Compress-Archive -Path dist\yfine -DestinationPath ${{ matrix.asset_name }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact }}
-          path: ${{ matrix.zip_name }}
+          path: ${{ matrix.asset_name }}
 
   release:
     needs: build
@@ -88,3 +105,20 @@ jobs:
         with:
           files: artifacts/**/*
           generate_release_notes: true
+          body: |
+            ## Installation
+
+            **Non-technical users (recommended):** run the one-shot installer — no admin required, no Python needed.
+
+            - macOS: `curl -fsSL https://raw.githubusercontent.com/AlexDevFlow/Yfine/main/scripts/install-macos.sh | bash`
+            - Linux: `curl -fsSL https://raw.githubusercontent.com/AlexDevFlow/Yfine/main/scripts/install-linux.sh | bash`
+            - Windows (PowerShell): `irm https://raw.githubusercontent.com/AlexDevFlow/Yfine/main/scripts/install-windows.ps1 | iex`
+
+            **Prebuilt binaries (this release):** download below and extract.
+
+            - **macOS** — drag `Yfine.app` to `/Applications`. The app is unsigned; on first launch macOS blocks it. Right-click → **Open** → **Open**, or run once:
+              ```
+              xattr -dr com.apple.quarantine /Applications/Yfine.app
+              ```
+            - **Linux** — extract the tarball and run `./yfine/yfine`.
+            - **Windows** — extract and run `yfine\yfine.exe`.
