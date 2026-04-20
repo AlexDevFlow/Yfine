@@ -286,4 +286,8 @@ if __name__ == "__main__":
     window.expose(api.save_logs)
 
     threading.Thread(target=on_loaded, daemon=True).start()
-    webview.start()
+    # Force Qt backend on Windows/Linux to avoid pywebview's WinForms path
+    # (pythonnet/clr_loader fails to init inside PyInstaller bundles). macOS
+    # keeps its native Cocoa/WebKit backend via pyobjc.
+    _gui = None if sys.platform == "darwin" else "qt"
+    webview.start(gui=_gui)
