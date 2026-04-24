@@ -163,8 +163,8 @@ if _sys.platform == "darwin":
         info_plist={
             "CFBundleName": "Yfine",
             "CFBundleDisplayName": "Yfine",
-            "CFBundleShortVersionString": "1.0.0",
-            "CFBundleVersion": "1",
+            "CFBundleShortVersionString": "1.0.2",
+            "CFBundleVersion": "1.0.2",
             "NSHighResolutionCapable": True,
             "LSMinimumSystemVersion": "11.0",
             "LSApplicationCategoryType": "public.app-category.finance",
