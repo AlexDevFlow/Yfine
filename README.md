@@ -6,6 +6,8 @@ The app is still in early development and evolving quickly. I’m doing my best 
 
 If you need support or want to contribute, feel free to join the discussions on GitHub, open an issue, or submit a PR.
 
+Another known issue is related to the executables built in the releases which might not always work on all platforms or configurations. If you encounter any problems running the desktop app, please report them so I can investigate and provide fixes, building from source is recommended in the meantime.
+
 Stay tuned! A stable release is coming soon!
 ---
 
