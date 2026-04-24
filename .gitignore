@@ -68,6 +68,12 @@ backups/
 plugins/plugin_state.json
 plugins/.plugin_state.lock
 
+# User-installed plugins (runtime-installed per user, not redistributed)
+plugins/installed/
+
+# Migration warning marker (written when upgrade falls back to auto-heal)
+migration_warning.txt
+
 # Markdown docs (CLAUDE.md, internal specs, etc.)
 *.md
 !README.md

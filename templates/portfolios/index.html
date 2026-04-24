@@ -92,17 +92,21 @@
         </div>
         <div class="d-flex justify-content-between align-items-center">
           <small class="text-muted">{{ _('invested') }}: {{ "%.2f"|format(p.total_cost) }} {{ p.base_currency }}</small>
+          {% if p.total_pnl is not none %}
           <small class="fw-bold {% if p.total_pnl >= 0 %}text-success{% else %}text-danger{% endif %}">
             {% if p.total_pnl >= 0 %}+{% endif %}{{ "%.2f"|format(p.total_pnl) }}
-            ({% if p.total_pnl_pct >= 0 %}+{% endif %}{{ "%.2f"|format(p.total_pnl_pct) }}%)
+            {% if p.total_pnl_pct is not none %}({% if p.total_pnl_pct >= 0 %}+{% endif %}{{ "%.2f"|format(p.total_pnl_pct) }}%){% endif %}
           </small>
+          {% else %}
+          <small class="text-muted">—</small>
+          {% endif %}
         </div>
         <hr class="my-2">
         <div class="d-flex flex-wrap gap-2 small text-muted">
           <span><i class="bi bi-collection me-1"></i>{{ p.holdings_count }} {{ _('holdings') }}</span>
         </div>
         <div class="mt-2 position-relative portfolio-sparkline-wrap">
-          <canvas class="portfolio-sparkline" data-portfolio-id="{{ p.id }}" data-pnl="{{ p.total_pnl }}"></canvas>
+          <canvas class="portfolio-sparkline" data-portfolio-id="{{ p.id }}" data-pnl="{{ p.total_pnl if p.total_pnl is not none else 0 }}" data-currency="{{ p.base_currency }}"></canvas>
         </div>
       </div>
       <div class="card-footer bg-transparent border-0 d-flex justify-content-end gap-1 pt-0 pb-3 px-3">
@@ -215,6 +219,7 @@
   async function loadPortfolioSparkline(canvas) {
     var id = canvas.dataset.portfolioId;
     var pnl = parseFloat(canvas.dataset.pnl || '0');
+    var currency = canvas.dataset.currency || '';
     try {
       var resp = await fetch('/api/portfolios/' + id + '/history?range=30d');
       if (!resp.ok) return;
@@ -229,16 +234,21 @@
             data: points.map(function(p) { return p.value; }),
             borderColor: color,
             backgroundColor: color + '20',
-            fill: true, tension: 0.4, pointRadius: 0, borderWidth: 2,
+            fill: true, tension: 0.4, pointRadius: 0, pointHoverRadius: 4, borderWidth: 2,
           }]
         },
         options: {
           responsive: true, maintainAspectRatio: false, resizeDelay: 200,
+          interaction: { mode: 'index', intersect: false },
           plugins: { legend: { display: false }, tooltip: {
-            enabled: true, backgroundColor: 'rgba(0,0,0,0.8)',
+            enabled: true, backgroundColor: 'rgba(0,0,0,0.85)',
             displayColors: false,
             callbacks: {
-              label: function(ctx) { return ctx.parsed.y.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2}); }
+              title: function(items) { return items && items[0] ? items[0].label : ''; },
+              label: function(ctx) {
+                var v = ctx.parsed.y.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+                return currency ? (v + ' ' + currency) : v;
+              }
             }
           }},
           scales: { x: { display: false }, y: { display: false } },

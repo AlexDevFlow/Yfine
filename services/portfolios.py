@@ -163,8 +163,13 @@ def enrich_holding(h: Holding) -> dict:
     pnl_pct = None
     if h.last_price is not None:
         market_value = round(h.quantity * h.last_price, 2)
-        pnl = round(market_value - cost_basis, 2)
-        pnl_pct = round((pnl / cost_basis * 100.0), 2) if cost_basis else 0.0
+        # Only compute PnL when the user actually recorded an avg_cost.
+        # If cost_basis is 0 (avg_cost left blank), PnL is unknowable —
+        # surface that as None so the UI shows "—" instead of a bogus
+        # "+X (+0.00%)" reading.
+        if cost_basis > 0:
+            pnl = round(market_value - cost_basis, 2)
+            pnl_pct = round(pnl / cost_basis * 100.0, 2)
     return {
         "id": h.id,
         "portfolio_id": h.portfolio_id,
@@ -188,13 +193,24 @@ def enrich_holding(h: Holding) -> dict:
 def summarize_portfolio(session: Session, portfolio: Portfolio) -> dict:
     holdings = list_holdings(session, portfolio.id)
     enriched = [enrich_holding(h) for h in holdings]
+    # Total invested sums cost_basis across all holdings. Holdings with an
+    # unknown cost (avg_cost=0) contribute 0, which matches the user's intent
+    # ("I didn't record my purchase price").
     total_cost = round(sum((e["cost_basis"] or 0.0) for e in enriched), 2)
     total_value = round(
         sum((e["market_value"] if e["market_value"] is not None else e["cost_basis"] or 0.0) for e in enriched),
         2,
     )
-    pnl = round(total_value - total_cost, 2)
-    pnl_pct = round((pnl / total_cost * 100.0), 2) if total_cost else 0.0
+    # Only sum PnL from holdings with a known cost basis — otherwise the
+    # total would double-count market_value as "profit" for free/unpriced
+    # holdings. Percentage is relative to total_cost; undefined when zero.
+    priced_pnl = [e["unrealized_pnl"] for e in enriched if e["unrealized_pnl"] is not None]
+    if priced_pnl and total_cost > 0:
+        pnl = round(sum(priced_pnl), 2)
+        pnl_pct = round(pnl / total_cost * 100.0, 2)
+    else:
+        pnl = None
+        pnl_pct = None
     source = session.get(Source, portfolio.source_id) if portfolio.source_id else None
     return {
         "id": portfolio.id,

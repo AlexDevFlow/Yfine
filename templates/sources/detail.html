@@ -80,9 +80,13 @@
                   <div class="small text-muted">{{ p.holdings_count }} {{ _('holdings') }}</div>
                   <div class="d-flex justify-content-between align-items-center mt-1">
                     <strong>{{ "%.2f"|format(p.total_value) }} {{ p.base_currency }}</strong>
+                    {% if p.total_pnl is not none and p.total_pnl_pct is not none %}
                     <small class="{% if p.total_pnl >= 0 %}text-success{% else %}text-danger{% endif %} fw-bold">
                       {% if p.total_pnl >= 0 %}+{% endif %}{{ "%.2f"|format(p.total_pnl_pct) }}%
                     </small>
+                    {% else %}
+                    <small class="text-muted">—</small>
+                    {% endif %}
                   </div>
                 </div>
               </div>

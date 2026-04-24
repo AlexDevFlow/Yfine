@@ -1,6 +1,6 @@
 import logging
 import threading
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from sqlmodel import Session, select
@@ -143,8 +143,19 @@ def start_scheduler():
     process_recurring_items()
     scheduler.add_job(process_recurring_items, "interval", hours=1, id="recurring_job", replace_existing=True)
     scheduler.add_job(cleanup_notifications, "interval", hours=24, id="notification_cleanup_job", replace_existing=True)
-    # Portfolio prices: refresh every 30 minutes (only if enabled in settings)
-    scheduler.add_job(refresh_portfolio_prices, "interval", minutes=30, id="portfolio_prices_job", replace_existing=True)
+    # Portfolio prices: refresh on startup, then every 30 minutes.
+    # `next_run_time=now` fires the first run on a scheduler thread as soon
+    # as `scheduler.start()` returns, so we don't block app startup on
+    # network calls but the user doesn't have to wait 30 minutes to see
+    # fresh prices after opening the app.
+    scheduler.add_job(
+        refresh_portfolio_prices,
+        "interval",
+        minutes=30,
+        next_run_time=datetime.now(),
+        id="portfolio_prices_job",
+        replace_existing=True,
+    )
     scheduler.start()
 
 

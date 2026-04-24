@@ -117,8 +117,8 @@ class PortfolioRead(BaseModel):
     holdings_count: int = 0
     total_cost: float = 0.0
     total_value: float = 0.0
-    total_pnl: float = 0.0
-    total_pnl_pct: float = 0.0
+    total_pnl: Optional[float] = None
+    total_pnl_pct: Optional[float] = None
 
 
 # --- Holding ---

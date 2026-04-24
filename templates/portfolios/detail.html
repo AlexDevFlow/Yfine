@@ -59,10 +59,36 @@
     <div class="card h-100">
       <div class="card-body">
         <small class="text-muted">{{ _('unrealized_pnl') }}</small>
+        {% if portfolio.total_pnl is not none %}
         <h4 class="mb-0 fw-bold {% if portfolio.total_pnl >= 0 %}text-success{% else %}text-danger{% endif %}">
           {% if portfolio.total_pnl >= 0 %}+{% endif %}{{ "%.2f"|format(portfolio.total_pnl) }}
-          <small class="fs-6">({% if portfolio.total_pnl_pct >= 0 %}+{% endif %}{{ "%.2f"|format(portfolio.total_pnl_pct) }}%)</small>
+          {% if portfolio.total_pnl_pct is not none %}<small class="fs-6">({% if portfolio.total_pnl_pct >= 0 %}+{% endif %}{{ "%.2f"|format(portfolio.total_pnl_pct) }}%)</small>{% endif %}
         </h4>
+        {% else %}
+        <h4 class="mb-0 fw-bold text-muted">—</h4>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Value history chart -->
+<div class="card mb-4">
+  <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <h6 class="card-title mb-0">{{ _('total_value') }}</h6>
+    <div class="btn-group btn-group-sm" role="group" aria-label="range" id="portfolio-history-ranges">
+      <button type="button" class="btn btn-outline-secondary" data-range="7d">{{ _('7d') }}</button>
+      <button type="button" class="btn btn-outline-secondary active" data-range="30d">{{ _('30d') }}</button>
+      <button type="button" class="btn btn-outline-secondary" data-range="90d">{{ _('90d') }}</button>
+      <button type="button" class="btn btn-outline-secondary" data-range="1y">{{ _('1y') }}</button>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="position-relative" style="height: 280px;">
+      <canvas id="portfolio-history-chart"></canvas>
+      <div id="portfolio-history-empty" class="d-none text-center text-muted py-5">
+        <i class="bi bi-graph-up mb-2" style="font-size:2rem"></i>
+        <p class="mb-0">—</p>
       </div>
     </div>
   </div>
@@ -121,9 +147,9 @@
               {% if h.unrealized_pnl is not none %}
                 <span class="fw-bold {% if h.unrealized_pnl >= 0 %}text-success{% else %}text-danger{% endif %}">
                   {% if h.unrealized_pnl >= 0 %}+{% endif %}{{ "%.2f"|format(h.unrealized_pnl) }}
-                  <small>({% if h.unrealized_pnl_pct >= 0 %}+{% endif %}{{ "%.2f"|format(h.unrealized_pnl_pct) }}%)</small>
+                  {% if h.unrealized_pnl_pct is not none %}<small>({% if h.unrealized_pnl_pct >= 0 %}+{% endif %}{{ "%.2f"|format(h.unrealized_pnl_pct) }}%)</small>{% endif %}
                 </span>
-              {% else %}—{% endif %}
+              {% else %}<span class="text-muted">—</span>{% endif %}
             </td>
             <td class="text-end">
               <button class="btn btn-sm btn-outline-warning" onclick='editHolding({{ h | tojson }})' title="{{ _('edit') }}"><i class="bi bi-pencil"></i></button>
@@ -252,9 +278,99 @@
 {% endblock %}
 
 {% block page_js %}
+<script src="/static/vendor/chartjs/chart.umd.min.js"></script>
 <script>
   var PORTFOLIO_ID = {{ portfolio.id }};
   var PORTFOLIO_KIND = '{{ portfolio.kind }}';
+  var PORTFOLIO_CURRENCY = '{{ portfolio.base_currency }}';
+  var PORTFOLIO_PNL_SIGN = {{ 1 if (portfolio.total_pnl is not none and portfolio.total_pnl >= 0) else -1 }};
+
+  var _historyChart = null;
+  async function loadHistoryChart(range) {
+    var canvas = document.getElementById('portfolio-history-chart');
+    var empty = document.getElementById('portfolio-history-empty');
+    if (!canvas) return;
+    try {
+      var resp = await fetch('/api/portfolios/' + PORTFOLIO_ID + '/history?range=' + encodeURIComponent(range));
+      if (!resp.ok) { throw new Error('history fetch failed'); }
+      var points = await resp.json();
+      if (!points || points.length < 2) {
+        canvas.classList.add('d-none');
+        empty.classList.remove('d-none');
+        if (_historyChart) { _historyChart.destroy(); _historyChart = null; }
+        return;
+      }
+      canvas.classList.remove('d-none');
+      empty.classList.add('d-none');
+      var color = PORTFOLIO_PNL_SIGN >= 0 ? '#71dd37' : '#ff3e1d';
+      var labels = points.map(function(p) { return p.date; });
+      var values = points.map(function(p) { return p.value; });
+      if (_historyChart) {
+        _historyChart.data.labels = labels;
+        _historyChart.data.datasets[0].data = values;
+        _historyChart.data.datasets[0].borderColor = color;
+        _historyChart.data.datasets[0].backgroundColor = color + '20';
+        _historyChart.update();
+        return;
+      }
+      _historyChart = new Chart(canvas.getContext('2d'), {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: values,
+            borderColor: color,
+            backgroundColor: color + '20',
+            fill: true, tension: 0.3,
+            pointRadius: 0, pointHoverRadius: 5, borderWidth: 2,
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: 'rgba(0,0,0,0.85)',
+              displayColors: false,
+              callbacks: {
+                title: function(items) { return items && items[0] ? items[0].label : ''; },
+                label: function(ctx) {
+                  var v = ctx.parsed.y.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                  return v + ' ' + PORTFOLIO_CURRENCY;
+                }
+              }
+            }
+          },
+          scales: {
+            x: { ticks: { maxTicksLimit: 8, maxRotation: 0 }, grid: { display: false } },
+            y: {
+              ticks: {
+                callback: function(v) {
+                  return v.toLocaleString(undefined, {maximumFractionDigits: 0});
+                }
+              }
+            }
+          },
+          animation: { duration: 300 }
+        }
+      });
+    } catch (e) {
+      canvas.classList.add('d-none');
+      empty.classList.remove('d-none');
+    }
+  }
+
+  document.querySelectorAll('#portfolio-history-ranges [data-range]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('#portfolio-history-ranges [data-range]').forEach(function(b) {
+        b.classList.remove('active');
+      });
+      btn.classList.add('active');
+      loadHistoryChart(btn.dataset.range);
+    });
+  });
+  loadHistoryChart('30d');
   var modalEl = document.getElementById('holdingModal');
   var bsModal = null;
 

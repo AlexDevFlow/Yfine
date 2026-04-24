@@ -230,7 +230,9 @@ class TestValuation:
         assert e["unrealized_pnl_pct"] == -20.0
 
     def test_enrich_holding_zero_cost(self, session):
-        """Dividends / free tokens: zero cost but priced positively."""
+        """Unknown cost basis (user left avg_cost blank): market value is
+        still reported, but PnL is None so the UI does not show a misleading
+        "+50 (+0.00%)" reading."""
         h = Holding(
             portfolio_id=1, asset_class="crypto", symbol="X",
             quantity=10, avg_cost=0, currency="EUR", last_price=5,
@@ -238,9 +240,8 @@ class TestValuation:
         e = portfolio_service.enrich_holding(h)
         assert e["cost_basis"] == 0
         assert e["market_value"] == 50
-        assert e["unrealized_pnl"] == 50
-        # pnl_pct must not divide by zero
-        assert e["unrealized_pnl_pct"] == 0.0
+        assert e["unrealized_pnl"] is None
+        assert e["unrealized_pnl_pct"] is None
 
     def test_summarize_portfolio(self, session):
         _make_setting(session)
