@@ -31,18 +31,18 @@
 {% block content %}
 <div class="card">
   <div class="card-header">
-    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2 mb-3">
+    <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-3 mb-3 w-100">
       <h5 class="card-title mb-0">{{ _('movements') }}</h5>
-      <div class="d-flex gap-2 flex-nowrap overflow-auto w-100 w-sm-auto pb-1 pb-sm-0 yn-action-row">
-        <button type="button" class="btn btn-sm btn-outline-secondary yn-action-btn flex-shrink-0" onclick="openMovementsCalendar()">
+      <div class="d-flex gap-2 flex-nowrap overflow-auto w-100 w-sm-auto pb-1 pb-sm-0 ms-sm-auto yn-action-row">
+        <button type="button" class="btn btn-outline-secondary yn-action-btn flex-shrink-0" onclick="openMovementsCalendar()">
           <i class="bi bi-calendar"></i>
           <span>{{ _('view_calendar') }}</span>
         </button>
-        <a href="/movements/new?transfer=1{% if filter_source_id %}&source_id={{ filter_source_id }}{% endif %}" class="btn btn-sm btn-outline-primary yn-action-btn flex-shrink-0">
+        <a href="/movements/new?transfer=1{% if filter_source_id %}&source_id={{ filter_source_id }}{% endif %}" class="btn btn-outline-primary yn-action-btn flex-shrink-0">
           <i class="bi bi-arrow-left-right"></i>
           <span>{{ _('new_transfer') }}</span>
         </a>
-        <a href="/movements/new{% if filter_source_id %}?source_id={{ filter_source_id }}{% endif %}" class="btn btn-sm btn-primary yn-action-btn flex-shrink-0">
+        <a href="/movements/new{% if filter_source_id %}?source_id={{ filter_source_id }}{% endif %}" class="btn btn-primary yn-action-btn flex-shrink-0">
           <i class="bi bi-plus-lg"></i>
           <span>{{ _('new_movement') }}</span>
         </a>

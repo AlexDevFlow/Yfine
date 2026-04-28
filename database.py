@@ -4,6 +4,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
+from sqlalchemy import event
 from sqlmodel import SQLModel, Session, create_engine, select
 
 
@@ -47,6 +48,17 @@ DATA_DIR.mkdir(parents=True, exist_ok=True)
 DB_PATH = DATA_DIR / "yfine.db"
 DATABASE_URL = f"sqlite:///{DB_PATH}"
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+
+
+@event.listens_for(engine, "connect")
+def _enable_sqlite_fk(dbapi_conn, _):
+    # SQLite leaves FK enforcement off by default — turn it on per-connection
+    # so ondelete=CASCADE declarations and orphan checks actually fire.
+    cursor = dbapi_conn.cursor()
+    try:
+        cursor.execute("PRAGMA foreign_keys=ON")
+    finally:
+        cursor.close()
 
 DEFAULT_TAGS = [
     "🛒 Groceries 🛒",

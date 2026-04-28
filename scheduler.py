@@ -48,58 +48,69 @@ def process_recurring_items():
                 if item.end_date and item.end_date < today:
                     continue
 
-                # Advance alert: notify N days before due date (including due day itself)
-                alert_date = item.next_due_date - timedelta(days=item.alert_days_before)
-                if alert_date <= today <= item.next_due_date:
-                    if not _has_unread_notification(session, entity, "alert"):
-                        # Check insufficient funds
-                        if item.alert_if_insufficient and item.source_id:
-                            balance = get_balance(session, item.source_id)
-                            if balance < item.amount:
-                                if not _has_unread_notification(session, entity, "warning"):
-                                    notification = Notification(
-                                        type="warning",
-                                        title=f"⚠️ {item.name}",
-                                        body=f"{_('balance')}: {balance:.2f} — {_('amount')}: {item.amount:.2f} {item.currency}. {format_date(item.next_due_date)}",
-                                        related_entity=entity,
-                                    )
-                                    session.add(notification)
+                # Advance alert: notify N days before due date (including due day itself).
+                # last_alert_date prevents re-firing once the user reads the notification.
+                alert_window_start = item.next_due_date - timedelta(days=item.alert_days_before)
+                in_alert_window = alert_window_start <= today <= item.next_due_date
+                already_alerted_for_due = (
+                    item.last_alert_date is not None
+                    and item.last_alert_date >= alert_window_start
+                )
+                if in_alert_window and not already_alerted_for_due:
+                    # Check insufficient funds
+                    if item.alert_if_insufficient and item.source_id:
+                        balance = get_balance(session, item.source_id)
+                        if balance < item.amount:
+                            notification = Notification(
+                                type="warning",
+                                title=f"⚠️ {item.name}",
+                                body=f"{_('balance')}: {balance:.2f} — {_('amount')}: {item.amount:.2f} {item.currency}. {format_date(item.next_due_date)}",
+                                related_entity=entity,
+                            )
+                            session.add(notification)
 
+                    direction_label = _('income') if item.direction == 'in' else _('expense')
+                    sign = '+' if item.direction == 'in' else '-'
+                    notification = Notification(
+                        type="alert",
+                        title=f"📅 {item.name}",
+                        body=f"{direction_label} {sign}{item.amount:.2f} {item.currency} — {format_date(item.next_due_date)}",
+                        related_entity=entity,
+                    )
+                    session.add(notification)
+                    item.last_alert_date = today
+                    session.add(item)
+
+                # Due items: catch up every missed period in one tick.
+                # Cap iterations defensively in case compute_next_due_date ever returns
+                # the same date (shouldn't, but a stuck loop would hang the scheduler).
+                if item.apply_mode == "auto":
+                    iterations = 0
+                    while item.next_due_date <= today and iterations < 3650:
+                        # Stop if the rule has ended — apply_recurring_item raises
+                        # HTTPException past end_date, which would abort the whole tick.
+                        if item.end_date and item.next_due_date > item.end_date:
+                            break
+                        # Idempotency by last_fired_date: never apply the same due date twice.
+                        if item.last_fired_date == item.next_due_date:
+                            break
+                        prev_due = item.next_due_date
+                        apply_recurring_item(session, item)
+                        if item.next_due_date <= prev_due:
+                            # Defensive: frequency calc didn't advance — bail out.
+                            break
+                        iterations += 1
+                elif item.apply_mode == "confirm":
+                    if item.next_due_date <= today and not _has_unread_notification(session, entity, "alert"):
                         direction_label = _('income') if item.direction == 'in' else _('expense')
                         sign = '+' if item.direction == 'in' else '-'
                         notification = Notification(
                             type="alert",
-                            title=f"📅 {item.name}",
+                            title=f"✅ {_('confirm')}: {item.name}",
                             body=f"{direction_label} {sign}{item.amount:.2f} {item.currency} — {format_date(item.next_due_date)}",
                             related_entity=entity,
                         )
                         session.add(notification)
-
-                # Due items
-                if item.next_due_date <= today:
-                    if item.apply_mode == "auto":
-                        # Idempotency: check if a movement was already created for this due date
-                        from models import Movement
-                        already_applied = session.exec(
-                            select(Movement).where(
-                                Movement.source_id == item.source_id,
-                                Movement.date == item.next_due_date,
-                                Movement.note.contains(f"Recurring: {item.name}"),  # type: ignore
-                            )
-                        ).first()
-                        if not already_applied:
-                            apply_recurring_item(session, item)
-                    elif item.apply_mode == "confirm":
-                        if not _has_unread_notification(session, entity, "alert"):
-                            direction_label = _('income') if item.direction == 'in' else _('expense')
-                            sign = '+' if item.direction == 'in' else '-'
-                            notification = Notification(
-                                type="alert",
-                                title=f"✅ {_('confirm')}: {item.name}",
-                                body=f"{direction_label} {sign}{item.amount:.2f} {item.currency} — {format_date(item.next_due_date)}",
-                                related_entity=entity,
-                            )
-                            session.add(notification)
 
             session.commit()
     finally:

@@ -768,7 +768,7 @@
         if (plugins.length > 0) {
           html += '<h6 class="mb-2">{{ _("plugins") }}</h6>';
           html += '<div class="table-responsive"><table class="table table-sm table-bordered mb-3">';
-          html += '<thead><tr><th>{{ _("name") }}</th><th>{{ _("version") }}</th><th>{{ _("action") }}</th><th>{{ _("security") }}</th></tr></thead><tbody>';
+          html += '<thead><tr><th>{{ _("name") }}</th><th>{{ _("version") }}</th><th>{{ _("actions") }}</th><th>{{ _("security") }}</th></tr></thead><tbody>';
           plugins.forEach(function(p) {
             var verInfo = p.archive_version;
             if (p.installed_version) verInfo += ' <small class="text-muted">({{ _("installed") }}: ' + p.installed_version + ')</small>';

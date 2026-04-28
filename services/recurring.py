@@ -121,11 +121,19 @@ def create_recurring(session: Session, data: RecurringCreate) -> RecurringItem:
 def update_recurring(session: Session, recurring_id: int, data: RecurringUpdate) -> RecurringItem:
     item = get_recurring(session, recurring_id)
     update_data = data.model_dump(exclude_unset=True)
+    # Capture pre-edit state so the next_due_date sync below can compare against it.
+    prior_last_fired = item.last_fired_date
+    prior_next_due = item.next_due_date
     for key, value in update_data.items():
         setattr(item, key, value)
-    # Keep next_due_date in sync with start_date so the schedule reflects edits
+    # Sync next_due_date with start_date, but never backwards once the rule has
+    # already fired — backdating would let the scheduler re-apply periods that
+    # were already paid out. If the rule never fired, the new start always wins.
     if "start_date" in update_data and update_data["start_date"] is not None:
-        item.next_due_date = update_data["start_date"]
+        new_start = update_data["start_date"]
+        if prior_last_fired is None or new_start > prior_next_due:
+            item.next_due_date = new_start
+        # else: keep prior_next_due (preserve schedule against backdated edits)
     item.updated_at = datetime.utcnow()
     session.add(item)
     session.commit()
@@ -207,6 +215,7 @@ def apply_recurring_item(
     )
     session.add(notification)
 
+    item.last_fired_date = item.next_due_date
     item.next_due_date = compute_next_due_date(item.next_due_date, item.frequency)
     item.updated_at = datetime.utcnow()
     session.add(item)

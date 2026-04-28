@@ -112,7 +112,12 @@ def _derive_fernet_key(password: str, salt_hex: str) -> bytes:
 
 
 def encrypt_db_file(password: str) -> bool:
-    """Encrypt yfine.db -> yfine.db.enc (AES-256-GCM) and remove the plaintext."""
+    """Encrypt yfine.db -> yfine.db.enc (AES-256-GCM) and remove the plaintext.
+
+    Writes the ciphertext to a temp file in the same directory and atomically
+    renames it into place so a power loss mid-write can never leave a truncated
+    .enc that crash recovery would treat as canonical.
+    """
     import os
     from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
@@ -126,9 +131,31 @@ def encrypt_db_file(password: str) -> bool:
 
     data = DB_PATH.read_bytes()
     ciphertext = aesgcm.encrypt(nonce, data, None)
+    payload = _AES256_HEADER + nonce + ciphertext
 
-    # Format: HEADER + nonce (12) + ciphertext (includes 16-byte GCM tag)
-    ENC_DB_PATH.write_bytes(_AES256_HEADER + nonce + ciphertext)
+    # Format: HEADER + nonce (12) + ciphertext (includes 16-byte GCM tag).
+    # Atomic write: temp file → fsync → rename. os.replace is atomic on POSIX
+    # and Windows (Python 3.3+).
+    tmp_path = ENC_DB_PATH.with_suffix(ENC_DB_PATH.suffix + ".tmp")
+    try:
+        with open(tmp_path, "wb") as f:
+            f.write(payload)
+            f.flush()
+            try:
+                os.fsync(f.fileno())
+            except OSError:
+                # fsync can fail on some filesystems (e.g. tmpfs); the rename
+                # itself is still atomic, so we tolerate it.
+                pass
+        os.replace(tmp_path, ENC_DB_PATH)
+    except Exception:
+        # Clean up the partial temp file so we don't leak it on the next boot.
+        try:
+            tmp_path.unlink(missing_ok=True)
+        except OSError:
+            pass
+        raise
+
     DB_PATH.unlink(missing_ok=True)
     UNLOCK_MARKER.unlink(missing_ok=True)
     _logger.info("Database encrypted successfully (AES-256-GCM)")
@@ -276,14 +303,22 @@ def change_password(old_password: str, new_password: str) -> bool:
     if not verify_password(old_password, config["password_hash"], config["password_salt"]):
         return False
 
-    # If DB is currently decrypted, we just update the config.
-    # Next shutdown will encrypt with the new key.
+    # If DB is currently decrypted, we just update the config; next shutdown
+    # encrypts with the new key. We must also drop any stale .enc on disk —
+    # it is keyed to the *old* salt and would be undecryptable with the new
+    # password. Without this, a crash before clean shutdown would leave only
+    # an unreadable .enc and erase the plaintext on the next failed login.
     pw_hash, pw_salt = hash_password(new_password)
     config["password_hash"] = pw_hash
     config["password_salt"] = pw_salt
     config["encryption_salt"] = secrets.token_bytes(32).hex()
     save_auth_config(config)
     set_runtime_password(new_password)
+    if DB_PATH.exists():
+        # Plaintext is intact — wipe the stale ciphertext so it can't outlive
+        # the password change.
+        ENC_DB_PATH.unlink(missing_ok=True)
+        UNLOCK_MARKER.write_text(datetime.utcnow().isoformat())
     return True
 
 

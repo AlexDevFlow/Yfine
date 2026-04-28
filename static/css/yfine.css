@@ -1003,27 +1003,39 @@ body {
 #dash-prices-btn .bi-toggle-off { font-size: 1.1rem; opacity: .7; }
 
 /* ═══ Page-header action buttons — consistent height / alignment ═══ */
+.yn-action-row {
+  align-items: center;
+}
 .yn-action-btn {
   display: inline-flex !important;
   align-items: center;
-  gap: .35rem;
-  height: 32px;
-  padding-top: 0;
-  padding-bottom: 0;
-  line-height: 1;
+  justify-content: center;
+  gap: .4rem;
+  min-height: 38px;
+  padding: .4rem .9rem !important;
+  line-height: 1.2;
   white-space: nowrap;
+  font-size: .875rem;
+  font-weight: 500;
+  border-width: 1px;
+  border-radius: .375rem;
 }
 .yn-action-btn > i {
   font-size: 1rem;
   line-height: 1;
   flex-shrink: 0;
+  width: 1rem;
+  text-align: center;
 }
-.yn-action-btn > span { line-height: 1; }
+.yn-action-btn > span { line-height: 1.2; }
 .yn-action-btn > strong { font-weight: 600; }
+/* Outline buttons get a slightly thicker border so they read as the same
+   visual weight as solid (filled) buttons in the same row. */
+.yn-action-btn[class*="btn-outline-"] { border-width: 1.5px; }
 /* On very small screens the label hides, keep icon-only pills squared */
 @media (max-width: 380px) {
   .yn-action-btn > span { display: none; }
-  .yn-action-btn { padding-left: .5rem; padding-right: .5rem; }
+  .yn-action-btn { padding-left: .55rem !important; padding-right: .55rem !important; }
 }
 
 /* ═══ Notification bell + dropdown (glassmorphism) ═══ */

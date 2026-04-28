@@ -25,5 +25,7 @@ class RecurringItem(SQLModel, table=True):
     next_due_date: date
     alert_days_before: int = Field(default=7)
     alert_if_insufficient: bool = Field(default=True)
+    last_fired_date: Optional[date] = Field(default=None)
+    last_alert_date: Optional[date] = Field(default=None)
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
