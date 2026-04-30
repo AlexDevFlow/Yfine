@@ -13,6 +13,12 @@ import traceback
 # Set desktop flag BEFORE importing the app so templates can detect it
 os.environ["YFINE_DESKTOP"] = "1"
 
+# Pin pywebview to the Qt backend on Linux/Windows BEFORE importing webview, so
+# the library skips its GTK auto-detection (which throws a noisy traceback when
+# PyGObject isn't bundled). macOS keeps its default Cocoa/WebKit backend.
+if sys.platform != "darwin":
+    os.environ.setdefault("PYWEBVIEW_GUI", "qt")
+
 # Log to file so errors are visible even with --windowed
 from database import DATA_DIR
 
@@ -249,7 +255,13 @@ class Api:
 if __name__ == "__main__":
     multiprocessing.freeze_support()
 
-    _logger.info("Yfine desktop starting (frozen=%s)", getattr(sys, "frozen", False))
+    _logger.info(
+        "Yfine desktop starting | platform=%s frozen=%s python=%s log=%s",
+        sys.platform,
+        getattr(sys, "frozen", False),
+        sys.version.split()[0],
+        _log_file,
+    )
 
     port = find_free_port()
 
@@ -290,4 +302,8 @@ if __name__ == "__main__":
     # (pythonnet/clr_loader fails to init inside PyInstaller bundles). macOS
     # keeps its native Cocoa/WebKit backend via pyobjc.
     _gui = None if sys.platform == "darwin" else "qt"
-    webview.start(gui=_gui)
+    try:
+        webview.start(gui=_gui)
+    except Exception:
+        _logger.exception("webview.start crashed")
+        raise

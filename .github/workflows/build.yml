@@ -34,15 +34,6 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install system dependencies (Linux)
-        if: runner.os == 'Linux'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            libgirepository1.0-dev \
-            gir1.2-webkit2-4.1 \
-            libwebkit2gtk-4.1-dev
-
       - name: Install Python dependencies
         run: |
           pip install --upgrade pip
@@ -73,6 +64,11 @@ jobs:
       - name: Package (macOS)
         if: runner.os == 'macOS'
         run: |
+          # Ad-hoc sign every binary in the bundle. Not a Developer ID signature
+          # (users still see the Gatekeeper warning), but on Apple Silicon a
+          # completely unsigned arm64 bundle is rejected by the kernel. Run on
+          # both Intel and Apple Silicon for consistency.
+          codesign --force --deep --sign - dist/Yfine.app
           # ditto preserves extended attributes and symlinks that .app bundles need
           ditto -c -k --sequesterRsrc --keepParent dist/Yfine.app ${{ matrix.asset_name }}
 
