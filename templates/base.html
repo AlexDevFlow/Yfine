@@ -2,7 +2,8 @@
 <html
   lang="{{ get_locale() }}"
   dir="ltr"
-  data-bs-theme="{{ get_theme() if get_theme() != 'system' else 'light' }}">
+  data-bs-theme="{{ get_theme() if get_theme() != 'system' else 'light' }}"
+  data-ui-scale="{{ get_ui_scale() }}">
   <head>
     <meta charset="utf-8" />
     <!-- Render-blocking: correct background from the very first frame -->

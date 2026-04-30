@@ -132,3 +132,34 @@ class TestTagDelete:
 
         links_after = session.exec(select(MovementTag).where(MovementTag.tag_id == t.id)).all()
         assert links_after == []
+
+
+# ── Tag card → movements filter (template regression) ────────────
+
+class TestTagCardLinksFilteredMovements:
+    """The tags page builds a card per tag with `data-href` pointing at the
+    Movements page pre-filtered by that tag. The Movements router accepts
+    `tag_ids` (plural, list-typed); a singular `tag_id` is silently ignored
+    and the user lands on an unfiltered list. This test pins the correct
+    query-param name so that bug doesn't come back.
+    """
+
+    TEMPLATE_PATH = "templates/tags/index.html"
+
+    def test_card_uses_tag_ids_query_param(self):
+        with open(self.TEMPLATE_PATH) as f:
+            html = f.read()
+        assert 'data-href="/movements?tag_ids=' in html, (
+            "tag card must link with `tag_ids=` (plural) — `tag_id=` is silently dropped"
+        )
+        assert 'data-href="/movements?tag_id=' not in html
+
+    def test_movements_router_accepts_tag_ids(self):
+        """Sanity: the route handler signature still accepts `tag_ids`. If
+        someone renames it to `tag_id` (singular), the template fix above
+        becomes useless — flag both halves of the contract."""
+        from inspect import signature
+        from routers.pages import movements_index
+        params = signature(movements_index).parameters
+        assert "tag_ids" in params
+        assert "tag_id" not in params

@@ -155,7 +155,7 @@
 <div class="row g-3">
   {% for t in tags %}
   <div class="col-6 col-md-4 col-lg-3" id="tag-card-wrap-{{ t.id }}">
-    <div class="tag-card" data-href="/movements?tag_id={{ t.id }}">
+    <div class="tag-card" data-href="/movements?tag_ids={{ t.id }}">
       <div class="tag-card-header">
         <div class="tag-dot-title">
           <span class="tag-dot" {% if t.color %}style="background-color:{{ t.color }}"{% endif %}></span>

@@ -110,6 +110,21 @@ def get_mobile_nav_mode() -> str:
     return _mobile_nav_mode
 
 
+_ui_scale = "normal"
+
+_UI_SCALES = ("small", "normal", "large", "xlarge")
+
+
+def set_ui_scale(val: str):
+    global _ui_scale
+    if val in _UI_SCALES:
+        _ui_scale = val
+
+
+def get_ui_scale() -> str:
+    return _ui_scale
+
+
 _date_format = "dd/mm/yyyy"
 
 # Map setting values to strftime patterns

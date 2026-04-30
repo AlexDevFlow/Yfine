@@ -51,7 +51,14 @@ def test_auto_heal_fills_missing_settings_columns(tmp_path, monkeypatch):
         ).fetchone()
         assert row == (0, 0)
         version = conn.execute("SELECT version_num FROM alembic_version").fetchone()[0]
-        assert version == "a3b4c5d6e7f8"
+        # The healed DB must be stamped to the *current* head, whatever it
+        # is — hard-coding a revision turns this into a chore every release.
+        from alembic.config import Config
+        from alembic.script import ScriptDirectory
+        cfg = Config("alembic.ini")
+        cfg.set_main_option("script_location", "alembic")
+        head = ScriptDirectory.from_config(cfg).get_current_head()
+        assert version == head
         conn.close()
     finally:
         # Restore the default engine for the rest of the suite

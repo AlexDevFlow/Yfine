@@ -44,6 +44,9 @@ def update_settings(session: Session, data: SettingUpdate) -> Setting:
     if "mobile_nav_mode" in update_data:
         from i18n import set_mobile_nav_mode
         set_mobile_nav_mode(update_data["mobile_nav_mode"])
+    if "ui_scale" in update_data:
+        from i18n import set_ui_scale
+        set_ui_scale(update_data["ui_scale"])
 
     # Persist settings to auth config so they work even when the DB is encrypted
     _sync_keys = {"lan_access", "locale"}

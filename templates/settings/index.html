@@ -58,6 +58,27 @@
         </div>
 
         <h6 class="d-flex align-items-center gap-2 mb-3">
+          <span class="yn-icon-box rounded bg-label-primary p-2"><i class="bi bi-aspect-ratio"></i></span>
+          {{ _('ui_size') }}
+        </h6>
+        <div class="d-flex flex-wrap gap-2">
+          <input type="hidden" id="ui_scale" name="ui_scale" value="{{ settings.ui_scale }}">
+          <button type="button" class="btn btn-sm ui-scale-btn {% if settings.ui_scale == 'small' %}btn-primary{% else %}btn-outline-primary{% endif %}" data-scale="small">
+            <i class="bi bi-dash-circle me-1"></i>{{ _('ui_size_small') }}
+          </button>
+          <button type="button" class="btn btn-sm ui-scale-btn {% if settings.ui_scale == 'normal' %}btn-primary{% else %}btn-outline-primary{% endif %}" data-scale="normal">
+            <i class="bi bi-circle me-1"></i>{{ _('ui_size_normal') }}
+          </button>
+          <button type="button" class="btn btn-sm ui-scale-btn {% if settings.ui_scale == 'large' %}btn-primary{% else %}btn-outline-primary{% endif %}" data-scale="large">
+            <i class="bi bi-plus-circle me-1"></i>{{ _('ui_size_large') }}
+          </button>
+          <button type="button" class="btn btn-sm ui-scale-btn {% if settings.ui_scale == 'xlarge' %}btn-primary{% else %}btn-outline-primary{% endif %}" data-scale="xlarge">
+            <i class="bi bi-plus-circle-fill me-1"></i>{{ _('ui_size_xlarge') }}
+          </button>
+        </div>
+        <small class="form-text text-muted d-block mt-1 mb-4">{{ _('ui_size_desc') }}</small>
+
+        <h6 class="d-flex align-items-center gap-2 mb-3">
           <span class="yn-icon-box rounded bg-label-primary p-2"><i class="bi bi-phone"></i></span>
           {{ _('mobile_navigation') }}
         </h6>
@@ -575,6 +596,7 @@
       base_currency: document.getElementById('base_currency').value || null,
       theme: document.getElementById('theme').value,
       mobile_nav_mode: document.getElementById('mobile_nav_mode').value,
+      ui_scale: document.getElementById('ui_scale').value,
       lan_access: document.getElementById('lan_access').checked
     };
 
@@ -613,6 +635,22 @@
       } else {
         document.documentElement.setAttribute('data-bs-theme', theme);
       }
+      saveSettings();
+    });
+  });
+
+  // UI scale toggle with live preview + auto-save
+  document.querySelectorAll('.ui-scale-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.ui-scale-btn').forEach(b => {
+        b.classList.remove('btn-primary');
+        b.classList.add('btn-outline-primary');
+      });
+      this.classList.remove('btn-outline-primary');
+      this.classList.add('btn-primary');
+      const scale = this.dataset.scale;
+      document.getElementById('ui_scale').value = scale;
+      document.documentElement.setAttribute('data-ui-scale', scale);
       saveSettings();
     });
   });

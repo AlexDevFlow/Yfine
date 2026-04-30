@@ -691,6 +691,65 @@ class TestPriceSnapshotsFeedHistory:
         source_service.delete_source(session, src.id, action="delete_all")
         assert session.exec(_select(HoldingPriceSnapshot)).first() is None
 
+    def test_holding_price_history_no_snapshots_returns_empty(self, session):
+        """Without any snapshot the per-holding chart has nothing to render —
+        the endpoint must return [] so the UI can show the empty state."""
+        _make_setting(session)
+        p = _make_portfolio(session)
+        h = portfolio_service.create_holding(
+            session,
+            HoldingCreate(portfolio_id=p.id, asset_class="crypto", symbol="BTC",
+                          quantity=1, avg_cost=20000, currency="EUR"),
+        )
+        assert portfolio_service.holding_price_history(session, h.id, "30d") == []
+
+    def test_holding_price_history_uses_snapshots_and_quantity(self, session):
+        from datetime import date as _date, timedelta
+        from models.portfolio import HoldingPriceSnapshot
+        src, p, h = self._setup_portfolio(session, with_price=100.0)
+        d_past = _date.today() - timedelta(days=4)
+        session.add(HoldingPriceSnapshot(holding_id=h.id, date=d_past, price=80.0))
+        session.commit()
+        history = portfolio_service.holding_price_history(session, h.id, "30d")
+        by_date = {e["date"]: e for e in history}
+        # qty=2 so value = qty*price
+        assert by_date[d_past.isoformat()]["price"] == 80.0
+        assert by_date[d_past.isoformat()]["value"] == 160.0
+        assert by_date[_date.today().isoformat()]["price"] == 100.0
+        assert by_date[_date.today().isoformat()]["value"] == 200.0
+
+    def test_holding_price_history_window_starts_at_first_snapshot(self, session):
+        """Range only stretches back to the first snapshot (no fake fallbacks
+        for days that predate any data)."""
+        from datetime import date as _date, timedelta
+        from models.portfolio import HoldingPriceSnapshot
+        src, p, h = self._setup_portfolio(session, with_price=100.0)
+        d_first = _date.today() - timedelta(days=2)
+        session.add(HoldingPriceSnapshot(holding_id=h.id, date=d_first, price=90.0))
+        session.commit()
+        history = portfolio_service.holding_price_history(session, h.id, "1y")
+        # First point is the first snapshot date, not a year ago
+        assert history[0]["date"] == d_first.isoformat()
+        # And the last is today
+        assert history[-1]["date"] == _date.today().isoformat()
+
+    def test_holding_price_history_unknown_holding_returns_empty(self, session):
+        assert portfolio_service.holding_price_history(session, 99999, "30d") == []
+
+    def test_holding_price_history_invalid_range_falls_back_to_30d(self, session):
+        """An unknown range string must not crash — service silently falls
+        back to 30d (consistent with portfolio_value_history)."""
+        from datetime import date as _date, timedelta
+        from models.portfolio import HoldingPriceSnapshot
+        src, p, h = self._setup_portfolio(session, with_price=100.0)
+        d_old = _date.today() - timedelta(days=5)
+        session.add(HoldingPriceSnapshot(holding_id=h.id, date=d_old, price=70.0))
+        session.commit()
+        history = portfolio_service.holding_price_history(session, h.id, "bogus")
+        assert len(history) > 0
+        # Last point is today
+        assert history[-1]["date"] == _date.today().isoformat()
+
     def test_balance_history_combines_cash_and_portfolios(self, session):
         from datetime import date as _date, timedelta
         from models.movement import Movement

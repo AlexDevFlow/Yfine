@@ -415,6 +415,59 @@ def portfolio_value_history(
     return points
 
 
+def holding_price_history(
+    session: Session, holding_id: int, range_str: str = "30d"
+) -> list[dict]:
+    """Return [{date, price, value}] for a single holding over the requested range.
+
+    Same fallback as the portfolio-level chart: the most recent snapshot ≤ d, or
+    avg_cost when the holding has no snapshots yet. Only days with a real
+    snapshot drive the chart; we still emit one point per day so the line stays
+    continuous.
+    """
+    from datetime import timedelta
+    h = session.get(Holding, holding_id)
+    if h is None:
+        return []
+    range_map = {"7d": 7, "30d": 30, "90d": 90, "1y": 365}
+    days = range_map.get(range_str, 30)
+    today = date.today()
+    start = today - timedelta(days=days)
+
+    snapshots = list(session.exec(
+        select(HoldingPriceSnapshot)
+        .where(HoldingPriceSnapshot.holding_id == holding_id)
+        .order_by(col(HoldingPriceSnapshot.date))
+    ).all())
+
+    if not snapshots:
+        return []
+
+    first_snapshot_date = min(s.date for s in snapshots)
+    window_start = max(start, first_snapshot_date)
+
+    def _price_on(d: date) -> float:
+        chosen = None
+        for s in snapshots:
+            if s.date <= d:
+                chosen = s
+            else:
+                break
+        return chosen.price if chosen is not None else h.avg_cost
+
+    points: list[dict] = []
+    d = window_start
+    while d <= today:
+        price = _price_on(d)
+        points.append({
+            "date": d.isoformat(),
+            "price": round(price, 6),
+            "value": round(h.quantity * price, 2),
+        })
+        d += timedelta(days=1)
+    return points
+
+
 def total_portfolio_value_by_currency(session: Session) -> dict[str, float]:
     """Sum of market value of ALL portfolios grouped by their base_currency."""
     portfolios = list(session.exec(select(Portfolio)).all())

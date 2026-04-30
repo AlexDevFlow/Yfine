@@ -86,6 +86,16 @@ def refresh_prices(session: Session = Depends(get_session)):
     return {"updated": updated, "enabled": True}
 
 
+@router.get("/holdings/{holding_id}/history")
+def get_holding_history(
+    holding_id: int,
+    range: str = "30d",
+    session: Session = Depends(get_session),
+):
+    portfolio_service.get_holding(session, holding_id)
+    return portfolio_service.holding_price_history(session, holding_id, range)
+
+
 @router.post("/holdings/{holding_id}/refresh-price")
 def refresh_holding_price(holding_id: int, session: Session = Depends(get_session)):
     if not price_service.are_prices_enabled(session):

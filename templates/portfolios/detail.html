@@ -119,7 +119,7 @@
         </thead>
         <tbody>
           {% for h in portfolio.holdings %}
-          <tr>
+          <tr class="holding-row" data-holding-id="{{ h.id }}" data-holding-symbol="{{ h.symbol }}" data-holding-currency="{{ h.currency }}" style="cursor:pointer">
             <td>
               <strong>{{ h.symbol }}</strong>
               {% if h.display_name %}<small class="text-muted d-block">{{ h.display_name }}</small>{% endif %}
@@ -169,6 +169,44 @@
       </button>
     </div>
     {% endif %}
+  </div>
+</div>
+
+<!-- Holding history modal -->
+<div class="modal fade" id="holdingHistoryModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="bi bi-graph-up me-2"></i>{{ _('holding_history') }}: <span id="holding-history-title"></span>
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+          <div class="btn-group btn-group-sm" role="group" aria-label="metric" id="holding-history-metric">
+            <button type="button" class="btn btn-outline-secondary active" data-metric="value">{{ _('value') }}</button>
+            <button type="button" class="btn btn-outline-secondary" data-metric="price">{{ _('price') }}</button>
+          </div>
+          <div class="btn-group btn-group-sm" role="group" aria-label="range" id="holding-history-ranges">
+            <button type="button" class="btn btn-outline-secondary" data-range="7d">{{ _('7d') }}</button>
+            <button type="button" class="btn btn-outline-secondary active" data-range="30d">{{ _('30d') }}</button>
+            <button type="button" class="btn btn-outline-secondary" data-range="90d">{{ _('90d') }}</button>
+            <button type="button" class="btn btn-outline-secondary" data-range="1y">{{ _('1y') }}</button>
+          </div>
+        </div>
+        <div class="position-relative" style="height: 300px;">
+          <canvas id="holding-history-chart"></canvas>
+          <div id="holding-history-empty" class="d-none text-center text-muted py-5">
+            <i class="bi bi-graph-up mb-2" style="font-size:2rem"></i>
+            <p class="mb-0">{{ _('no_history_data') }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ _('close_button') }}</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -509,6 +547,133 @@
     }
   }
   document.getElementById('confirm-delete-holding-btn').addEventListener('click', _confirmDeleteHolding);
+
+  // --- Per-holding history modal ---
+  var _holdingChart = null;
+  var _holdingChartCtx = { id: null, symbol: '', currency: '', range: '30d', metric: 'value' };
+
+  async function _loadHoldingHistory() {
+    var canvas = document.getElementById('holding-history-chart');
+    var empty = document.getElementById('holding-history-empty');
+    if (!canvas || _holdingChartCtx.id == null) return;
+    try {
+      var resp = await fetch('/api/portfolios/holdings/' + _holdingChartCtx.id + '/history?range=' + encodeURIComponent(_holdingChartCtx.range));
+      if (!resp.ok) throw new Error('history fetch failed');
+      var points = await resp.json();
+      if (!points || points.length < 2) {
+        canvas.classList.add('d-none');
+        empty.classList.remove('d-none');
+        if (_holdingChart) { _holdingChart.destroy(); _holdingChart = null; }
+        return;
+      }
+      canvas.classList.remove('d-none');
+      empty.classList.add('d-none');
+      var labels = points.map(function(p) { return p.date; });
+      var data = points.map(function(p) { return _holdingChartCtx.metric === 'price' ? p.price : p.value; });
+      var first = data[0], last = data[data.length - 1];
+      var color = (last >= first) ? '#71dd37' : '#ff3e1d';
+      var currency = _holdingChartCtx.currency;
+      if (_holdingChart) {
+        _holdingChart.data.labels = labels;
+        _holdingChart.data.datasets[0].data = data;
+        _holdingChart.data.datasets[0].borderColor = color;
+        _holdingChart.data.datasets[0].backgroundColor = color + '20';
+        _holdingChart.update();
+        return;
+      }
+      _holdingChart = new Chart(canvas.getContext('2d'), {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: data,
+            borderColor: color,
+            backgroundColor: color + '20',
+            fill: true, tension: 0.3,
+            pointRadius: 0, pointHoverRadius: 5, borderWidth: 2,
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: 'rgba(0,0,0,0.85)',
+              displayColors: false,
+              callbacks: {
+                title: function(items) { return items && items[0] ? items[0].label : ''; },
+                label: function(ctx) {
+                  var digits = _holdingChartCtx.metric === 'price' ? 4 : 2;
+                  var v = ctx.parsed.y.toLocaleString(undefined, {minimumFractionDigits: digits, maximumFractionDigits: digits});
+                  return v + ' ' + currency;
+                }
+              }
+            }
+          },
+          scales: {
+            x: { ticks: { maxTicksLimit: 8, maxRotation: 0 }, grid: { display: false } },
+            y: { ticks: { callback: function(v) { return v.toLocaleString(undefined, {maximumFractionDigits: 2}); } } }
+          },
+          animation: { duration: 250 }
+        }
+      });
+    } catch (e) {
+      canvas.classList.add('d-none');
+      empty.classList.remove('d-none');
+    }
+  }
+
+  function _openHoldingHistory(id, symbol, currency) {
+    _holdingChartCtx.id = id;
+    _holdingChartCtx.symbol = symbol;
+    _holdingChartCtx.currency = currency;
+    _holdingChartCtx.range = '30d';
+    _holdingChartCtx.metric = 'value';
+    document.getElementById('holding-history-title').textContent = symbol;
+    // Reset toolbar state
+    document.querySelectorAll('#holding-history-ranges [data-range]').forEach(function(b) {
+      b.classList.toggle('active', b.dataset.range === '30d');
+    });
+    document.querySelectorAll('#holding-history-metric [data-metric]').forEach(function(b) {
+      b.classList.toggle('active', b.dataset.metric === 'value');
+    });
+    if (_holdingChart) { _holdingChart.destroy(); _holdingChart = null; }
+    var modalEl = document.getElementById('holdingHistoryModal');
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+    _loadHoldingHistory();
+  }
+
+  document.addEventListener('click', function(e) {
+    var row = e.target.closest('.holding-row');
+    if (!row) return;
+    if (e.target.closest('button, a, .dropdown, .dropdown-menu')) return;
+    var id = parseInt(row.dataset.holdingId, 10);
+    if (!id) return;
+    _openHoldingHistory(id, row.dataset.holdingSymbol || '', row.dataset.holdingCurrency || '');
+  });
+
+  document.querySelectorAll('#holding-history-ranges [data-range]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('#holding-history-ranges [data-range]').forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      _holdingChartCtx.range = btn.dataset.range;
+      _loadHoldingHistory();
+    });
+  });
+
+  document.querySelectorAll('#holding-history-metric [data-metric]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('#holding-history-metric [data-metric]').forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      _holdingChartCtx.metric = btn.dataset.metric;
+      _loadHoldingHistory();
+    });
+  });
+
+  document.getElementById('holdingHistoryModal').addEventListener('hidden.bs.modal', function() {
+    if (_holdingChart) { _holdingChart.destroy(); _holdingChart = null; }
+  });
 
   async function refreshAllPrices() {
     showToast('{{ _("refreshing_prices") }}...', 'info');
