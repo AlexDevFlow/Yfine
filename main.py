@@ -114,7 +114,10 @@ def _load_settings_into_i18n():
     from sqlmodel import Session
     from database import engine
     from services.settings import get_settings
-    from i18n import set_theme, set_hide_net_worth, set_last_source_id, set_mobile_nav_mode, set_ui_scale
+    from i18n import (
+        set_theme, set_hide_net_worth, set_last_source_id, set_mobile_nav_mode,
+        set_ui_scale, set_hotkeys_enabled, set_hotkeys_json, set_nav_layout_json,
+    )
 
     with Session(engine) as session:
         settings = get_settings(session)
@@ -125,6 +128,9 @@ def _load_settings_into_i18n():
         set_last_source_id(settings.last_source_id)
         set_mobile_nav_mode(settings.mobile_nav_mode)
         set_ui_scale(settings.ui_scale)
+        set_hotkeys_enabled(settings.hotkeys_enabled)
+        set_hotkeys_json(settings.hotkeys_json)
+        set_nav_layout_json(settings.nav_layout_json)
         return settings
 
 
@@ -318,12 +324,18 @@ templates.env.filters["fdate"] = format_date
 templates.env.globals["is_desktop"] = os.environ.get("YFINE_DESKTOP") == "1"
 templates.env.globals["get_date_format"] = get_date_format
 templates.env.globals["get_locale"] = get_locale
-from i18n import get_theme, get_hide_net_worth, get_last_source_id, get_mobile_nav_mode, get_ui_scale
+from i18n import (
+    get_theme, get_hide_net_worth, get_last_source_id, get_mobile_nav_mode, get_ui_scale,
+    get_hotkeys_enabled, get_hotkeys_json, get_nav_items,
+)
 templates.env.globals["get_theme"] = get_theme
 templates.env.globals["get_hide_net_worth"] = get_hide_net_worth
 templates.env.globals["get_last_source_id"] = get_last_source_id
 templates.env.globals["get_mobile_nav_mode"] = get_mobile_nav_mode
 templates.env.globals["get_ui_scale"] = get_ui_scale
+templates.env.globals["get_hotkeys_enabled"] = get_hotkeys_enabled
+templates.env.globals["get_hotkeys_json"] = get_hotkeys_json
+templates.env.globals["get_nav_items"] = get_nav_items
 
 from plugins.registry import get_menu_items
 templates.env.globals["plugin_menu_items"] = get_menu_items

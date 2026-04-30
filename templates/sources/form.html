@@ -27,7 +27,7 @@
           </div>
           <div class="mb-3">
             <label for="starting_balance" class="form-label">{{ _('starting_balance') }}</label>
-            <input type="number" step="0.01" inputmode="decimal" class="form-control" id="starting_balance" name="starting_balance" value="{{ source.starting_balance if source else '0.00' }}">
+            <input type="number" step="0.01" inputmode="decimal" class="form-control" id="starting_balance" name="starting_balance" value="{{ source.starting_balance if source else '0.00' }}" data-money>
           </div>
           <div class="d-flex gap-2">
             <button type="submit" class="btn btn-primary">{{ _('save') }}</button>

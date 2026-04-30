@@ -66,7 +66,7 @@
 
           <div class="mb-3">
             <label for="amount" class="form-label">{{ _('amount') }}</label>
-            <input type="number" step="0.01" min="0.01" inputmode="decimal" class="form-control" id="amount" value="{{ movement.amount if movement else '' }}" required>
+            <input type="number" step="0.01" min="0.01" inputmode="decimal" class="form-control" id="amount" value="{{ movement.amount if movement else '' }}" data-money required>
           </div>
           <div class="mb-3">
             <label for="date" class="form-label">{{ _('date') }}</label>
@@ -97,16 +97,14 @@
           <div class="mb-3">
             <label class="form-label d-flex align-items-center gap-2">
               <i class="bi bi-paperclip"></i>{{ _('attachments') }}
-              <small class="text-muted">({{ _('attachments_hint') }})</small>
             </label>
-            <div class="yn-attach-drop" id="attach-drop">
+            <div class="yn-attach-drop" id="attach-drop" tabindex="0" role="button">
               <input type="file" id="attach-input" class="d-none" accept="image/png,image/jpeg,image/webp,image/heic,application/pdf" multiple>
-              <div class="yn-attach-drop-label text-muted">
-                <i class="bi bi-cloud-arrow-up"></i>
-                <span>{{ _('attachments_drop') }}</span>
-              </div>
+              <div class="yn-attach-drop-icon"><i class="bi bi-cloud-arrow-up-fill"></i></div>
+              <div class="yn-attach-drop-title">{{ _('attachments_drop') }}</div>
+              <div class="yn-attach-drop-hint">{{ _('attachments_hint') }}</div>
             </div>
-            <div id="attach-list" class="d-flex flex-wrap gap-2 mt-2"></div>
+            <div id="attach-list" class="yn-attach-grid"></div>
           </div>
           {% endif %}
 
@@ -157,7 +155,52 @@
     var input = document.getElementById('attach-input');
     if (!drop || !input) return;
 
-    drop.addEventListener('click', function() { input.click(); });
+    function _isPywebview() {
+      return !!(window.pywebview && window.pywebview.api);
+    }
+    function _hasNativePicker() {
+      return _isPywebview() && typeof window.pywebview.api.pick_attachments === 'function';
+    }
+
+    async function _pickViaPywebview() {
+      // pywebview's bridge resolves once the user closes the dialog. The
+      // result list is empty if they cancelled. Each item carries the file
+      // bytes as base64 so we can rebuild a real File and run it through the
+      // same handleFiles() pipeline as the browser <input type="file"> path.
+      try {
+        var items = await window.pywebview.api.pick_attachments();
+        if (!items || !items.length) return;
+        var files = items.map(function(it) {
+          var bin = atob(it.b64);
+          var arr = new Uint8Array(bin.length);
+          for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+          return new File([arr], it.name, { type: it.mime });
+        });
+        handleFiles(files);
+      } catch (e) {
+        showToast('{{ _("error") }}', 'error');
+      }
+    }
+
+    function _openPicker() {
+      if (_hasNativePicker()) {
+        _pickViaPywebview();
+      } else if (_isPywebview()) {
+        // Running under pywebview but pick_attachments is missing — almost
+        // always means the desktop process is the previous build. Surfacing
+        // the message is more useful than silently falling back to the Qt
+        // <input type=file> dialog the user is trying to escape.
+        showToast('{{ _("attachments_restart_for_native_picker") }}', 'warning');
+        input.click();
+      } else {
+        input.click();
+      }
+    }
+
+    drop.addEventListener('click', _openPicker);
+    drop.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); _openPicker(); }
+    });
     drop.addEventListener('dragover', function(e) { e.preventDefault(); drop.classList.add('is-dragover'); });
     drop.addEventListener('dragleave', function() { drop.classList.remove('is-dragover'); });
     drop.addEventListener('drop', function(e) {
@@ -246,29 +289,56 @@
     return (n / (1024 * 1024)).toFixed(1) + ' MB';
   }
 
-  function _chipIcon(mime, filename) {
-    if (mime && mime.indexOf('image/') === 0) return 'bi-image';
-    if (mime === 'application/pdf' || /\.pdf$/i.test(filename || '')) return 'bi-file-earmark-pdf';
-    return 'bi-paperclip';
+  function _isImageMime(mime, filename) {
+    if (mime && mime.indexOf('image/') === 0) return true;
+    return /\.(png|jpe?g|webp|heic)$/i.test(filename || '');
+  }
+  function _isPdfMime(mime, filename) {
+    if (mime === 'application/pdf') return true;
+    return /\.pdf$/i.test(filename || '');
   }
 
+  // Render a tile during local pending OR active upload state. For images we
+  // build the thumbnail from the local File via URL.createObjectURL — the user
+  // sees what they uploaded *immediately*, before the server round-trip.
   function renderPendingChip(id, file, uploading) {
     var list = document.getElementById('attach-list');
     if (!list) return;
-    var div = document.createElement('div');
-    div.className = 'yn-attach-chip' + (uploading ? ' is-uploading' : '');
-    div.id = 'att-chip-' + id;
-    div.innerHTML =
-      '<i class="bi ' + _chipIcon(file.type, file.name) + '"></i>' +
-      '<span class="yn-attach-chip-name" title="' + escAtt(file.name) + '">' + escAtt(file.name) + '</span>' +
-      '<span class="yn-attach-chip-size">' + _humanSize(file.size) + '</span>' +
-      (uploading ? '<span class="yn-attach-chip-spinner"></span>' :
-        '<button type="button" class="yn-attach-chip-remove" title="{{ _("remove") }}"><i class="bi bi-x"></i></button>');
-    list.appendChild(div);
+    var isImg = _isImageMime(file.type, file.name);
+    var isPdf = _isPdfMime(file.type, file.name);
+    var tile = document.createElement('div');
+    tile.className = 'yn-attach-tile' + (uploading ? ' is-uploading' : '') + (isPdf ? ' is-pdf' : '');
+    tile.id = 'att-chip-' + id;
+
+    var thumbHtml;
+    if (isImg) {
+      var url = URL.createObjectURL(file);
+      tile._objectUrl = url;
+      thumbHtml = '<img src="' + url + '" alt="' + escAtt(file.name) + '">';
+    } else {
+      var icon = isPdf ? 'bi-file-earmark-pdf-fill' : 'bi-file-earmark';
+      var badge = isPdf ? 'PDF' : (file.name.split('.').pop() || '').toUpperCase().slice(0, 5);
+      thumbHtml =
+        (badge ? '<span class="yn-attach-tile-badge">' + escAtt(badge) + '</span>' : '') +
+        '<i class="bi ' + icon + ' yn-attach-tile-thumb-icon"></i>';
+    }
+
+    tile.innerHTML =
+      '<div class="yn-attach-tile-thumb">' + thumbHtml + '</div>' +
+      (uploading ? '' :
+        '<button type="button" class="yn-attach-tile-remove" title="{{ _("remove") }}" aria-label="{{ _("remove") }}"><i class="bi bi-x-lg"></i></button>') +
+      '<div class="yn-attach-tile-info">' +
+        '<div class="yn-attach-tile-name" title="' + escAtt(file.name) + '">' + escAtt(file.name) + '</div>' +
+        '<div class="yn-attach-tile-size">' + _humanSize(file.size) + '</div>' +
+      '</div>';
+
+    list.appendChild(tile);
     if (!uploading) {
-      div.querySelector('.yn-attach-chip-remove').addEventListener('click', function() {
+      tile.querySelector('.yn-attach-tile-remove').addEventListener('click', function(e) {
+        e.stopPropagation();
         _pendingFiles = _pendingFiles.filter(function(p) { return p.id !== id; });
-        div.remove();
+        if (tile._objectUrl) URL.revokeObjectURL(tile._objectUrl);
+        tile.remove();
       });
     }
   }
@@ -276,23 +346,47 @@
   function renderUploadedChip(att) {
     var list = document.getElementById('attach-list');
     if (!list) return;
-    var div = document.createElement('div');
-    div.className = 'yn-attach-chip is-uploaded';
-    div.id = 'att-chip-uploaded-' + att.id;
-    var icon = _chipIcon(att.mime_type, att.filename);
-    div.innerHTML =
-      '<a class="yn-attach-chip-link" href="/api/movements/attachments/' + att.id + '" target="_blank" rel="noopener" onclick="return yfOpenExternal(this.href)">' +
-        '<i class="bi ' + icon + '"></i>' +
-        '<span class="yn-attach-chip-name" title="' + escAtt(att.filename) + '">' + escAtt(att.filename) + '</span>' +
-        '<span class="yn-attach-chip-size">' + _humanSize(att.size_bytes) + '</span>' +
-      '</a>' +
-      '<button type="button" class="yn-attach-chip-remove" title="{{ _("remove") }}"><i class="bi bi-x"></i></button>';
-    list.appendChild(div);
-    div.querySelector('.yn-attach-chip-remove').addEventListener('click', async function() {
+    var isImg = _isImageMime(att.mime_type, att.filename);
+    var isPdf = _isPdfMime(att.mime_type, att.filename);
+    var url = '/api/movements/attachments/' + att.id;
+    var tile = document.createElement('div');
+    tile.className = 'yn-attach-tile' + (isPdf ? ' is-pdf' : '');
+    tile.id = 'att-chip-uploaded-' + att.id;
+
+    var thumbHtml;
+    if (isImg) {
+      thumbHtml = '<img src="' + url + '" alt="' + escAtt(att.filename) + '" loading="lazy">';
+    } else {
+      var icon = isPdf ? 'bi-file-earmark-pdf-fill' : 'bi-file-earmark';
+      var badge = isPdf ? 'PDF' : (att.filename.split('.').pop() || '').toUpperCase().slice(0, 5);
+      thumbHtml =
+        (badge ? '<span class="yn-attach-tile-badge">' + escAtt(badge) + '</span>' : '') +
+        '<i class="bi ' + icon + ' yn-attach-tile-thumb-icon"></i>';
+    }
+
+    tile.innerHTML =
+      '<div class="yn-attach-tile-thumb">' + thumbHtml + '</div>' +
+      '<button type="button" class="yn-attach-tile-remove" title="{{ _("remove") }}" aria-label="{{ _("remove") }}"><i class="bi bi-x-lg"></i></button>' +
+      '<div class="yn-attach-tile-info">' +
+        '<div class="yn-attach-tile-name" title="' + escAtt(att.filename) + '">' + escAtt(att.filename) + '</div>' +
+        '<div class="yn-attach-tile-size">' + _humanSize(att.size_bytes) + '</div>' +
+      '</div>';
+
+    list.appendChild(tile);
+
+    // Click anywhere on the tile (except the remove button) opens the file
+    tile.addEventListener('click', function(e) {
+      if (e.target.closest('.yn-attach-tile-remove')) return;
+      if (typeof yfOpenExternal === 'function' && yfOpenExternal(url) === false) return;
+      window.open(url, '_blank', 'noopener');
+    });
+
+    tile.querySelector('.yn-attach-tile-remove').addEventListener('click', async function(e) {
+      e.stopPropagation();
       if (!(await confirmDialog('{{ _("attachments_confirm_delete") }}', { icon: 'warning', confirmColor: 'danger', confirmText: '{{ _("delete") }}' }))) return;
       var r = await fetch('/api/movements/attachments/' + att.id, { method: 'DELETE' });
       if (r.ok) {
-        div.remove();
+        tile.remove();
         _uploadedCount = Math.max(0, _uploadedCount - 1);
         showToast('{{ _("deleted_successfully") }}', 'success');
       } else {
@@ -303,7 +397,10 @@
 
   function removeChip(id) {
     var el = document.getElementById('att-chip-' + id);
-    if (el) el.remove();
+    if (el) {
+      if (el._objectUrl) URL.revokeObjectURL(el._objectUrl);
+      el.remove();
+    }
   }
 
   function escAtt(s) { var d = document.createElement('div'); d.textContent = String(s); return d.innerHTML; }

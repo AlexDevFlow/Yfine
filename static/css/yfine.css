@@ -1445,82 +1445,224 @@ body {
 .yn-help-mock-value.income  { color: var(--yn-success); }
 .yn-help-mock-value.expense { color: var(--yn-danger); }
 
-/* ----- Attachments (movement form) ----- */
+/* ----- Attachments: dropzone, tile grid, lightbox ----- */
+
+/* Dropzone */
 .yn-attach-drop {
   border: 2px dashed var(--bs-border-color);
-  border-radius: .55rem;
-  padding: 1.1rem 1rem;
+  border-radius: .85rem;
+  padding: 1.6rem 1.25rem;
   text-align: center;
   cursor: pointer;
-  background: var(--bs-body-bg);
-  transition: border-color .15s ease, background-color .15s ease;
+  background:
+    linear-gradient(180deg, rgba(105, 108, 255, .03), rgba(105, 108, 255, 0)),
+    var(--bs-body-bg);
+  transition: border-color .18s ease, background-color .18s ease, transform .18s ease;
 }
-.yn-attach-drop:hover,
+.yn-attach-drop:hover {
+  border-color: rgba(105, 108, 255, .55);
+  background: rgba(105, 108, 255, .04);
+}
 .yn-attach-drop.is-dragover {
   border-color: var(--yn-primary, #696cff);
-  background: rgba(105, 108, 255, .06);
+  background: rgba(105, 108, 255, .08);
+  transform: scale(1.005);
 }
-.yn-attach-drop-label {
+.yn-attach-drop-icon {
   display: inline-flex;
-  align-items: center;
-  gap: .5rem;
-  font-size: .9rem;
+  width: 44px; height: 44px;
+  align-items: center; justify-content: center;
+  border-radius: 50%;
+  background: rgba(105, 108, 255, .1);
+  color: var(--yn-primary, #696cff);
+  font-size: 1.4rem;
+  margin-bottom: .55rem;
 }
-.yn-attach-drop-label i { font-size: 1.1rem; }
+.yn-attach-drop-title {
+  font-weight: 600;
+  font-size: .95rem;
+  margin-bottom: .15rem;
+}
+.yn-attach-drop-hint {
+  font-size: .78rem;
+  color: var(--bs-secondary-color);
+}
+.yn-attach-drop-browse {
+  color: var(--yn-primary, #696cff);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
 
-.yn-attach-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: .45rem;
-  padding: .35rem .55rem;
+/* Tile grid (form upload AND viewer modal) */
+.yn-attach-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: .75rem;
+  margin-top: .9rem;
+}
+.yn-attach-tile {
+  position: relative;
   border: 1px solid var(--bs-border-color);
-  border-radius: .45rem;
+  border-radius: .65rem;
+  overflow: hidden;
   background: var(--bs-body-bg);
-  max-width: 280px;
-  font-size: .82rem;
+  transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease;
+  cursor: pointer;
 }
-.yn-attach-chip.is-uploading { opacity: .7; }
-.yn-attach-chip.is-uploaded  { border-color: rgba(113, 221, 55, .5); }
-.yn-attach-chip i { flex-shrink: 0; }
-.yn-attach-chip-link {
-  display: inline-flex;
-  align-items: center;
-  gap: .45rem;
-  color: inherit;
-  text-decoration: none;
-  min-width: 0;
+.yn-attach-tile:hover {
+  border-color: var(--yn-primary, #696cff);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, .08);
+  transform: translateY(-2px);
 }
-.yn-attach-chip-link:hover { color: var(--yn-primary, #696cff); }
-.yn-attach-chip-name {
+.yn-attach-tile-thumb {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: var(--bs-tertiary-bg, rgba(0, 0, 0, .03));
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+.yn-attach-tile-thumb img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.yn-attach-tile-thumb-icon {
+  font-size: 2.5rem;
+  color: var(--bs-secondary-color);
+  opacity: .85;
+}
+.yn-attach-tile.is-pdf .yn-attach-tile-thumb {
+  background: linear-gradient(135deg, rgba(255, 62, 29, .08), rgba(255, 62, 29, .02));
+}
+.yn-attach-tile.is-pdf .yn-attach-tile-thumb-icon { color: var(--yn-danger, #ff3e1d); }
+.yn-attach-tile-badge {
+  position: absolute;
+  top: 6px; left: 6px;
+  font-size: .6rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  padding: .15rem .4rem;
+  border-radius: .25rem;
+  background: rgba(0, 0, 0, .65);
+  color: #fff;
+  text-transform: uppercase;
+  z-index: 2;
+}
+.yn-attach-tile-info {
+  padding: .5rem .6rem .55rem;
+}
+.yn-attach-tile-name {
+  font-size: .78rem;
+  font-weight: 500;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  min-width: 0;
+  margin-bottom: .1rem;
 }
-.yn-attach-chip-size {
+.yn-attach-tile-size {
+  font-size: .68rem;
   color: var(--bs-secondary-color);
-  font-size: .72rem;
-  flex-shrink: 0;
 }
-.yn-attach-chip-remove {
-  border: none;
-  background: transparent;
-  color: var(--bs-secondary-color);
-  padding: 0 .1rem;
-  line-height: 1;
+.yn-attach-tile-remove {
+  position: absolute;
+  top: 6px; right: 6px;
+  width: 26px; height: 26px;
+  border: none; border-radius: 50%;
+  background: rgba(0, 0, 0, .65);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
   cursor: pointer;
-  border-radius: .25rem;
+  opacity: 0;
+  transition: opacity .15s, background .15s;
+  z-index: 3;
+  line-height: 1;
 }
-.yn-attach-chip-remove:hover { color: var(--yn-danger, #ff3e1d); background: rgba(255, 62, 29, .1); }
-.yn-attach-chip-spinner {
-  display: inline-block;
-  width: 12px; height: 12px;
-  border: 2px solid var(--bs-border-color);
-  border-top-color: var(--yn-primary, #696cff);
+.yn-attach-tile:hover .yn-attach-tile-remove,
+.yn-attach-tile:focus-within .yn-attach-tile-remove { opacity: 1; }
+.yn-attach-tile-remove:hover { background: var(--yn-danger, #ff3e1d); }
+
+/* Upload progress overlay (replaces the old chip spinner) */
+.yn-attach-tile.is-uploading { pointer-events: none; }
+.yn-attach-tile.is-uploading::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: rgba(0, 0, 0, .45);
+  z-index: 1;
+}
+.yn-attach-tile.is-uploading::after {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 32px; height: 32px;
+  border: 3px solid rgba(255, 255, 255, .25);
+  border-top-color: #fff;
   border-radius: 50%;
   animation: yn-att-spin .8s linear infinite;
+  transform: translate(-50%, -50%);
+  z-index: 2;
 }
 @keyframes yn-att-spin { to { transform: rotate(360deg); } }
+
+/* Lightbox (image preview in viewer modal) */
+.yn-attach-lightbox {
+  position: fixed; inset: 0;
+  background: rgba(0, 0, 0, .92);
+  z-index: 2000;
+  display: none;
+  align-items: center; justify-content: center;
+  padding: 2.5rem 1rem;
+}
+.yn-attach-lightbox.is-open { display: flex; }
+.yn-attach-lightbox-img {
+  max-width: 95vw;
+  max-height: 85vh;
+  object-fit: contain;
+  border-radius: .25rem;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, .5);
+}
+.yn-attach-lightbox-btn {
+  position: fixed;
+  border: none;
+  background: rgba(255, 255, 255, .12);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: background .15s;
+}
+.yn-attach-lightbox-btn:hover { background: rgba(255, 255, 255, .25); }
+.yn-attach-lightbox-close {
+  top: 1rem; right: 1rem;
+  width: 40px; height: 40px;
+  font-size: 1.1rem;
+}
+.yn-attach-lightbox-nav {
+  top: 50%; transform: translateY(-50%);
+  width: 48px; height: 48px;
+  font-size: 1.5rem;
+}
+.yn-attach-lightbox-nav.prev { left: 1rem; }
+.yn-attach-lightbox-nav.next { right: 1rem; }
+.yn-attach-lightbox-caption {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%; transform: translateX(-50%);
+  padding: .55rem 1.1rem;
+  border-radius: .5rem;
+  background: rgba(0, 0, 0, .7);
+  color: #fff;
+  font-size: .85rem;
+  max-width: 90vw;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  display: flex; align-items: center; gap: .75rem;
+}
+.yn-attach-lightbox-counter {
+  font-size: .7rem;
+  opacity: .7;
+  flex-shrink: 0;
+}
 
 /* ----- Goal cards ----- */
 .yn-goal-card {
@@ -1560,4 +1702,25 @@ body {
   background: rgba(105, 108, 255, .08);
 }
 .yn-attach-flag i { font-size: .85rem; }
+
+/* ---------- Sidebar layout customization (Settings → Menu) ------------- */
+.nav-layout-list .nav-layout-item {
+  cursor: grab;
+  transition: background-color .15s ease, box-shadow .15s ease;
+}
+.nav-layout-list .nav-layout-item:active { cursor: grabbing; }
+.nav-layout-list .nav-grip { cursor: grab; }
+.nav-layout-list .nav-layout-dragging {
+  opacity: .45;
+  background-color: rgba(105, 108, 255, .08);
+}
+.nav-layout-list .nav-layout-drop-above {
+  box-shadow: inset 0 3px 0 0 var(--yn-primary, #696cff);
+}
+.nav-layout-list .nav-layout-drop-below {
+  box-shadow: inset 0 -3px 0 0 var(--yn-primary, #696cff);
+}
+/* Don't let drag start from the visibility switch — clicking it must toggle, not drag */
+.nav-layout-list .form-check { cursor: default; }
+.nav-layout-list .form-check-input { cursor: pointer; }
 

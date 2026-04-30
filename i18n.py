@@ -125,6 +125,94 @@ def get_ui_scale() -> str:
     return _ui_scale
 
 
+# --- Hotkeys & nav layout ---------------------------------------------------
+# We keep the *defaults* in one place; the DB only stores user overrides
+# (a JSON object for hotkey bindings, a JSON array for the sidebar layout).
+# That way adding a new nav entry or hotkey action in code does not require
+# any data migration.
+
+DEFAULT_NAV_ITEMS = [
+    {"id": "dashboard",     "url": "/",              "icon": "bi-house",            "label_key": "dashboard",     "section": "ledger"},
+    {"id": "sources",       "url": "/sources",       "icon": "bi-wallet2",          "label_key": "sources",       "section": "ledger"},
+    {"id": "portfolios",    "url": "/portfolios",    "icon": "bi-briefcase",        "label_key": "portfolios",    "section": "ledger"},
+    {"id": "movements",     "url": "/movements",     "icon": "bi-arrow-left-right", "label_key": "movements",     "section": "ledger"},
+    {"id": "tags",          "url": "/tags",          "icon": "bi-tag",              "label_key": "tags",          "section": "ledger"},
+    {"id": "recurring",     "url": "/recurring",     "icon": "bi-arrow-repeat",     "label_key": "recurring",     "section": "planning"},
+    {"id": "savings",       "url": "/savings",       "icon": "bi-piggy-bank",       "label_key": "savings",       "section": "planning"},
+    {"id": "whims",         "url": "/whims",         "icon": "bi-star",             "label_key": "whims",         "section": "planning"},
+    {"id": "notifications", "url": "/notifications", "icon": "bi-bell",             "label_key": "notifications", "section": "system"},
+    {"id": "settings",      "url": "/settings",      "icon": "bi-gear",             "label_key": "settings",      "section": "system"},
+]
+
+_hotkeys_enabled = True
+_hotkeys_json = "{}"
+_nav_layout_json = "[]"
+
+
+def set_hotkeys_enabled(val: bool):
+    global _hotkeys_enabled
+    _hotkeys_enabled = bool(val)
+
+
+def get_hotkeys_enabled() -> bool:
+    return _hotkeys_enabled
+
+
+def set_hotkeys_json(val: str):
+    global _hotkeys_json
+    if isinstance(val, str):
+        _hotkeys_json = val
+
+
+def get_hotkeys_json() -> str:
+    return _hotkeys_json
+
+
+def set_nav_layout_json(val: str):
+    global _nav_layout_json
+    if isinstance(val, str):
+        _nav_layout_json = val
+
+
+def get_nav_layout_json() -> str:
+    return _nav_layout_json
+
+
+def get_nav_items() -> list[dict]:
+    """Apply the user's saved layout (visibility + order) on top of the
+    defaults. Items present in defaults but missing from the saved layout
+    keep their default position appended at the end (so a new build that
+    adds a nav entry never silently hides it from upgrading users)."""
+    import json as _json
+    try:
+        layout = _json.loads(_nav_layout_json or "[]")
+    except Exception:
+        layout = []
+    if not isinstance(layout, list):
+        layout = []
+
+    defaults_by_id = {d["id"]: d for d in DEFAULT_NAV_ITEMS}
+    result = []
+    seen = set()
+    for entry in layout:
+        if not isinstance(entry, dict):
+            continue
+        eid = entry.get("id")
+        if eid not in defaults_by_id or eid in seen:
+            continue
+        item = dict(defaults_by_id[eid])
+        item["visible"] = bool(entry.get("visible", True))
+        result.append(item)
+        seen.add(eid)
+    for d in DEFAULT_NAV_ITEMS:
+        if d["id"] in seen:
+            continue
+        item = dict(d)
+        item["visible"] = True
+        result.append(item)
+    return result
+
+
 _date_format = "dd/mm/yyyy"
 
 # Map setting values to strftime patterns

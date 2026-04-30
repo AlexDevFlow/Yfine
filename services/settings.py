@@ -47,6 +47,15 @@ def update_settings(session: Session, data: SettingUpdate) -> Setting:
     if "ui_scale" in update_data:
         from i18n import set_ui_scale
         set_ui_scale(update_data["ui_scale"])
+    if "hotkeys_enabled" in update_data:
+        from i18n import set_hotkeys_enabled
+        set_hotkeys_enabled(update_data["hotkeys_enabled"])
+    if "hotkeys_json" in update_data:
+        from i18n import set_hotkeys_json
+        set_hotkeys_json(update_data["hotkeys_json"])
+    if "nav_layout_json" in update_data:
+        from i18n import set_nav_layout_json
+        set_nav_layout_json(update_data["nav_layout_json"])
 
     # Persist settings to auth config so they work even when the DB is encrypted
     _sync_keys = {"lan_access", "locale"}

@@ -29,6 +29,12 @@
       <a href="#tab-imports" class="list-group-item list-group-item-action d-flex align-items-center gap-2" data-bs-toggle="pill" role="tab">
         <i class="bi bi-cloud-upload text-info"></i><span>{{ _('import_from_bank') }}</span>
       </a>
+      <a href="#tab-menu" class="list-group-item list-group-item-action d-flex align-items-center gap-2" data-bs-toggle="pill" role="tab">
+        <i class="bi bi-list-ul text-primary"></i><span>{{ _('menu_layout') }}</span>
+      </a>
+      <a href="#tab-hotkeys" class="list-group-item list-group-item-action d-flex align-items-center gap-2" data-bs-toggle="pill" role="tab">
+        <i class="bi bi-keyboard text-secondary"></i><span>{{ _('hotkeys') }}</span>
+      </a>
       <a href="#tab-plugins" class="list-group-item list-group-item-action d-flex align-items-center gap-2" data-bs-toggle="pill" role="tab">
         <i class="bi bi-puzzle text-primary"></i><span>{{ _('plugins') }}</span>
       </a>
@@ -272,6 +278,71 @@
   </div>
 
   {% include "settings/_tab_imports.html" %}
+
+  <!-- Sidebar layout customization -->
+  <div class="tab-pane fade" id="tab-menu" role="tabpanel">
+    <div class="card mb-3">
+      <div class="card-body">
+        <h6 class="d-flex align-items-center gap-2 mb-3">
+          <span class="yn-icon-box rounded bg-label-primary p-2"><i class="bi bi-list-ul"></i></span>
+          {{ _('menu_layout') }}
+        </h6>
+        <p class="text-muted small mb-3">{{ _('menu_layout_desc') }}</p>
+        <ul class="list-group nav-layout-list" id="nav-layout-list">
+          {% for it in get_nav_items() %}
+          <li class="list-group-item d-flex align-items-center gap-3 nav-layout-item" draggable="true" data-nav-id="{{ it.id }}">
+            <i class="bi bi-grip-vertical text-muted nav-grip" title="{{ _('drag_to_reorder') }}"></i>
+            <i class="bi {{ it.icon }} fs-5 text-primary"></i>
+            <span class="flex-grow-1 fw-medium">{{ _(it.label_key) }}</span>
+            <small class="text-muted text-uppercase d-none d-sm-inline">{{ _('nav_' ~ it.section) }}</small>
+            <div class="form-check form-switch mb-0">
+              <input class="form-check-input nav-visible-cb" type="checkbox" {% if it.visible %}checked{% endif %} title="{{ _('visible') }}">
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+        <div class="mt-3">
+          <button class="btn btn-sm btn-outline-secondary" type="button" onclick="resetNavLayout()">
+            <i class="bi bi-arrow-counterclockwise me-1"></i>{{ _('reset_to_default') }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hotkeys customization -->
+  <div class="tab-pane fade" id="tab-hotkeys" role="tabpanel">
+    <div class="card mb-3">
+      <div class="card-body">
+        <h6 class="d-flex align-items-center gap-2 mb-3">
+          <span class="yn-icon-box rounded bg-label-secondary p-2"><i class="bi bi-keyboard"></i></span>
+          {{ _('hotkeys') }}
+        </h6>
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <div class="form-check form-switch mb-0">
+            <input class="form-check-input" type="checkbox" id="hotkeys_enabled" {% if settings.hotkeys_enabled %}checked{% endif %}>
+          </div>
+          <div class="flex-grow-1">
+            <div class="fw-bold small">{{ _('hotkeys_master_toggle') }}</div>
+            <small class="text-muted">{{ _('hotkeys_desc') }}</small>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-sm align-middle mb-0" id="hotkeys-table">
+            <thead>
+              <tr>
+                <th>{{ _('action') }}</th>
+                <th style="width:200px">{{ _('shortcut') }}</th>
+                <th style="width:80px"></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <small class="text-muted d-block mt-2">{{ _('hotkeys_capture_hint') }}</small>
+      </div>
+    </div>
+  </div>
 
   <div class="tab-pane fade" id="tab-plugins" role="tabpanel">
     <div class="card mb-3">
@@ -1112,6 +1183,238 @@
       await handleApiError(resp);
     }
   }
+
+  // --- Hotkeys customization -------------------------------------------
+  (function buildHotkeysTable() {
+    var tbody = document.querySelector('#hotkeys-table tbody');
+    if (!tbody) return;
+    var actions = window.YN_HOTKEY_ACTIONS || {};
+    // Read overrides from the <html data-hotkeys-json> attribute that base.html
+    // already emits — same source the runtime listener uses, so the UI never
+    // disagrees with what is actually bound.
+    var saved = {};
+    try {
+      saved = JSON.parse(document.documentElement.getAttribute('data-hotkeys-json') || '{}');
+    } catch (_) { saved = {}; }
+
+    var labelMap = {
+      nav_dashboard: '{{ _("hotkey_nav_dashboard") }}',
+      nav_sources: '{{ _("hotkey_nav_sources") }}',
+      nav_portfolios: '{{ _("hotkey_nav_portfolios") }}',
+      nav_movements: '{{ _("hotkey_nav_movements") }}',
+      nav_tags: '{{ _("hotkey_nav_tags") }}',
+      nav_recurring: '{{ _("hotkey_nav_recurring") }}',
+      nav_savings: '{{ _("hotkey_nav_savings") }}',
+      nav_whims: '{{ _("hotkey_nav_whims") }}',
+      nav_notifications: '{{ _("hotkey_nav_notifications") }}',
+      nav_settings: '{{ _("hotkey_nav_settings") }}',
+      new_movement: '{{ _("hotkey_new_movement") }}',
+      new_recurring: '{{ _("hotkey_new_recurring") }}',
+      focus_search: '{{ _("hotkey_focus_search") }}',
+      toggle_theme: '{{ _("hotkey_toggle_theme") }}',
+    };
+
+    Object.keys(actions).forEach(function(name) {
+      var def = actions[name].def;
+      var cur = (name in saved) ? (saved[name] || '') : def;
+      var tr = document.createElement('tr');
+      tr.dataset.action = name;
+      tr.innerHTML =
+        '<td>' + (labelMap[name] || name) + '<br><small class="text-muted">' + def + '</small></td>' +
+        '<td><input type="text" class="form-control form-control-sm hotkey-input" placeholder="' + '{{ _("hotkeys_press_keys") }}' + '" value="' + cur.replace(/"/g, '&quot;') + '"></td>' +
+        '<td><button type="button" class="btn btn-sm btn-outline-secondary hotkey-reset" title="{{ _("reset") }}"><i class="bi bi-arrow-counterclockwise"></i></button></td>';
+      tbody.appendChild(tr);
+    });
+
+    // Capture key combo when input is focused
+    tbody.addEventListener('focus', function(e) {
+      var inp = e.target.closest('.hotkey-input');
+      if (!inp) return;
+      inp.dataset.captured = '';
+      inp.placeholder = '{{ _("hotkeys_press_keys") }}';
+    }, true);
+
+    tbody.addEventListener('keydown', function(e) {
+      var inp = e.target.closest('.hotkey-input');
+      if (!inp) return;
+      // Allow Tab to move focus, Backspace/Escape to clear/cancel
+      if (e.key === 'Tab') return;
+      e.preventDefault();
+      if (e.key === 'Escape') { inp.blur(); return; }
+      if (e.key === 'Backspace' || e.key === 'Delete') {
+        inp.value = '';
+        saveHotkeys();
+        return;
+      }
+      // Ignore lone modifier keys
+      if (['Shift','Control','Alt','Meta'].indexOf(e.key) !== -1) return;
+      var combo = window.ynNormalizeKeyEvent ? window.ynNormalizeKeyEvent(e) : e.key;
+      // Chord support: if user already typed a "g", "c" etc. as the previous
+      // single key, append. Otherwise replace.
+      if (inp.dataset.captured && inp.dataset.captured.split(' ').length < 2) {
+        inp.value = inp.dataset.captured + ' ' + combo;
+        inp.dataset.captured = '';
+        saveHotkeys();
+      } else {
+        inp.value = combo;
+        inp.dataset.captured = combo;
+      }
+    });
+
+    tbody.addEventListener('blur', function(e) {
+      var inp = e.target.closest('.hotkey-input');
+      if (!inp) return;
+      saveHotkeys();
+    }, true);
+
+    tbody.addEventListener('click', function(e) {
+      var btn = e.target.closest('.hotkey-reset');
+      if (!btn) return;
+      var tr = btn.closest('tr');
+      var name = tr.dataset.action;
+      var inp = tr.querySelector('.hotkey-input');
+      inp.value = (window.YN_HOTKEY_ACTIONS[name] || {}).def || '';
+      saveHotkeys();
+    });
+
+    document.getElementById('hotkeys_enabled').addEventListener('change', function() {
+      fetch('/api/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ hotkeys_enabled: this.checked })
+      }).then(function(r) {
+        if (r.ok) {
+          document.documentElement.setAttribute('data-hotkeys-enabled', this.checked ? '1' : '0');
+          showToast('{{ _("settings_saved") }}', 'success');
+        }
+      }.bind(this));
+    });
+
+    function saveHotkeys() {
+      var rows = tbody.querySelectorAll('tr');
+      var out = {};
+      rows.forEach(function(tr) {
+        var name = tr.dataset.action;
+        var cur = tr.querySelector('.hotkey-input').value.trim();
+        var def = (window.YN_HOTKEY_ACTIONS[name] || {}).def || '';
+        // Only persist user overrides; defaults stay implicit so future
+        // default tweaks reach existing users automatically.
+        if (cur !== def) out[name] = cur;
+      });
+      var json = JSON.stringify(out);
+      fetch('/api/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ hotkeys_json: json })
+      }).then(function(r) {
+        if (r.ok) {
+          document.documentElement.setAttribute('data-hotkeys-json', json);
+          showToast('{{ _("settings_saved") }}', 'success');
+        }
+      });
+    }
+  })();
+
+  // --- Sidebar layout customization ------------------------------------
+  // HTML5 drag-and-drop reordering + visibility toggles. Any change triggers
+  // a full page reload so the actual sidebar (rendered server-side) reflects
+  // the new layout immediately — optimistically rewriting the sidebar in JS
+  // would mean keeping two parallel renderers in sync.
+  (function navLayout() {
+    var list = document.getElementById('nav-layout-list');
+    if (!list) return;
+
+    function _serialize() {
+      var entries = [];
+      list.querySelectorAll('li[data-nav-id]').forEach(function(li) {
+        entries.push({ id: li.dataset.navId, visible: li.querySelector('.nav-visible-cb').checked });
+      });
+      return entries;
+    }
+
+    function _save(opts) {
+      opts = opts || {};
+      var json = JSON.stringify(_serialize());
+      return fetch('/api/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nav_layout_json: json })
+      }).then(function(r) {
+        if (r.ok) {
+          showToast('{{ _("settings_saved") }}', 'success');
+          if (opts.reload !== false) {
+            // Tiny delay so the toast paints before the reload kicks in
+            setTimeout(function() { location.reload(); }, 350);
+          }
+        }
+      });
+    }
+
+    // --- Native drag-and-drop ------------------------------------------
+    var _dragged = null;
+
+    list.addEventListener('dragstart', function(e) {
+      var li = e.target.closest('li[data-nav-id]');
+      if (!li) return;
+      _dragged = li;
+      li.classList.add('nav-layout-dragging');
+      try {
+        e.dataTransfer.effectAllowed = 'move';
+        // Some browsers require setData to actually start a drag
+        e.dataTransfer.setData('text/plain', li.dataset.navId);
+      } catch (_) {}
+    });
+
+    list.addEventListener('dragend', function(e) {
+      if (_dragged) _dragged.classList.remove('nav-layout-dragging');
+      list.querySelectorAll('.nav-layout-drop-above, .nav-layout-drop-below').forEach(function(el) {
+        el.classList.remove('nav-layout-drop-above', 'nav-layout-drop-below');
+      });
+      _dragged = null;
+    });
+
+    list.addEventListener('dragover', function(e) {
+      if (!_dragged) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      var target = e.target.closest('li[data-nav-id]');
+      if (!target || target === _dragged) return;
+      // Determine "above" vs "below" based on midpoint
+      var rect = target.getBoundingClientRect();
+      var aboveHalf = (e.clientY - rect.top) < rect.height / 2;
+      list.querySelectorAll('.nav-layout-drop-above, .nav-layout-drop-below').forEach(function(el) {
+        el.classList.remove('nav-layout-drop-above', 'nav-layout-drop-below');
+      });
+      target.classList.add(aboveHalf ? 'nav-layout-drop-above' : 'nav-layout-drop-below');
+    });
+
+    list.addEventListener('drop', function(e) {
+      if (!_dragged) return;
+      e.preventDefault();
+      var target = e.target.closest('li[data-nav-id]');
+      if (!target || target === _dragged) return;
+      var rect = target.getBoundingClientRect();
+      var aboveHalf = (e.clientY - rect.top) < rect.height / 2;
+      target.parentNode.insertBefore(_dragged, aboveHalf ? target : target.nextSibling);
+      target.classList.remove('nav-layout-drop-above', 'nav-layout-drop-below');
+      _save();
+    });
+
+    // --- Visibility toggle ---------------------------------------------
+    list.addEventListener('change', function(e) {
+      if (e.target.classList.contains('nav-visible-cb')) _save();
+    });
+
+    window.resetNavLayout = function() {
+      fetch('/api/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nav_layout_json: '[]' })
+      }).then(function(r) {
+        if (r.ok) location.reload();
+      });
+    };
+  })();
 
   // --- Import from bank / other apps ---
   window.IMP_I18N = {

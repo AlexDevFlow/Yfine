@@ -275,11 +275,11 @@
           <div class="row g-2 mb-3">
             <div class="col-sm-4">
               <label for="h_quantity" class="form-label" id="h_quantity_label">{{ _('quantity') }}</label>
-              <input type="number" step="any" inputmode="decimal" class="form-control form-control-sm" id="h_quantity" value="0" required>
+              <input type="number" step="any" inputmode="decimal" class="form-control form-control-sm" id="h_quantity" value="0" data-money required>
             </div>
             <div class="col-sm-4">
               <label for="h_avg_cost" class="form-label" id="h_avg_cost_label">{{ _('avg_cost') }}</label>
-              <input type="number" step="any" inputmode="decimal" class="form-control form-control-sm" id="h_avg_cost" value="0">
+              <input type="number" step="any" inputmode="decimal" class="form-control form-control-sm" id="h_avg_cost" value="0" data-money>
             </div>
             <div class="col-sm-4">
               <label for="h_currency" class="form-label">{{ _('currency') }}</label>
@@ -298,7 +298,7 @@
           </div>
           <div class="mb-3" id="manual-price-wrap" style="display:none">
             <label for="h_last_price" class="form-label">{{ _('price') }}</label>
-            <input type="number" step="any" inputmode="decimal" class="form-control form-control-sm" id="h_last_price">
+            <input type="number" step="any" inputmode="decimal" class="form-control form-control-sm" id="h_last_price" data-money>
           </div>
           <div class="mb-0">
             <label for="h_note" class="form-label">{{ _('note') }}</label>

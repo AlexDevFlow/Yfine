@@ -3,7 +3,9 @@
   lang="{{ get_locale() }}"
   dir="ltr"
   data-bs-theme="{{ get_theme() if get_theme() != 'system' else 'light' }}"
-  data-ui-scale="{{ get_ui_scale() }}">
+  data-ui-scale="{{ get_ui_scale() }}"
+  data-hotkeys-enabled="{{ '1' if get_hotkeys_enabled() else '0' }}"
+  data-hotkeys-json="{{ get_hotkeys_json() }}">
   <head>
     <meta charset="utf-8" />
     <!-- Render-blocking: correct background from the very first frame -->
@@ -93,71 +95,24 @@
         </div>
 
         <ul class="yn-nav">
-          <li class="yn-nav-header">{{ _('nav_ledger') }}</li>
-          <li class="yn-nav-item">
-            <a href="/" class="yn-nav-link {% if active_page == 'dashboard' %}active{% endif %}">
-              <i class="bi bi-house"></i>
-              <span>{{ _('dashboard') }}</span>
-            </a>
-          </li>
-          <li class="yn-nav-item">
-            <a href="/sources" class="yn-nav-link {% if active_page == 'sources' %}active{% endif %}">
-              <i class="bi bi-wallet2"></i>
-              <span>{{ _('sources') }}</span>
-            </a>
-          </li>
-          <li class="yn-nav-item">
-            <a href="/portfolios" class="yn-nav-link {% if active_page == 'portfolios' %}active{% endif %}">
-              <i class="bi bi-briefcase"></i>
-              <span>{{ _('portfolios') }}</span>
-            </a>
-          </li>
-          <li class="yn-nav-item">
-            <a href="/movements" class="yn-nav-link {% if active_page == 'movements' %}active{% endif %}">
-              <i class="bi bi-arrow-left-right"></i>
-              <span>{{ _('movements') }}</span>
-            </a>
-          </li>
-          <li class="yn-nav-item">
-            <a href="/tags" class="yn-nav-link {% if active_page == 'tags' %}active{% endif %}">
-              <i class="bi bi-tag"></i>
-              <span>{{ _('tags') }}</span>
-            </a>
-          </li>
-
-          <li class="yn-nav-header">{{ _('nav_planning') }}</li>
-          <li class="yn-nav-item">
-            <a href="/recurring" class="yn-nav-link {% if active_page == 'recurring' %}active{% endif %}">
-              <i class="bi bi-arrow-repeat"></i>
-              <span>{{ _('recurring') }}</span>
-            </a>
-          </li>
-          <li class="yn-nav-item">
-            <a href="/savings" class="yn-nav-link {% if active_page == 'savings' %}active{% endif %}">
-              <i class="bi bi-piggy-bank"></i>
-              <span>{{ _('savings') }}</span>
-            </a>
-          </li>
-          <li class="yn-nav-item">
-            <a href="/whims" class="yn-nav-link {% if active_page == 'whims' %}active{% endif %}">
-              <i class="bi bi-star"></i>
-              <span>{{ _('whims') }}</span>
-            </a>
-          </li>
-
-          <li class="yn-nav-header">{{ _('nav_system') }}</li>
-          <li class="yn-nav-item">
-            <a href="/notifications" class="yn-nav-link {% if active_page == 'notifications' %}active{% endif %}">
-              <i class="bi bi-bell"></i>
-              <span>{{ _('notifications') }}</span>
-            </a>
-          </li>
-          <li class="yn-nav-item">
-            <a href="/settings" class="yn-nav-link {% if active_page == 'settings' %}active{% endif %}">
-              <i class="bi bi-gear"></i>
-              <span>{{ _('settings') }}</span>
-            </a>
-          </li>
+          {# Sidebar items are user-customizable from /settings (visibility +
+             order). Defaults live in i18n.DEFAULT_NAV_ITEMS. Items hidden by
+             the user are filtered out before render so they leave no trace. #}
+          {% set _nav_items = get_nav_items() %}
+          {% set _visible_nav = _nav_items | selectattr('visible') | list %}
+          {% set _seen_sections = [] %}
+          {% for item in _visible_nav %}
+            {% if item.section not in _seen_sections %}
+              {% set _x = _seen_sections.append(item.section) %}
+              <li class="yn-nav-header">{{ _('nav_' ~ item.section) }}</li>
+            {% endif %}
+            <li class="yn-nav-item">
+              <a href="{{ item.url }}" class="yn-nav-link {% if active_page == item.id %}active{% endif %}">
+                <i class="bi {{ item.icon }}"></i>
+                <span>{{ _(item.label_key) }}</span>
+              </a>
+            </li>
+          {% endfor %}
 
           {# --- Plugin section --- #}
           {% if plugin_menu_items() %}
@@ -831,6 +786,14 @@
         _importPendingFile = null;
       }
     </script>
+
+    <!-- Yfine helpers — load before page_js so page-level scripts can read
+         globals exposed here (e.g. window.YN_HOTKEY_ACTIONS in the Settings
+         page builds the shortcut table from this list). The helpers themselves
+         only call into globals like toggleDarkMode lazily, so they don't need
+         to wait for the rest of base.html. -->
+    <script src="/static/js/hotkeys.js?v={{ cache_bust }}"></script>
+    <script src="/static/js/math-input.js?v={{ cache_bust }}"></script>
 
     {% block page_js %}{% endblock %}
 

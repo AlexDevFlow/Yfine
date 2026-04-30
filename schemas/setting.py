@@ -13,6 +13,9 @@ class SettingRead(BaseModel):
     last_source_id: Optional[int] = None
     mobile_nav_mode: str = "sidebar"
     ui_scale: str = "normal"
+    hotkeys_enabled: bool = True
+    hotkeys_json: str = "{}"
+    nav_layout_json: str = "[]"
     lan_access: bool = False
     portfolio_prices_enabled: bool = False
     portfolio_prices_prompted: bool = False
@@ -27,6 +30,9 @@ class SettingUpdate(BaseModel):
     last_source_id: Optional[int] = None
     mobile_nav_mode: Optional[str] = None
     ui_scale: Optional[str] = None
+    hotkeys_enabled: Optional[bool] = None
+    hotkeys_json: Optional[str] = None
+    nav_layout_json: Optional[str] = None
     lan_access: Optional[bool] = None
     portfolio_prices_enabled: Optional[bool] = None
     portfolio_prices_prompted: Optional[bool] = None

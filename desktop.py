@@ -231,6 +231,122 @@ class Api:
             _logger.exception("open_external failed for %s", url)
             return False
 
+    def pick_attachments(self):
+        """Open the native OS file picker for attachment uploads.
+
+        Backend selection by platform:
+
+        - **Linux**: prefer ``zenity --file-selection`` if the binary exists.
+          Both `<input type="file">` AND ``webview.create_file_dialog()``
+          end up rendering through Qt's `QFileDialog`, which on a stack
+          without xdg-desktop-portal looks exactly like Qt's own widget —
+          not the GTK/GNOME picker the user expects. Zenity bypasses Qt
+          entirely and shows the same chooser GNOME/Pop!_OS apps use.
+          ``kdialog`` (KDE) is tried as a second option.
+        - **macOS / Windows**: ``webview.create_file_dialog(OPEN_DIALOG)``
+          maps to NSOpenPanel / IFileOpenDialog respectively, both of which
+          are the actual native dialog, so we use that path directly.
+
+        Returns a list of dicts ``[{name, size, mime, b64}, ...]``. The JS
+        side rebuilds ``File`` objects from the base64 payload and feeds
+        them through the same ``handleFiles()`` pipeline used by the
+        browser ``<input type="file">`` path, so the rest of the app stays
+        agnostic to desktop-vs-web. Capped at the form's 10 MB-per-file
+        limit (so a worst-case JSON bridge payload is ~70 MB for 5 files).
+        """
+        import base64
+        import mimetypes
+        import shutil
+        import subprocess
+
+        paths: list[str] = []
+
+        if sys.platform.startswith("linux"):
+            paths = self._linux_native_picker(shutil, subprocess)
+
+        if not paths:
+            try:
+                result = self._window.create_file_dialog(
+                    webview.OPEN_DIALOG,
+                    allow_multiple=True,
+                    file_types=(
+                        "Receipts (*.png;*.jpg;*.jpeg;*.webp;*.heic;*.pdf)",
+                        "Images (*.png;*.jpg;*.jpeg;*.webp;*.heic)",
+                        "PDF (*.pdf)",
+                        "All files (*.*)",
+                    ),
+                )
+            except Exception:
+                _logger.exception("pick_attachments: dialog failed")
+                return []
+            if not result:
+                return []
+            paths = [result] if isinstance(result, str) else list(result)
+
+        out = []
+        for p in paths:
+            try:
+                with open(p, "rb") as f:
+                    data = f.read()
+            except OSError:
+                _logger.exception("pick_attachments: cannot read %s", p)
+                continue
+            mime, _ = mimetypes.guess_type(p)
+            out.append({
+                "name": os.path.basename(p),
+                "size": len(data),
+                "mime": mime or "application/octet-stream",
+                "b64": base64.b64encode(data).decode("ascii"),
+            })
+        return out
+
+    @staticmethod
+    def _linux_native_picker(shutil_mod, subprocess_mod) -> list[str]:
+        """Run zenity (GNOME/Pop!_OS/XFCE) or kdialog (KDE) for the file
+        chooser. Returns selected paths, or [] on cancel / unavailable.
+        """
+        zenity = shutil_mod.which("zenity")
+        if zenity:
+            try:
+                cp = subprocess_mod.run(
+                    [
+                        zenity, "--file-selection", "--multiple",
+                        "--separator=\n",
+                        "--title=Yfine — select attachments",
+                        # Filters: zenity uses space-separated globs after a "|"
+                        "--file-filter=Receipts | *.png *.jpg *.jpeg *.webp *.heic *.pdf",
+                        "--file-filter=Images | *.png *.jpg *.jpeg *.webp *.heic",
+                        "--file-filter=PDF | *.pdf",
+                        "--file-filter=All files | *",
+                    ],
+                    capture_output=True, text=True, timeout=600, check=False,
+                )
+                # rc=0 → user picked, rc=1 → cancelled, anything else → error
+                if cp.returncode == 0 and cp.stdout.strip():
+                    return [p for p in cp.stdout.strip().split("\n") if p]
+                if cp.returncode not in (0, 1):
+                    _logger.warning("zenity rc=%s stderr=%s", cp.returncode, cp.stderr.strip())
+            except Exception:
+                _logger.exception("zenity invocation failed")
+
+        kdialog = shutil_mod.which("kdialog")
+        if kdialog:
+            try:
+                cp = subprocess_mod.run(
+                    [
+                        kdialog, "--multiple", "--separate-output",
+                        "--getopenfilename", os.path.expanduser("~"),
+                        "Receipts (*.png *.jpg *.jpeg *.webp *.heic *.pdf)",
+                    ],
+                    capture_output=True, text=True, timeout=600, check=False,
+                )
+                if cp.returncode == 0 and cp.stdout.strip():
+                    return [p for p in cp.stdout.strip().split("\n") if p]
+            except Exception:
+                _logger.exception("kdialog invocation failed")
+
+        return []
+
     def save_logs(self):
         """Save the Yfine log file via native file dialog."""
         if not _log_file.exists():
@@ -296,6 +412,7 @@ if __name__ == "__main__":
     window.expose(api.save_pdf_export)
     window.expose(api.open_external)
     window.expose(api.save_logs)
+    window.expose(api.pick_attachments)
 
     threading.Thread(target=on_loaded, daemon=True).start()
     # Force Qt backend on Windows/Linux to avoid pywebview's WinForms path
