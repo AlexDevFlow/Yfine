@@ -213,8 +213,8 @@
                 <small class="fw-bold d-block">{{ r.name }}</small>
                 <small class="text-muted">{{ r.next_due_date|fdate }}</small>
                 {% if r.days_left is not none %}
-                <span class="badge ms-1 {% if r.days_left == 0 %}bg-danger{% elif r.days_left <= 3 %}bg-warning{% else %}bg-label-secondary{% endif %}" style="font-size:0.7rem">
-                  {% if r.days_left == 0 %}{{ _('today') }}{% elif r.days_left == 1 %}{{ _('tomorrow') }}{% else %}{{ r.days_left }} {{ _('days_left') }}{% endif %}
+                <span class="badge ms-1 {% if r.days_left < 0 %}bg-danger{% elif r.days_left == 0 %}bg-danger{% elif r.days_left <= 3 %}bg-warning{% else %}bg-label-secondary{% endif %}" style="font-size:0.7rem">
+                  {% if r.days_left < 0 %}{{ _('overdue').replace('{n}', (-r.days_left)|string) }}{% elif r.days_left == 0 %}{{ _('today') }}{% elif r.days_left == 1 %}{{ _('tomorrow') }}{% else %}{{ r.days_left }} {{ _('days_left') }}{% endif %}
                 </span>
                 {% endif %}
               </div>

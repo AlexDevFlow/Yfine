@@ -215,6 +215,18 @@ def merge_sources(session: Session, from_id: int, into_id: int) -> Source:
     from_source = get_source(session, from_id)
     into_source = get_source(session, into_id)
 
+    # Refuse to merge a savings fund in either direction. From-side: deleting
+    # the fund orphans Goal.source_id (FK is RESTRICT) or, if no goals exist,
+    # silently mixes is_savings_contribution movements into a regular source
+    # and the next save_for_goal call spawns a fresh empty fund. Into-side:
+    # ordinary movements get pulled into the fund, inflating its apparent
+    # balance and breaking the "fund only holds saved money" invariant.
+    if from_source.is_savings_fund or into_source.is_savings_fund:
+        raise HTTPException(
+            status_code=422,
+            detail="Cannot merge the savings fund with another source.",
+        )
+
     if from_source.currency != into_source.currency:
         raise HTTPException(
             status_code=400,

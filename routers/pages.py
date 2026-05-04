@@ -107,6 +107,7 @@ def sources_index(request: Request, session: Session = Depends(get_session)):
             "portfolio_value_other_ccy": pf_other,
             "total_with_portfolios": round(cash + pf_same, 2),
             "movement_count": mov_counts.get(s.id, 0),
+            "is_savings_fund": s.is_savings_fund,
         })
     return _templates().TemplateResponse("sources/index.html", {
         "request": request,

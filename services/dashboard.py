@@ -81,10 +81,14 @@ def get_dashboard_stats(session: Session) -> dict:
         select(Movement).order_by(col(Movement.date).desc()).limit(5)
     ).all()
 
-    # Upcoming recurring
+    # Upcoming recurring — include overdue items (next_due_date in the past)
+    # so the dashboard surfaces them until the user applies them. Items whose
+    # rule has ended (end_date passed) are excluded since they can't fire.
     upcoming = session.exec(
         select(RecurringItem)
-        .where(RecurringItem.next_due_date >= today)
+        .where(
+            (RecurringItem.end_date.is_(None)) | (RecurringItem.end_date >= today)  # type: ignore
+        )
         .order_by(col(RecurringItem.next_due_date))
         .limit(5)
     ).all()

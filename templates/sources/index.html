@@ -87,7 +87,9 @@
           <a href="/sources/{{ s.id }}" class="btn btn-sm btn-outline-primary" title="{{ _('view_all') }}"><i class="bi bi-eye"></i></a>
           <a href="/movements/new?source_id={{ s.id }}" class="btn btn-sm btn-outline-success" title="{{ _('new_movement') }}"><i class="bi bi-plus"></i></a>
           <a href="/sources/{{ s.id }}/edit" class="btn btn-sm btn-outline-warning" title="{{ _('edit') }}"><i class="bi bi-pencil"></i></a>
+          {% if not s.is_savings_fund %}
           <button class="btn btn-sm btn-outline-info merge-btn" data-id="{{ s.id }}" data-name="{{ s.name }}" data-currency="{{ s.currency }}" title="{{ _('merge') }}"><i class="bi bi-arrows-collapse"></i></button>
+          {% endif %}
           <button class="btn btn-sm btn-outline-danger delete-btn" data-id="{{ s.id }}" data-name="{{ s.name }}" title="{{ _('delete') }}"><i class="bi bi-trash"></i></button>
         </div>
       </div>
@@ -335,12 +337,13 @@
     document.getElementById('merge-source-name').textContent = name;
     const targetSelect = document.getElementById('merge-target');
     targetSelect.innerHTML = '';
-    // Populate with same-currency sources, excluding self
-    {% for s in sources %}
-    if ({{ s.id }} !== id && '{{ s.currency }}' === currency) {
+    // Populate with same-currency sources, excluding self and savings funds
+    // (merging into the fund would mix non-savings movements into it).
+    {% for s in sources if not s.is_savings_fund %}
+    if ({{ s.id }} !== id && {{ s.currency | tojson }} === currency) {
       const opt = document.createElement('option');
       opt.value = {{ s.id }};
-      opt.textContent = '{{ s.name }} ({{ s.currency }})';
+      opt.textContent = {{ (s.name ~ ' (' ~ s.currency ~ ')') | tojson }};
       targetSelect.appendChild(opt);
     }
     {% endfor %}
@@ -360,7 +363,7 @@
     });
     if (resp.ok) {
       bootstrap.Modal.getInstance(document.getElementById('mergeModal')).hide();
-      showToast('{{ _("merged_successfully") }}', 'success');
+      showToast({{ _("merged_successfully") | tojson }}, 'success');
       location.reload();
     } else {
       await handleApiError(resp);

@@ -200,6 +200,21 @@
 
 {% block page_js %}
 <script>
+  // Server-rendered translations. Use |tojson so that strings containing
+  // apostrophes/quotes/HTML-special chars survive Jinja autoescape into
+  // <script> as proper JS string literals (not "&#39;" / "&#34;").
+  const I18N = {
+    base_amount:          {{ _("base_amount") | tojson }},
+    adjust_if_needed:     {{ _("adjust_if_needed") | tojson }},
+    income:               {{ _("income") | tojson }},
+    expense:              {{ _("expense") | tojson }},
+    adjust_amount_hint:   {{ _("adjust_amount_hint") | tojson }},
+    error:                {{ _("error") | tojson }},
+    applied_successfully: {{ _("applied_successfully") | tojson }},
+    delete_label:         {{ _("delete") | tojson }},
+    deleted_successfully: {{ _("deleted_successfully") | tojson }},
+  };
+
   let applyRecurringId = null;
   let applyBaseAmount = 0;
 
@@ -215,9 +230,9 @@
     document.getElementById('apply-amount').value = amount.toFixed(2);
     document.getElementById('apply-currency').textContent = currency;
     document.getElementById('apply-base-hint').textContent =
-      `{{ _("base_amount") }}: ${amount.toFixed(2)} ${currency}. {{ _("adjust_if_needed") }}`;
+      `${I18N.base_amount}: ${amount.toFixed(2)} ${currency}. ${I18N.adjust_if_needed}`;
     document.getElementById('apply-modal-description').textContent =
-      `${direction === 'in' ? '{{ _("income") }}' : '{{ _("expense") }}'} — {{ _("adjust_amount_hint") }}`;
+      `${direction === 'in' ? I18N.income : I18N.expense} — ${I18N.adjust_amount_hint}`;
     document.getElementById('apply-note').value = '';
 
     const modal = new bootstrap.Modal(document.getElementById('applyModal'));
@@ -236,7 +251,7 @@
     const note = document.getElementById('apply-note').value.trim() || null;
 
     if (!amount || amount <= 0) {
-      showToast('{{ _("error") }}', 'error');
+      showToast(I18N.error, 'error');
       return;
     }
 
@@ -257,7 +272,7 @@
 
     if (resp.ok) {
       bootstrap.Modal.getInstance(document.getElementById('applyModal')).hide();
-      showToast('{{ _("applied_successfully") }}', 'success');
+      showToast(I18N.applied_successfully, 'success');
       location.reload();
     } else {
       await handleApiError(resp);
@@ -278,7 +293,7 @@
     var freq = document.getElementById('filter-frequency').value;
     if (freq) params.set('frequency', freq);
     // Preserve current direction tab from server-rendered state
-    var dir = {{ ('"' ~ filter_direction ~ '"') if filter_direction else '""' }};
+    var dir = {{ (filter_direction or '')|tojson }};
     if (dir) params.set('direction', dir);
     return params;
   }
@@ -295,12 +310,12 @@
   }
 
   async function deleteRecurring(id) {
-    if (!(await confirmDialog('{{ _("delete") }}?', {icon: 'warning', confirmColor: 'danger', confirmText: '{{ _("delete") }}'}))) return;
+    if (!(await confirmDialog(I18N.delete_label + '?', {icon: 'warning', confirmColor: 'danger', confirmText: I18N.delete_label}))) return;
     const resp = await fetch(`/api/recurring/${id}`, { method: 'DELETE' });
     if (resp.ok) {
       var card = document.getElementById(`recurring-card-${id}`);
       if (card) card.remove();
-      showToast('{{ _("deleted_successfully") }}', 'success');
+      showToast(I18N.deleted_successfully, 'success');
     } else {
       await handleApiError(resp);
     }

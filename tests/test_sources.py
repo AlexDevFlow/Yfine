@@ -259,6 +259,32 @@ class TestMergeSources:
             merge_sources(session, s1.id, s2.id)
         assert exc.value.status_code == 400
 
+    def test_merge_with_savings_fund_as_source_rejected(self, session):
+        # Merging the fund INTO another source would orphan goals (FK RESTRICT)
+        # or silently mix savings contributions into a regular source.
+        fund = _make_source(session, name="Fund EUR", currency="EUR")
+        fund.is_savings_fund = True
+        session.add(fund); session.commit()
+        regular = _make_source(session, name="Wallet", currency="EUR")
+        from fastapi import HTTPException
+        with pytest.raises(HTTPException) as exc:
+            merge_sources(session, fund.id, regular.id)
+        assert exc.value.status_code == 422
+        assert "savings fund" in exc.value.detail.lower()
+
+    def test_merge_into_savings_fund_rejected(self, session):
+        # Merging a regular source INTO the fund would inflate the fund's
+        # apparent balance with non-savings movements.
+        fund = _make_source(session, name="Fund EUR", currency="EUR")
+        fund.is_savings_fund = True
+        session.add(fund); session.commit()
+        regular = _make_source(session, name="Wallet", currency="EUR")
+        from fastapi import HTTPException
+        with pytest.raises(HTTPException) as exc:
+            merge_sources(session, regular.id, fund.id)
+        assert exc.value.status_code == 422
+        assert "savings fund" in exc.value.detail.lower()
+
 
 # ── Toggle Exclude ───────────────────────────────────────────────
 
