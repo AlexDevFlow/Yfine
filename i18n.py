@@ -137,6 +137,7 @@ DEFAULT_NAV_ITEMS = [
     {"id": "portfolios",    "url": "/portfolios",    "icon": "bi-briefcase",        "label_key": "portfolios",    "section": "ledger"},
     {"id": "movements",     "url": "/movements",     "icon": "bi-arrow-left-right", "label_key": "movements",     "section": "ledger"},
     {"id": "tags",          "url": "/tags",          "icon": "bi-tag",              "label_key": "tags",          "section": "ledger"},
+    {"id": "budgets",       "url": "/budgets",       "icon": "bi-pie-chart",        "label_key": "budgets",       "section": "planning"},
     {"id": "recurring",     "url": "/recurring",     "icon": "bi-arrow-repeat",     "label_key": "recurring",     "section": "planning"},
     {"id": "savings",       "url": "/savings",       "icon": "bi-piggy-bank",       "label_key": "savings",       "section": "planning"},
     {"id": "whims",         "url": "/whims",         "icon": "bi-star",             "label_key": "whims",         "section": "planning"},
@@ -147,6 +148,8 @@ DEFAULT_NAV_ITEMS = [
 _hotkeys_enabled = True
 _hotkeys_json = "{}"
 _nav_layout_json = "[]"
+_saved_views_json = "[]"
+_movement_templates_json = "[]"
 
 
 def set_hotkeys_enabled(val: bool):
@@ -178,6 +181,26 @@ def get_nav_layout_json() -> str:
     return _nav_layout_json
 
 
+def set_saved_views_json(val: str):
+    global _saved_views_json
+    if isinstance(val, str):
+        _saved_views_json = val
+
+
+def get_saved_views_json() -> str:
+    return _saved_views_json
+
+
+def set_movement_templates_json(val: str):
+    global _movement_templates_json
+    if isinstance(val, str):
+        _movement_templates_json = val
+
+
+def get_movement_templates_json() -> str:
+    return _movement_templates_json
+
+
 def get_nav_items() -> list[dict]:
     """Apply the user's saved layout (visibility + order) on top of the
     defaults. Items present in defaults but missing from the saved layout
@@ -192,6 +215,7 @@ def get_nav_items() -> list[dict]:
         layout = []
 
     defaults_by_id = {d["id"]: d for d in DEFAULT_NAV_ITEMS}
+    default_order = [d["id"] for d in DEFAULT_NAV_ITEMS]
     result = []
     seen = set()
     for entry in layout:
@@ -204,12 +228,23 @@ def get_nav_items() -> list[dict]:
         item["visible"] = bool(entry.get("visible", True))
         result.append(item)
         seen.add(eid)
+    # Insert any default item the saved layout didn't mention (e.g. a nav entry
+    # added in a newer build) next to its default neighbours, rather than dumping
+    # it at the very end — appending it last would render it under whatever
+    # section happens to come last (e.g. a new "planning" item showing up under
+    # "system"). Anchoring to its default predecessors keeps it in its section.
     for d in DEFAULT_NAV_ITEMS:
         if d["id"] in seen:
             continue
         item = dict(d)
         item["visible"] = True
-        result.append(item)
+        preceding = set(default_order[: default_order.index(d["id"])])
+        insert_at = 0
+        for idx, existing in enumerate(result):
+            if existing["id"] in preceding:
+                insert_at = idx + 1
+        result.insert(insert_at, item)
+        seen.add(d["id"])
     return result
 
 

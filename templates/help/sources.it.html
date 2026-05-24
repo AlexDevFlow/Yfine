@@ -79,6 +79,15 @@
 <h6>Unire le fonti</h6>
 <p>L'unione conserva tutti i dati: ogni movimento della fonte unita passa alla fonte di destinazione e i due saldi di liquidità si sommano. Utile quando smetti di usare un conto e vuoi farlo confluire in uno attivo.</p>
 
+<h6>Interesse / Rendimento</h6>
+<p>Una fonte può maturare <strong>interessi periodici</strong> da sola, come un conto deposito. Nel form della fonte imposti un <strong>tasso di rendimento per periodo</strong> e ogni quanti mesi accreditarlo: a ogni scadenza Yfine crea un movimento di entrata pari a saldo di cassa × tasso, e capitalizza (gli interessi successivi sono calcolati sul saldo aggiornato).</p>
+<ul>
+  <li>Il tasso è la percentuale <em>per periodo</em>, non annualizzata: 1% ogni mese e 12% ogni 12 mesi non sono equivalenti.</li>
+  <li>Gli interessi maturano solo sul <strong>saldo di cassa positivo</strong> — il valore dei portafogli collegati non conta e un saldo in rosso non viene mai addebitato.</li>
+  <li>Se l'app resta chiusa, all'avvio Yfine recupera tutti i periodi maturati in una volta (senza pagare due volte lo stesso periodo).</li>
+  <li>Lascia il tasso a <strong>0</strong> per disattivare. Quando il rendimento è attivo, il form mostra la <strong>prossima data di accredito</strong>.</li>
+</ul>
+
 <h6>Passo passo: la prima fonte</h6>
 <ol class="yn-help-steps">
   <li>Clicca <span class="yn-help-chip primary"><i class="bi bi-plus-lg"></i> Nuova Fonte</span>.</li>

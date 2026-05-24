@@ -107,7 +107,25 @@ def get_recurring(session: Session, recurring_id: int) -> RecurringItem:
     return item
 
 
+def _validate_source_currency(session: Session, source_id: int | None, currency: str) -> None:
+    """A recurring item posts movements into its source, which carries the
+    currency. Reject a source whose currency doesn't match the rule's declared
+    currency, otherwise the amount would silently be booked in the wrong
+    currency (the movement has no currency of its own)."""
+    if source_id is None:
+        return
+    src = session.get(Source, source_id)
+    if not src:
+        raise HTTPException(status_code=404, detail="Source not found")
+    if (src.currency or "").upper() != (currency or "").upper():
+        raise HTTPException(
+            status_code=422,
+            detail=f"Currency mismatch: source is {src.currency}, recurring is {currency}.",
+        )
+
+
 def create_recurring(session: Session, data: RecurringCreate) -> RecurringItem:
+    _validate_source_currency(session, data.source_id, data.currency)
     item = RecurringItem(
         **data.model_dump(),
         next_due_date=data.start_date,
@@ -121,6 +139,10 @@ def create_recurring(session: Session, data: RecurringCreate) -> RecurringItem:
 def update_recurring(session: Session, recurring_id: int, data: RecurringUpdate) -> RecurringItem:
     item = get_recurring(session, recurring_id)
     update_data = data.model_dump(exclude_unset=True)
+    # Validate the resulting source/currency pairing before mutating anything.
+    target_currency = update_data.get("currency", item.currency)
+    target_source_id = update_data["source_id"] if "source_id" in update_data else item.source_id
+    _validate_source_currency(session, target_source_id, target_currency)
     # Capture pre-edit state so the next_due_date sync below can compare against it.
     prior_last_fired = item.last_fired_date
     prior_next_due = item.next_due_date

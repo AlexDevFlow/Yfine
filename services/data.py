@@ -9,9 +9,12 @@ from packaging.version import Version, InvalidVersion
 from sqlalchemy import inspect, text
 from sqlmodel import Session, SQLModel, select
 
+from models.budget import Budget
+from models.exchange_rate import ExchangeRate
 from models.goal import Goal, GoalAllocation
 from models.movement import Movement, MovementAttachment, MovementTag
 from models.notification import Notification
+from models.portfolio import Holding, HoldingPriceSnapshot, Portfolio
 from models.recurring import RecurringItem
 from models.saving import Saving, SavingTag
 from models.setting import Setting
@@ -19,10 +22,14 @@ from models.source import Source
 from models.tag import Tag
 from models.whim import Whim
 
-# Core tables in dependency order (children first for delete, parents first for insert)
+# Core tables in dependency order (parents first for insert; reverse for delete).
+# Keep this list complete — every SQLModel core table must appear here, otherwise
+# export/reset silently skip it and it gets misclassified as a plugin table
+# (which breaks reset with FK errors and corrupts full-archive restores).
 _CORE_TABLES_INSERT_ORDER = [
     ("sources", Source),
     ("tags", Tag),
+    ("exchange_rates", ExchangeRate),
     ("movements", Movement),
     ("movement_tag", MovementTag),
     ("movement_attachments", MovementAttachment),
@@ -30,11 +37,41 @@ _CORE_TABLES_INSERT_ORDER = [
     ("notifications", Notification),
     ("settings", Setting),
     ("whims", Whim),
+    ("budgets", Budget),
+    ("portfolios", Portfolio),
+    ("holdings", Holding),
+    ("holding_price_snapshots", HoldingPriceSnapshot),
     ("goals", Goal),
     ("goal_allocations", GoalAllocation),
     ("savings", Saving),
     ("saving_tag", SavingTag),
 ]
+
+# Per-table date/datetime field specs for import parsing (ISO strings → objects).
+# datetime_mode=True means a model's "date_fields" are actually datetimes.
+_TABLE_FIELD_SPECS: dict[str, dict] = {
+    "sources": {"date_fields": ["created_at", "updated_at"], "datetime_mode": True},
+    "tags": {"date_fields": ["created_at", "updated_at"], "datetime_mode": True},
+    "exchange_rates": {"datetime_fields": ["updated_at"]},
+    "movements": {"date_fields": ["date"], "datetime_fields": ["created_at", "updated_at"]},
+    "movement_tag": {},
+    "movement_attachments": {"datetime_fields": ["created_at"]},
+    "recurring_items": {
+        "date_fields": ["start_date", "end_date", "next_due_date", "last_fired_date", "last_alert_date"],
+        "datetime_fields": ["created_at", "updated_at"],
+    },
+    "notifications": {"datetime_fields": ["created_at"]},
+    "settings": {"datetime_fields": ["created_at", "updated_at"]},
+    "whims": {"datetime_fields": ["created_at", "updated_at", "purchased_at"]},
+    "budgets": {"date_fields": ["start_date"], "datetime_fields": ["created_at", "updated_at"]},
+    "portfolios": {"datetime_fields": ["created_at", "updated_at"]},
+    "holdings": {"datetime_fields": ["created_at", "updated_at", "last_price_at"]},
+    "holding_price_snapshots": {"date_fields": ["date"], "datetime_fields": ["created_at"]},
+    "goals": {"date_fields": ["target_date"], "datetime_fields": ["created_at", "updated_at"]},
+    "goal_allocations": {"date_fields": ["date"], "datetime_fields": ["created_at"]},
+    "savings": {"date_fields": ["date"], "datetime_fields": ["created_at", "updated_at"]},
+    "saving_tag": {},
+}
 
 _CORE_TABLE_NAMES = {name for name, _ in _CORE_TABLES_INSERT_ORDER}
 
@@ -102,43 +139,30 @@ def export_all(session: Session, mode: str = "core") -> dict:
 
 
 def reset_all_data(session: Session) -> None:
-    """Delete all user data (sources, movements, tags, recurring, savings, whims, notifications).
+    """Delete all user data (sources, movements, tags, recurring, savings, whims,
+    notifications, budgets, portfolios, exchange rates, …).
 
-    User preferences (settings) and plugin tables are preserved. Default tags are re-seeded
-    after the wipe so the app looks like a fresh install.
+    User preferences (settings) and plugin tables are preserved. Default tags are
+    re-seeded after the wipe so the app looks like a fresh install. Tables are
+    wiped children-first (reverse dependency order) so foreign-key constraints
+    hold — driven by _CORE_TABLES_INSERT_ORDER so a new model is never missed.
     """
-    for mt in session.exec(select(MovementTag)).all():
-        session.delete(mt)
-    for st in session.exec(select(SavingTag)).all():
-        session.delete(st)
-    for s in session.exec(select(Saving)).all():
-        session.delete(s)
-    for a in session.exec(select(GoalAllocation)).all():
-        session.delete(a)
-    for g in session.exec(select(Goal)).all():
-        session.delete(g)
-    for n in session.exec(select(Notification)).all():
-        session.delete(n)
-    for r in session.exec(select(RecurringItem)).all():
-        session.delete(r)
-    for w in session.exec(select(Whim)).all():
-        session.delete(w)
-    # Attachments: drop file rows + files on disk
     from services.attachments import attachment_path as _att_path
-    for a in session.exec(select(MovementAttachment)).all():
-        p = _att_path(a)
+
+    # Remove attachment files from disk first; their rows are dropped in the loop.
+    for att in session.exec(select(MovementAttachment)).all():
+        p = _att_path(att)
         if p.exists():
             try:
                 p.unlink()
             except OSError:
                 pass
-        session.delete(a)
-    for m in session.exec(select(Movement)).all():
-        session.delete(m)
-    for t in session.exec(select(Tag)).all():
-        session.delete(t)
-    for s in session.exec(select(Source)).all():
-        session.delete(s)
+
+    for table_name, model_cls in reversed(_CORE_TABLES_INSERT_ORDER):
+        if table_name == "settings":
+            continue  # user preferences survive a reset
+        for row in session.exec(select(model_cls)).all():
+            session.delete(row)
     session.commit()
 
     # Re-seed default tags (opens its own session, safe after commit)
@@ -147,67 +171,35 @@ def reset_all_data(session: Session) -> None:
 
 
 def import_all(session: Session, data: dict) -> None:
-    """Import data. Handles both core-only and full exports."""
-    # Delete core data in reverse dependency order
-    for mt in session.exec(select(MovementTag)).all():
-        session.delete(mt)
-    for st in session.exec(select(SavingTag)).all():
-        session.delete(st)
-    for s in session.exec(select(Saving)).all():
-        session.delete(s)
-    for a in session.exec(select(GoalAllocation)).all():
-        session.delete(a)
-    for g in session.exec(select(Goal)).all():
-        session.delete(g)
-    for n in session.exec(select(Notification)).all():
-        session.delete(n)
-    for r in session.exec(select(RecurringItem)).all():
-        session.delete(r)
-    for w in session.exec(select(Whim)).all():
-        session.delete(w)
-    # Attachment rows (files on disk handled separately during archive import)
-    for a in session.exec(select(MovementAttachment)).all():
-        session.delete(a)
-    for m in session.exec(select(Movement)).all():
-        session.delete(m)
-    for t in session.exec(select(Tag)).all():
-        session.delete(t)
-    for s in session.exec(select(Source)).all():
-        session.delete(s)
-    for st in session.exec(select(Setting)).all():
-        session.delete(st)
+    """Import data. Handles both core-only and full exports.
+
+    Wipes every core table then re-inserts from `data`, all in one transaction so
+    a failure rolls the whole thing back (no half-imported state). Tables are
+    deleted children-first and inserted parents-first, both driven by
+    _CORE_TABLES_INSERT_ORDER so a newly added model is never silently skipped.
+    """
+    # Delete core data, children first (reverse dependency order).
+    # (Attachment files on disk are handled separately during archive import.)
+    for table_name, model_cls in reversed(_CORE_TABLES_INSERT_ORDER):
+        for row in session.exec(select(model_cls)).all():
+            session.delete(row)
     session.flush()
 
-    # Import core data in dependency order
-    _import_model(session, data, "sources", Source,
-                  date_fields=["created_at", "updated_at"], datetime_mode=True)
-    _import_model(session, data, "tags", Tag,
-                  date_fields=["created_at", "updated_at"], datetime_mode=True)
-    session.flush()
+    # Defer FK checks to COMMIT for the rest of this transaction. Transfer
+    # movements reference each other (movements.transfer_pair_id forms a cycle),
+    # so no row-by-row insert order can satisfy immediate FK enforcement —
+    # without this, restoring any backup containing a transfer fails. Must be set
+    # while a transaction is already active (the deletes above started one),
+    # otherwise it runs in autocommit and resets immediately. SQLite clears it on
+    # the next COMMIT, by which point every referenced row exists.
+    session.exec(text("PRAGMA defer_foreign_keys=ON"))
 
-    _import_model(session, data, "movements", Movement,
-                  date_fields=["date"], datetime_fields=["created_at", "updated_at"])
-    _import_model(session, data, "movement_tag", MovementTag)
-    _import_model(session, data, "movement_attachments", MovementAttachment,
-                  datetime_fields=["created_at"])
-    _import_model(session, data, "recurring_items", RecurringItem,
-                  date_fields=["start_date", "end_date", "next_due_date"],
-                  datetime_fields=["created_at", "updated_at"])
-    _import_model(session, data, "notifications", Notification,
-                  datetime_fields=["created_at"])
-    _import_model(session, data, "settings", Setting,
-                  datetime_fields=["created_at", "updated_at"])
-    _import_model(session, data, "whims", Whim,
-                  datetime_fields=["created_at", "updated_at", "purchased_at"])
-    _import_model(session, data, "goals", Goal,
-                  date_fields=["target_date"],
-                  datetime_fields=["created_at", "updated_at"])
-    _import_model(session, data, "goal_allocations", GoalAllocation,
-                  date_fields=["date"],
-                  datetime_fields=["created_at"])
-    _import_model(session, data, "savings", Saving,
-                  date_fields=["date"], datetime_fields=["created_at", "updated_at"])
-    _import_model(session, data, "saving_tag", SavingTag)
+    # Re-insert core data, parents first. Flush after each table so every parent
+    # row is persisted before the next (child) table references it under FK ON.
+    for table_name, model_cls in _CORE_TABLES_INSERT_ORDER:
+        _import_model(session, data, table_name, model_cls,
+                      **_TABLE_FIELD_SPECS.get(table_name, {}))
+        session.flush()
 
     # Import plugin tables if present
     plugin_tables = data.get("_plugin_tables", {})

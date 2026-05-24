@@ -22,6 +22,7 @@ from services import tags as tag_service
 from services import whims as whim_service
 from services import savings as saving_service
 from services import portfolios as portfolio_service
+from services import budgets as budget_service
 
 router = APIRouter(tags=["pages"])
 
@@ -108,6 +109,8 @@ def sources_index(request: Request, session: Session = Depends(get_session)):
             "total_with_portfolios": round(cash + pf_same, 2),
             "movement_count": mov_counts.get(s.id, 0),
             "is_savings_fund": s.is_savings_fund,
+            "yield_rate": s.yield_rate,
+            "yield_period_months": s.yield_period_months,
         })
     return _templates().TemplateResponse("sources/index.html", {
         "request": request,
@@ -178,6 +181,8 @@ def movements_index(
     date_to: date | None = Query(default=None),
     amount_min: float | None = Query(default=None),
     amount_max: float | None = Query(default=None),
+    q: str | None = Query(default=None),
+    tag_match: str = Query(default="or"),
     page: int = Query(default=1, ge=1),
     session: Session = Depends(get_session),
 ):
@@ -188,6 +193,7 @@ def movements_index(
         date_from=date_from, date_to=date_to,
         amount_min=amount_min, amount_max=amount_max,
         exclude_transfer_in=True,
+        q=q, tag_match=tag_match,
     )
     total_count = movement_service.count_movements(session, **filter_kwargs)
     total_pages = max(1, math.ceil(total_count / per_page))
@@ -261,11 +267,14 @@ def movements_index(
 
     sources = source_service.list_sources(session)
     all_tags = tag_service.list_tags(session)
+    from services import movement_templates as mt_service
     return _templates().TemplateResponse("movements/index.html", {
         "request": request,
         "grouped_movements": grouped_movements,
         "sources": sources,
         "tags": all_tags,
+        "saved_views": mt_service.list_saved_views(session),
+        "movement_templates": mt_service.list_templates(session),
         "filter_source_id": source_id,
         "filter_tag_ids": tag_ids,
         "filter_direction": direction,
@@ -273,6 +282,8 @@ def movements_index(
         "filter_date_to": date_to,
         "filter_amount_min": amount_min,
         "filter_amount_max": amount_max,
+        "filter_q": q,
+        "filter_tag_match": tag_match,
         "page": page,
         "total_pages": total_pages,
         "total_count": total_count,
@@ -300,6 +311,7 @@ def movements_new(
         "transfer_from_source_id": None,
         "transfer_to_source_id": None,
         "transfer_out_id": None,
+        "transfer_to_amount": None,
     })
 
 
@@ -315,6 +327,7 @@ def movements_edit(movement_id: int, request: Request, session: Session = Depend
     transfer_from_source_id = None
     transfer_to_source_id = None
     transfer_out_id = None
+    transfer_to_amount = None
 
     if is_transfer:
         partner = movement_service.get_movement(session, movement.transfer_pair_id)
@@ -322,10 +335,12 @@ def movements_edit(movement_id: int, request: Request, session: Session = Depend
             transfer_from_source_id = movement.source_id
             transfer_to_source_id = partner.source_id
             transfer_out_id = movement.id
+            transfer_to_amount = partner.amount
         else:
             transfer_from_source_id = partner.source_id
             transfer_to_source_id = movement.source_id
             transfer_out_id = partner.id
+            transfer_to_amount = movement.amount
 
     return _templates().TemplateResponse("movements/form.html", {
         "request": request,
@@ -338,6 +353,7 @@ def movements_edit(movement_id: int, request: Request, session: Session = Depend
         "transfer_from_source_id": transfer_from_source_id,
         "transfer_to_source_id": transfer_to_source_id,
         "transfer_out_id": transfer_out_id,
+        "transfer_to_amount": transfer_to_amount,
     })
 
 
@@ -413,6 +429,58 @@ def recurring_edit(recurring_id: int, request: Request, session: Session = Depen
         "request": request,
         "item": item,
         "sources": sources,
+    })
+
+
+# --- Budgets ---
+@router.get("/budgets")
+def budgets_index(
+    request: Request,
+    offset: int = Query(default=0),
+    session: Session = Depends(get_session),
+):
+    statuses = budget_service.list_budget_statuses(session, offset=offset)
+    # Per-currency rollup so mixed-currency budgets stay legible.
+    totals: dict[str, dict] = {}
+    for s in statuses:
+        t = totals.setdefault(s["currency"], {
+            "currency": s["currency"], "available": 0.0, "actual": 0.0, "remaining": 0.0,
+        })
+        t["available"] += s["available"]
+        t["actual"] += s["actual"]
+        t["remaining"] += s["remaining"]
+    for t in totals.values():
+        for k in ("available", "actual", "remaining"):
+            t[k] = round(t[k], 2)
+    # Month label is only a navigation hint; each card shows its own period range.
+    month_ref = budget_service.shift_period("monthly", date.today(), offset)
+    return _templates().TemplateResponse("budgets/index.html", {
+        "request": request,
+        "statuses": statuses,
+        "totals": list(totals.values()),
+        "offset": offset,
+        "ref_month": month_ref.strftime("%Y-%m"),
+    })
+
+
+@router.get("/budgets/new")
+def budgets_new(request: Request, session: Session = Depends(get_session)):
+    tags = tag_service.list_tags(session, limit=500)
+    return _templates().TemplateResponse("budgets/form.html", {
+        "request": request,
+        "budget": None,
+        "tags": tags,
+    })
+
+
+@router.get("/budgets/{budget_id}/edit")
+def budgets_edit(budget_id: int, request: Request, session: Session = Depends(get_session)):
+    budget = budget_service.get_budget(session, budget_id)
+    tags = tag_service.list_tags(session, limit=500)
+    return _templates().TemplateResponse("budgets/form.html", {
+        "request": request,
+        "budget": budget,
+        "tags": tags,
     })
 
 

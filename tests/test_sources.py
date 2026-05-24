@@ -2,6 +2,7 @@
 from datetime import date, timedelta
 
 import pytest
+from dateutil.relativedelta import relativedelta
 from sqlmodel import select
 
 from models.movement import Movement
@@ -10,6 +11,7 @@ from models.recurring import RecurringItem
 from models.source import Source
 from schemas.source import SourceCreate, SourceUpdate
 from services.sources import (
+    accrue_source_yields,
     create_source,
     delete_source,
     get_balance,
@@ -296,3 +298,122 @@ class TestToggleExclude:
         assert s.exclude_from_stats is True
         s = toggle_exclude_from_stats(session, s.id)
         assert s.exclude_from_stats is False
+
+
+# ── Periodic Yield / Interest ────────────────────────────────────
+
+def _make_yielding_source(session, *, rate, period_months, balance, next_date):
+    """A source with an interest schedule whose next accrual is `next_date`."""
+    s = Source(
+        name="Deposit", currency="EUR", starting_balance=balance,
+        yield_rate=rate, yield_period_months=period_months,
+        yield_next_date=next_date,
+    )
+    session.add(s)
+    session.commit()
+    session.refresh(s)
+    return s
+
+
+class TestYieldSchedule:
+    def test_create_with_yield_sets_next_date(self, session):
+        src = create_source(session, SourceCreate(
+            name="Conto deposito", currency="EUR", starting_balance=1000,
+            yield_rate=3.0, yield_period_months=12,
+        ))
+        assert src.yield_rate == 3.0
+        assert src.yield_next_date == date.today() + relativedelta(months=12)
+        assert src.yield_last_date is None
+
+    def test_create_without_yield_leaves_schedule_empty(self, session):
+        src = create_source(session, SourceCreate(name="Wallet", currency="EUR"))
+        assert src.yield_rate == 0.0
+        assert src.yield_next_date is None
+
+    def test_update_enabling_yield_sets_schedule(self, session):
+        s = _make_source(session)
+        assert s.yield_next_date is None
+        updated = update_source(session, s.id, SourceUpdate(yield_rate=2.0, yield_period_months=6))
+        assert updated.yield_next_date == date.today() + relativedelta(months=6)
+
+    def test_update_disabling_yield_clears_schedule(self, session):
+        s = _make_yielding_source(session, rate=3, period_months=12, balance=100,
+                                  next_date=date.today() + relativedelta(months=12))
+        updated = update_source(session, s.id, SourceUpdate(yield_rate=0))
+        assert updated.yield_next_date is None
+
+    def test_unrelated_update_keeps_schedule(self, session):
+        nd = date.today() + relativedelta(months=12)
+        s = _make_yielding_source(session, rate=3, period_months=12, balance=100, next_date=nd)
+        updated = update_source(session, s.id, SourceUpdate(name="Renamed"))
+        assert updated.yield_next_date == nd  # countdown not reset
+
+
+class TestYieldAccrual:
+    def test_accrues_when_due(self, session):
+        s = _make_yielding_source(session, rate=3, period_months=12, balance=1000,
+                                  next_date=date.today())
+        created = accrue_source_yields(session, today=date.today())
+        assert created == 1
+        assert get_balance(session, s.id) == 1030.0  # 1000 + 3%
+        session.refresh(s)
+        assert s.yield_last_date == date.today()
+        assert s.yield_next_date == date.today() + relativedelta(months=12)
+        # The credit is a real "in" movement on the source.
+        movs = session.exec(select(Movement).where(Movement.source_id == s.id)).all()
+        assert len(movs) == 1
+        assert movs[0].direction == "in"
+        assert movs[0].amount == 30.0
+
+    def test_not_due_yet_does_nothing(self, session):
+        s = _make_yielding_source(session, rate=3, period_months=12, balance=1000,
+                                  next_date=date.today() + relativedelta(months=1))
+        assert accrue_source_yields(session, today=date.today()) == 0
+        assert get_balance(session, s.id) == 1000.0
+
+    def test_catch_up_compounds_missed_periods(self, session):
+        # Three periods elapsed without the app running — credit all of them,
+        # each compounding on the prior balance.
+        start = date.today() - relativedelta(months=24)
+        s = _make_yielding_source(session, rate=3, period_months=12, balance=1000,
+                                  next_date=start)
+        created = accrue_source_yields(session, today=date.today())
+        assert created == 3
+        # 1000 → 1030 → 1060.90 → 1092.73 (rounded each step)
+        assert get_balance(session, s.id) == 1092.73
+        session.refresh(s)
+        assert s.yield_next_date == start + relativedelta(months=36)
+
+    def test_idempotent_same_day(self, session):
+        s = _make_yielding_source(session, rate=3, period_months=12, balance=1000,
+                                  next_date=date.today())
+        accrue_source_yields(session, today=date.today())
+        # A second pass the same day must not credit again.
+        assert accrue_source_yields(session, today=date.today()) == 0
+        assert get_balance(session, s.id) == 1030.0
+
+    def test_zero_balance_advances_without_movement(self, session):
+        s = _make_yielding_source(session, rate=5, period_months=12, balance=0,
+                                  next_date=date.today())
+        assert accrue_source_yields(session, today=date.today()) == 0
+        movs = session.exec(select(Movement).where(Movement.source_id == s.id)).all()
+        assert movs == []
+        session.refresh(s)
+        # Schedule still advances so we don't re-check the same due date forever.
+        assert s.yield_last_date == date.today()
+        assert s.yield_next_date == date.today() + relativedelta(months=12)
+
+    def test_disabled_source_never_accrues(self, session):
+        s = _make_source(session, balance=1000)  # yield_rate defaults to 0
+        assert accrue_source_yields(session, today=date.today()) == 0
+        assert get_balance(session, s.id) == 1000.0
+
+
+class TestYieldValidation:
+    def test_negative_rate_rejected(self, session):
+        with pytest.raises(Exception):
+            SourceCreate(name="X", currency="EUR", yield_rate=-1)
+
+    def test_zero_period_rejected(self, session):
+        with pytest.raises(Exception):
+            SourceCreate(name="X", currency="EUR", yield_period_months=0)

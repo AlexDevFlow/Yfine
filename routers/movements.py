@@ -8,7 +8,10 @@ from database import get_session
 from i18n import _
 from models.source import Source
 from schemas.attachment import AttachmentRead
-from schemas.movement import MovementCreate, MovementRead, MovementUpdate, TransferCreate, TransferUpdate
+from schemas.movement import (
+    BulkDelete, BulkExclude, BulkResult, BulkSource, BulkTags, MakeRecurring,
+    MovementCreate, MovementRead, MovementUpdate, TransferCreate, TransferUpdate,
+)
 from schemas.tag import TagRead
 from services import attachments as attachment_service
 from services import movements as movement_service
@@ -56,11 +59,14 @@ def list_movements(
     date_to: date | None = Query(default=None),
     amount_min: float | None = Query(default=None),
     amount_max: float | None = Query(default=None),
+    q: str | None = Query(default=None),
+    tag_match: str = Query(default="or"),
     session: Session = Depends(get_session),
 ):
     items = movement_service.list_movements(
         session, skip, limit, source_id, tag_ids or None,
         direction, date_from, date_to, amount_min, amount_max,
+        q=q, tag_match=tag_match,
     )
     return [_to_read(session, m) for m in items]
 
@@ -88,6 +94,42 @@ def update_movement(
 @router.delete("/{movement_id}", status_code=204)
 def delete_movement(movement_id: int, session: Session = Depends(get_session)):
     movement_service.delete_movement(session, movement_id)
+
+
+# ---------------------------------------------------------------------------
+# Bulk operations
+# ---------------------------------------------------------------------------
+
+
+@router.post("/bulk/delete", response_model=BulkResult)
+def bulk_delete(data: BulkDelete, session: Session = Depends(get_session)):
+    return BulkResult(**movement_service.bulk_delete(session, data.ids))
+
+
+@router.post("/bulk/tags", response_model=BulkResult)
+def bulk_tags(data: BulkTags, session: Session = Depends(get_session)):
+    return BulkResult(**movement_service.bulk_set_tags(session, data.ids, data.tag_ids, data.mode))
+
+
+@router.post("/bulk/source", response_model=BulkResult)
+def bulk_source(data: BulkSource, session: Session = Depends(get_session)):
+    return BulkResult(**movement_service.bulk_set_source(session, data.ids, data.source_id))
+
+
+@router.post("/bulk/exclude", response_model=BulkResult)
+def bulk_exclude(data: BulkExclude, session: Session = Depends(get_session)):
+    return BulkResult(**movement_service.bulk_set_exclude(session, data.ids, data.exclude_from_stats))
+
+
+@router.post("/{movement_id}/make-recurring", status_code=201)
+def make_recurring(
+    movement_id: int, data: MakeRecurring, session: Session = Depends(get_session)
+):
+    from routers.recurring import _to_read as recurring_to_read
+    item = movement_service.make_recurring_from_movement(
+        session, movement_id, data.frequency, data.apply_mode
+    )
+    return recurring_to_read(session, item)
 
 
 @router.post("/transfer", response_model=list[MovementRead], status_code=201)

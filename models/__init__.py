@@ -9,6 +9,7 @@ from models.saving import Saving, SavingTag
 from models.exchange_rate import ExchangeRate
 from models.portfolio import Holding, HoldingPriceSnapshot, Portfolio
 from models.goal import Goal, GoalAllocation
+from models.budget import Budget
 
 __all__ = [
     "Source",
@@ -28,4 +29,5 @@ __all__ = [
     "HoldingPriceSnapshot",
     "Goal",
     "GoalAllocation",
+    "Budget",
 ]

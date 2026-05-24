@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% set active_page = "budgets" %}
+
+{% block title %}{{ _('budgets') }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h5 class="mb-0">{{ _('budgets') }}</h5>
+  <a href="/budgets/new" class="btn btn-primary">
+    <i class="bi bi-plus me-1"></i>{{ _('new_budget') }}
+  </a>
+</div>
+
+<!-- Period navigation -->
+<div class="d-flex justify-content-center align-items-center gap-3 mb-4">
+  <a href="/budgets?offset={{ offset - 1 }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-chevron-left"></i></a>
+  <span class="fw-bold" id="period-label" data-month="{{ ref_month }}">{{ ref_month }}</span>
+  {% if offset != 0 %}<a href="/budgets" class="btn btn-sm btn-link p-0">{{ _('this_month') }}</a>{% endif %}
+  <a href="/budgets?offset={{ offset + 1 }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-chevron-right"></i></a>
+</div>
+
+{% if statuses %}
+<!-- Per-currency rollup -->
+{% if totals %}
+<div class="row g-2 mb-4">
+  {% for t in totals %}
+  <div class="col-md-4">
+    <div class="card border">
+      <div class="card-body py-2 px-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <span class="badge bg-primary">{{ t.currency }}</span>
+          <small class="text-muted">{{ _('spent') }} / {{ _('budgeted') }}</small>
+        </div>
+        <div class="d-flex justify-content-between align-items-baseline mt-1">
+          <span class="fw-bold {% if t.remaining < 0 %}text-danger{% else %}text-success{% endif %}">{{ "%.2f"|format(t.actual) }} / {{ "%.2f"|format(t.available) }}</span>
+          <small class="{% if t.remaining < 0 %}text-danger{% else %}text-muted{% endif %}">
+            {% if t.remaining < 0 %}{{ _('over_by') }} {{ "%.2f"|format(-t.remaining) }}{% else %}{{ "%.2f"|format(t.remaining) }} {{ _('left') }}{% endif %}
+          </small>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- Budget cards -->
+<div class="row g-4">
+  {% for b in statuses %}
+  {% set bar = 'success' if b.status == 'ok' else ('warning' if b.status == 'warning' else 'danger') %}
+  <div class="col-md-6 col-lg-4" id="budget-card-{{ b.id }}">
+    <div class="card h-100">
+      <div class="card-body d-flex flex-column">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <div class="d-flex align-items-center gap-2 text-truncate">
+            <span class="rounded-circle d-inline-block flex-shrink-0" style="width:.8rem;height:.8rem;background:{{ b.tag_color }}"></span>
+            <h6 class="mb-0 text-truncate">{{ b.tag_name }}</h6>
+            {% if b.direction == 'in' %}<span class="badge bg-label-success">{{ _('income') }}</span>{% endif %}
+          </div>
+          <span class="badge bg-label-secondary">{{ b.currency }}</span>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-baseline mb-1">
+          <span class="fw-bold fs-5 {% if b.status == 'over' %}text-danger{% endif %}">{{ "%.2f"|format(b.actual) }}</span>
+          <span class="text-muted small">/ {{ "%.2f"|format(b.available) }} {{ b.currency }}</span>
+        </div>
+
+        <div class="progress mb-2" style="height:.55rem">
+          <div class="progress-bar bg-{{ bar }}" role="progressbar"
+               style="width: {{ [b.spent_pct, 100]|min }}%"
+               aria-valuenow="{{ b.spent_pct }}" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center small mb-1">
+          <span class="text-muted">{{ "%.0f"|format(b.spent_pct) }}%</span>
+          <span class="{% if b.remaining < 0 %}text-danger fw-semibold{% else %}text-success{% endif %}">
+            {% if b.remaining < 0 %}{{ _('over_by') }} {{ "%.2f"|format(-b.remaining) }}{% else %}{{ "%.2f"|format(b.remaining) }} {{ _('left') }}{% endif %}
+          </span>
+        </div>
+
+        <!-- Pace -->
+        <div class="text-muted" style="font-size:.76rem">
+          {% if b.days_remaining > 0 and b.remaining >= 0 %}
+          <div><i class="bi bi-speedometer2 me-1"></i>{{ "%.2f"|format(b.daily_remaining) }} {{ b.currency }}/{{ _('day') }} · {{ b.days_remaining }} {{ _('days_left') }}</div>
+          {% elif b.days_remaining > 0 %}
+          <div class="text-danger"><i class="bi bi-exclamation-triangle me-1"></i>{{ b.days_remaining }} {{ _('days_left') }}</div>
+          {% endif %}
+          {% if b.projected > b.available and b.elapsed_pct < 100 %}
+          <div class="text-danger"><i class="bi bi-graph-up-arrow me-1"></i>{{ _('projected') }}: {{ "%.2f"|format(b.projected) }} {{ b.currency }}</div>
+          {% endif %}
+        </div>
+
+        <div class="d-flex flex-wrap gap-1 mt-2">
+          {% if b.rollover %}
+          <span class="badge bg-label-info" title="{{ _('rollover') }}">
+            <i class="bi bi-arrow-repeat me-1"></i>{{ '%+.2f'|format(b.rollover_in) }}
+          </span>
+          {% endif %}
+          <span class="badge bg-label-secondary">{{ _('period_' ~ b.period) if ('period_' ~ b.period) else b.period }}</span>
+          <span class="badge bg-label-secondary text-muted">{{ b.period_start | fdate }} – {{ b.period_end | fdate }}</span>
+        </div>
+
+        <div class="mt-auto pt-2 d-flex justify-content-end gap-1">
+          <a href="/movements?tag_ids={{ b.tag_id }}" class="btn btn-sm btn-outline-primary" title="{{ _('movements') }}"><i class="bi bi-list-ul"></i></a>
+          <a href="/budgets/{{ b.id }}/edit" class="btn btn-sm btn-outline-warning" title="{{ _('edit') }}"><i class="bi bi-pencil"></i></a>
+          <button class="btn btn-sm btn-outline-danger delete-btn" data-id="{{ b.id }}" data-name="{{ b.tag_name }}" title="{{ _('delete') }}"><i class="bi bi-trash"></i></button>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card">
+  <div class="card-body text-center py-5">
+    <i class="bi bi-pie-chart text-muted mb-3" style="font-size:3rem"></i>
+    <p class="text-muted mb-1">{{ _('no_budgets') }}</p>
+    <p class="text-muted small mb-3">{{ _('budgets_hint') }}</p>
+    <a href="/budgets/new" class="btn btn-primary"><i class="bi bi-plus me-1"></i>{{ _('new_budget') }}</a>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block page_js %}
+<script>
+  // Localize the "YYYY-MM" period label to a month name.
+  (function () {
+    var _monthNames = {
+      en: ['January','February','March','April','May','June','July','August','September','October','November','December'],
+      it: ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'],
+      es: ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
+      uk: ['Січень','Лютий','Березень','Квітень','Травень','Червень','Липень','Серпень','Вересень','Жовтень','Листопад','Грудень']
+    };
+    var el = document.getElementById('period-label');
+    if (!el) return;
+    var parts = (el.dataset.month || '').split('-');
+    var names = _monthNames['{{ get_locale() }}'] || _monthNames.en;
+    if (parts.length === 2) el.textContent = names[parseInt(parts[1], 10) - 1] + ' ' + parts[0];
+  })();
+
+  document.addEventListener('click', async function (e) {
+    var btn = e.target.closest('.delete-btn');
+    if (!btn) return;
+    var id = btn.dataset.id;
+    var name = btn.dataset.name;
+    var ok = await confirmDialog(
+      {{ _('delete_budget_confirm') | tojson }} + ' "' + name + '"?',
+      { icon: 'warning', confirmColor: 'danger', confirmText: {{ _('delete') | tojson }} }
+    );
+    if (!ok) return;
+    var resp = await fetch('/api/budgets/' + id, { method: 'DELETE' });
+    if (resp.ok) {
+      var card = document.getElementById('budget-card-' + id);
+      if (card) card.remove();
+      showToast({{ _('deleted_successfully') | tojson }}, 'success');
+    } else {
+      await handleApiError(resp);
+    }
+  });
+</script>
+{% endblock %}

@@ -207,51 +207,64 @@ def _auto_heal_schema() -> int:
     from sqlalchemy import inspect, text
 
     _mig_logger = logging.getLogger("database.migrations")
-    insp = inspect(engine)
     added = 0
-    try:
-        with engine.begin() as conn:
-            for table in SQLModel.metadata.sorted_tables:
-                if not insp.has_table(table.name):
-                    continue  # create_all already created it
-                existing = {c["name"] for c in insp.get_columns(table.name)}
-                for col in table.columns:
-                    if col.name in existing:
-                        continue
-                    try:
-                        col_type_sql = col.type.compile(engine.dialect)
-                    except Exception:
-                        _mig_logger.warning("auto-heal: cannot compile type for %s.%s", table.name, col.name)
-                        continue
 
-                    parts = [f'ALTER TABLE "{table.name}" ADD COLUMN "{col.name}" {col_type_sql}']
-                    default_added = False
-                    if col.server_default is not None:
-                        try:
-                            arg = col.server_default.arg
-                            default_text = getattr(arg, "text", None) or str(arg)
-                            parts.append(f"DEFAULT ({default_text})")
-                            default_added = True
-                        except Exception:
-                            pass
-                    if not col.nullable and not default_added:
-                        # SQLite requires a default when ALTERing a NOT NULL column
-                        py_type = getattr(col.type, "python_type", None)
-                        if py_type in (int, float, bool):
-                            parts.append("DEFAULT 0")
-                        else:
-                            parts.append("DEFAULT ''")
-                    if not col.nullable:
-                        parts.append("NOT NULL")
-                    sql = " ".join(parts)
-                    try:
-                        conn.execute(text(sql))
-                        _mig_logger.info("auto-heal: added %s.%s", table.name, col.name)
-                        added += 1
-                    except Exception as e:
-                        _mig_logger.warning("auto-heal: skipped %s.%s: %s", table.name, col.name, e)
+    # Collect missing columns first (read-only), then ALTER each in its OWN
+    # transaction. A single bad column must never roll back the others — an
+    # earlier version wrapped the whole loop in one transaction, so one
+    # unexpected error (e.g. `col.type.python_type` raising NotImplementedError,
+    # which getattr does not swallow) aborted every pending fix.
+    try:
+        insp = inspect(engine)
+        pending = []
+        for table in SQLModel.metadata.sorted_tables:
+            if not insp.has_table(table.name):
+                continue  # create_all already created it
+            existing = {c["name"] for c in insp.get_columns(table.name)}
+            for col in table.columns:
+                if col.name not in existing:
+                    pending.append((table.name, col))
     except Exception as e:
-        _mig_logger.warning("auto-heal failed (non-fatal): %s", e)
+        _mig_logger.warning("auto-heal inspection failed (non-fatal): %s", e)
+        return 0
+
+    for table_name, col in pending:
+        try:
+            col_type_sql = col.type.compile(engine.dialect)
+        except Exception:
+            _mig_logger.warning("auto-heal: cannot compile type for %s.%s", table_name, col.name)
+            continue
+
+        parts = [f'ALTER TABLE "{table_name}" ADD COLUMN "{col.name}" {col_type_sql}']
+        default_added = False
+        if col.server_default is not None:
+            try:
+                arg = col.server_default.arg
+                default_text = getattr(arg, "text", None) or str(arg)
+                parts.append(f"DEFAULT ({default_text})")
+                default_added = True
+            except Exception:
+                pass
+        if not col.nullable and not default_added:
+            # SQLite requires a default when ALTERing in a NOT NULL column.
+            # `python_type` is a *property* that raises NotImplementedError for
+            # SQLModel's AutoString (every VARCHAR column) — getattr() with a
+            # default does NOT catch that, so guard it explicitly.
+            try:
+                py_type = col.type.python_type
+            except Exception:
+                py_type = None
+            parts.append("DEFAULT 0" if py_type in (int, float, bool) else "DEFAULT ''")
+        if not col.nullable:
+            parts.append("NOT NULL")
+        sql = " ".join(parts)
+        try:
+            with engine.begin() as conn:
+                conn.execute(text(sql))
+            _mig_logger.info("auto-heal: added %s.%s", table_name, col.name)
+            added += 1
+        except Exception as e:
+            _mig_logger.warning("auto-heal: skipped %s.%s: %s", table_name, col.name, e)
     return added
 
 
@@ -293,6 +306,16 @@ def init_db():
         # Already at head. Still call upgrade so any hotfix migrations added
         # between releases get picked up; upgrade-to-head on head is a no-op.
         _run_migrations()
+        # Safety net: a DB can be stamped at head yet still be missing columns
+        # if a past auto-heal aborted before finishing (the heal now isolates
+        # each column, but legacy installs may already be in that state). This
+        # is an idempotent no-op once the schema matches the models.
+        healed = _auto_heal_schema()
+        if healed > 0:
+            _write_migration_warning(
+                f"Schema reconciled on an up-to-date DB: auto-heal added "
+                f"{healed} missing column(s) a previous run had failed to add."
+            )
 
     elif current and head and current != head:
         # Known intermediate revision — real migrations (including data

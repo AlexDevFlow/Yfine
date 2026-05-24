@@ -13,6 +13,15 @@
           <div>
             <h4 class="mb-1">{{ source.name }}</h4>
             <span class="badge bg-label-primary">{{ source.currency }}</span>
+            {% if source.yield_rate and source.yield_rate > 0 %}
+            {% set period_label = {1: _('period_monthly'), 3: _('period_quarterly'), 6: _('period_semiannual'), 12: _('period_annual')}.get(source.yield_period_months, source.yield_period_months ~ ' ' ~ _('months')) %}
+            <span class="badge bg-label-success ms-1" title="{{ _('yield_settings') }}">
+              <i class="bi bi-percent me-1"></i>{{ "%g"|format(source.yield_rate) }}% · {{ period_label }}
+            </span>
+            {% if source.yield_next_date %}
+            <div class="small text-muted mt-1"><i class="bi bi-calendar-event me-1"></i>{{ _('next_accrual') }}: {{ source.yield_next_date|fdate }}</div>
+            {% endif %}
+            {% endif %}
           </div>
           <div class="text-end">
             {% set has_pf = portfolios_value_same_ccy or portfolios_value_other_ccy %}
@@ -306,8 +315,12 @@ if (window.Chart) {
       }
     });
 
-    document.querySelectorAll('.range-btn').forEach(btn => btn.classList.remove('active'));
-    event.target.classList.add('active');
+    // Highlight the active range by matching the range argument, not event.target
+    // (loadChart is also called on page load, where there is no click event).
+    document.querySelectorAll('.range-btn').forEach(function (btn) {
+      var oc = btn.getAttribute('onclick') || '';
+      btn.classList.toggle('active', oc.indexOf("loadChart('" + range + "')") !== -1);
+    });
   }
 
   loadChart('all');

@@ -1,0 +1,90 @@
+<h5>Budgets</h5>
+<p class="yn-help-lead">A budget is a spending cap (or income target) tied to a tag and a currency that renews itself every period. Yfine computes how much you've spent live, from the movements carrying that tag, so you always know how much is left.</p>
+
+<h6>What you see</h6>
+<ul>
+  <li>At the top, <strong>period navigation arrows</strong>: ‹ previous · current · next ›. Navigation steps each budget in its own cadence (a weekly one by a week, a yearly one by a year).</li>
+  <li>A <strong>per-currency rollup</strong>: spent / budgeted and what's left, grouped by currency so mixed-currency budgets stay legible.</li>
+  <li>A grid of <strong>cards</strong>, one per budget, sorted most-at-risk first (over-budget first, then close to the threshold).</li>
+  <li>Each card shows: tag and colour, currency, <strong>spent / available</strong>, a <strong>progress bar</strong>, the percentage, how much is <strong>left</strong> (or how far <em>over</em> you are), the <strong>period</strong> with its date range, and — when on — the <strong>rollover</strong>.</li>
+  <li><strong>Pace</strong> hints: how much you can spend per day for the days remaining, and a <strong>projection</strong> for the end of the period if you keep the current pace.</li>
+</ul>
+
+<h6>Actions</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-plus-lg"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">New Budget</span>
+      <span class="yn-help-action-desc">Pick a tag, amount, currency, period and type (spending cap or income target).</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon muted"><i class="bi bi-list-ul"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">View movements</span>
+      <span class="yn-help-action-desc">Opens the movements list already filtered to the budget's tag, so you can see what makes it up.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-pencil"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Edit</span>
+      <span class="yn-help-action-desc">Change amount, period, threshold or rollover. Changing the rule resets the alert band it last fired on.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon danger"><i class="bi bi-trash"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Delete</span>
+      <span class="yn-help-action-desc">Removes the budget. Your movements are untouched.</span>
+    </div>
+  </div>
+</div>
+
+<h6>How it works</h6>
+<p>A budget materialises nothing per period: the <strong>spent</strong> figure is recomputed live from movements, so the numbers self-heal when you edit a past movement. A movement counts when it:</p>
+<ul>
+  <li>carries the budget's <strong>tag</strong>;</li>
+  <li>matches the <strong>direction</strong> (out for a spending cap, in for an income target);</li>
+  <li>falls in the current <strong>period</strong>;</li>
+  <li>has a source in the budget's <strong>currency</strong>.</li>
+</ul>
+<p><strong>Transfers</strong> and movements <strong>excluded from stats</strong> never count. <strong>External</strong> movements (no source, hence no currency) don't count either.</p>
+
+<h6>One budget per tag and currency</h6>
+<p>There can be only one <em>active</em> budget per tag-and-currency pair — it keeps the model simple. If you need the same tag in two currencies (say "Groceries" in EUR and in USD), create two budgets.</p>
+
+<h6>Period</h6>
+<ul>
+  <li><strong>Weekly</strong>: Monday to Sunday.</li>
+  <li><strong>Monthly</strong>: first to last day of the month.</li>
+  <li><strong>Quarterly</strong>: calendar-aligned three-month blocks (Jan–Mar, Apr–Jun, …).</li>
+  <li><strong>Yearly</strong>: the calendar year.</li>
+</ul>
+<p>Periods are calendar-aligned and renew on their own — you never recreate them.</p>
+
+<h6>Rollover</h6>
+<p>With <strong>rollover</strong> on, a period's surplus or overspend carries into the next (envelope-style). Budget 400 and spend 300, and next period you have 500 available; overspend by 100, and next period starts at 300. Without rollover, every period starts clean at the base amount.</p>
+
+<h6>Alert threshold</h6>
+<p>The <strong>alert threshold</strong> (a percentage) fires a notification when spending reaches it, and another one past 100%. Yfine fires once per band per period, so it never floods you. Set the threshold to <strong>0</strong> to turn that budget's alerts off.</p>
+
+<h6>Pace and projection</h6>
+<p>Yfine compares how far you are through the period with how much you've already spent. It shows how much you can spend <strong>per day</strong> for the remaining days and a <strong>projection</strong> for the end of the period: if the projection exceeds what's available, the number turns red as an early warning.</p>
+
+<h6>Step by step: create a spending budget</h6>
+<ol class="yn-help-steps">
+  <li>Make sure you have at least one <strong>tag</strong> (budgets build on tags).</li>
+  <li>Click <span class="yn-help-chip primary"><i class="bi bi-plus-lg"></i> New Budget</span>.</li>
+  <li>Pick the <strong>tag</strong> (e.g. "Groceries") and the <strong>currency</strong>.</li>
+  <li>Enter the <strong>limit per period</strong> and choose <strong>Monthly</strong>.</li>
+  <li>Leave the type on <strong>Spending cap</strong>.</li>
+  <li>Optional: set the <strong>alert threshold</strong> (defaults to 80%) and turn on <strong>rollover</strong>.</li>
+  <li>Save. The card appears with the current period's spend already computed.</li>
+</ol>
+
+<div class="yn-help-tip">
+  <i class="bi bi-info-circle-fill"></i>
+  <div>For a movement to count toward a budget it must carry its tag and sit on a source of the same currency. If a budget looks stuck at zero, check that the movements have the right tag and aren't excluded from stats.</div>
+</div>

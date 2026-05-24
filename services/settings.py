@@ -56,6 +56,12 @@ def update_settings(session: Session, data: SettingUpdate) -> Setting:
     if "nav_layout_json" in update_data:
         from i18n import set_nav_layout_json
         set_nav_layout_json(update_data["nav_layout_json"])
+    if "saved_views_json" in update_data:
+        from i18n import set_saved_views_json
+        set_saved_views_json(update_data["saved_views_json"])
+    if "movement_templates_json" in update_data:
+        from i18n import set_movement_templates_json
+        set_movement_templates_json(update_data["movement_templates_json"])
 
     # Persist settings to auth config so they work even when the DB is encrypted
     _sync_keys = {"lan_access", "locale"}

@@ -12,6 +12,8 @@ _logger = logging.getLogger(__name__)
 scheduler = BackgroundScheduler()
 _recurring_lock = threading.Lock()
 _prices_lock = threading.Lock()
+_yield_lock = threading.Lock()
+_budget_lock = threading.Lock()
 
 
 def _has_unread_notification(session, related_entity: str, notif_type: str) -> bool:
@@ -128,6 +130,42 @@ def cleanup_notifications():
             logging.getLogger(__name__).info("Notification cleanup: removed %d old notifications", deleted)
 
 
+def process_source_yields():
+    """Periodic job: credit due interest to sources with a yield rate set."""
+    from services.sources import accrue_source_yields
+
+    if not _yield_lock.acquire(blocking=False):
+        _logger.info("Yield accrual skipped — another run is in progress")
+        return
+    try:
+        with Session(engine) as session:
+            created = accrue_source_yields(session)
+            if created:
+                _logger.info("Source yields accrued: %d movement(s) created", created)
+    except Exception:
+        _logger.exception("Source yield accrual failed")
+    finally:
+        _yield_lock.release()
+
+
+def process_budget_alerts():
+    """Periodic job: notify when a budget crosses its threshold or 100%."""
+    from services.budgets import check_budget_alerts
+
+    if not _budget_lock.acquire(blocking=False):
+        _logger.info("Budget alert check skipped — another run is in progress")
+        return
+    try:
+        with Session(engine) as session:
+            fired = check_budget_alerts(session)
+            if fired:
+                _logger.info("Budget alerts fired: %d", fired)
+    except Exception:
+        _logger.exception("Budget alert check failed")
+    finally:
+        _budget_lock.release()
+
+
 def refresh_portfolio_prices():
     """Periodic job: refresh holding prices if the user has opted in."""
     if not _prices_lock.acquire(blocking=False):
@@ -154,6 +192,13 @@ def start_scheduler():
     process_recurring_items()
     scheduler.add_job(process_recurring_items, "interval", hours=1, id="recurring_job", replace_existing=True)
     scheduler.add_job(cleanup_notifications, "interval", hours=24, id="notification_cleanup_job", replace_existing=True)
+    # Interest accrual is date-based — credit any due periods on startup, then
+    # re-check a few times a day so a long-running app keeps crediting on time.
+    process_source_yields()
+    scheduler.add_job(process_source_yields, "interval", hours=6, id="source_yield_job", replace_existing=True)
+    # Budget alerts: check on startup, then a few times a day.
+    process_budget_alerts()
+    scheduler.add_job(process_budget_alerts, "interval", hours=6, id="budget_alert_job", replace_existing=True)
     # Portfolio prices: refresh on startup, then every 30 minutes.
     # `next_run_time=now` fires the first run on a scheduler thread as soon
     # as `scheduler.start()` returns, so we don't block app startup on

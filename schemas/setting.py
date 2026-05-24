@@ -19,6 +19,8 @@ class SettingRead(BaseModel):
     lan_access: bool = False
     portfolio_prices_enabled: bool = False
     portfolio_prices_prompted: bool = False
+    saved_views_json: str = "[]"
+    movement_templates_json: str = "[]"
 
 
 class SettingUpdate(BaseModel):
@@ -36,3 +38,5 @@ class SettingUpdate(BaseModel):
     lan_access: Optional[bool] = None
     portfolio_prices_enabled: Optional[bool] = None
     portfolio_prices_prompted: Optional[bool] = None
+    saved_views_json: Optional[str] = None
+    movement_templates_json: Optional[str] = None

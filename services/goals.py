@@ -318,9 +318,9 @@ def close_goal(session: Session, goal_id: int, data: GoalClose) -> Goal:
         ).all()
     )
 
-    # Emit a single consolidated transfer from goal.source_id to to_source
-    # equal to the total allocated; then drop the allocations + backing
-    # movements. This keeps /movements tidy (one refund, not N).
+    # Emit a single consolidated transfer from goal.source_id to to_source equal
+    # to the total allocated. This moves the money the goal accumulated in the
+    # fund out to the chosen account.
     total = sum(a.amount for a in allocations)
     if total > 0:
         out_mv = Movement(
@@ -345,12 +345,13 @@ def close_goal(session: Session, goal_id: int, data: GoalClose) -> Goal:
         session.add(out_mv)
         session.add(in_mv)
 
-    # Now delete the allocations + their source movements.
+    # Drop the allocation tracking rows but KEEP the backing deposit movements:
+    # they are the real record of money entering the fund, and the refund above
+    # already moves that balance out. Deleting the deposits too would return the
+    # money to its origin AND refund it to to_source — a double payout that
+    # leaves the fund negative (the original bug this guards against).
     for alloc in allocations:
-        in_mv = session.get(Movement, alloc.movement_id)
-        if in_mv:
-            from services import movements as movement_service
-            movement_service.delete_movement(session, in_mv.id)
+        session.delete(alloc)
 
     goal.status = "completed"
     goal.updated_at = datetime.utcnow()

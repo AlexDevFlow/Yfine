@@ -1,0 +1,90 @@
+<h5>Budget</h5>
+<p class="yn-help-lead">Un budget è un limite di spesa (o un obiettivo di entrata) legato a un'etichetta e a una valuta, che si rinnova da solo a ogni periodo. Yfine calcola in tempo reale quanto hai speso confrontando i movimenti che portano quell'etichetta, così sai sempre quanto ti resta.</p>
+
+<h6>Cosa vedi</h6>
+<ul>
+  <li>In alto, le <strong>frecce di navigazione del periodo</strong>: ‹ periodo precedente · periodo corrente · periodo successivo ›. La navigazione avanza ogni budget nella sua cadenza (un settimanale di una settimana, un annuale di un anno).</li>
+  <li>Un <strong>riepilogo per valuta</strong>: speso / preventivato e quanto resta, raggruppato per valuta così i budget di valute diverse restano leggibili.</li>
+  <li>Una griglia di <strong>schede</strong>, una per budget, ordinate con i più a rischio per primi (prima gli sforati, poi quelli vicini alla soglia).</li>
+  <li>Ogni scheda mostra: etichetta e colore, valuta, <strong>speso / disponibile</strong>, una <strong>barra di avanzamento</strong>, la percentuale, quanto <strong>resta</strong> (o di quanto hai <em>sforato</em>), il <strong>periodo</strong> con l'intervallo di date e — se attivo — il <strong>riporto</strong>.</li>
+  <li>Indicatori di <strong>ritmo</strong>: quanto puoi spendere al giorno per i giorni rimanenti e una <strong>proiezione</strong> di fine periodo se continui col passo attuale.</li>
+</ul>
+
+<h6>Azioni</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-plus-lg"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Nuovo Budget</span>
+      <span class="yn-help-action-desc">Scegli etichetta, importo, valuta, periodo e tipo (tetto di spesa o obiettivo di entrata).</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon muted"><i class="bi bi-list-ul"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Vedi movimenti</span>
+      <span class="yn-help-action-desc">Apre la lista movimenti già filtrata sull'etichetta del budget, per vedere cosa lo compone.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-pencil"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Modifica</span>
+      <span class="yn-help-action-desc">Cambia importo, periodo, soglia o riporto. Cambiare la regola azzera la banda di avviso già notificata.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon danger"><i class="bi bi-trash"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Elimina</span>
+      <span class="yn-help-action-desc">Rimuove il budget. I movimenti non vengono toccati.</span>
+    </div>
+  </div>
+</div>
+
+<h6>Come funziona</h6>
+<p>Un budget non memorizza nulla periodo per periodo: lo <strong>speso</strong> è ricalcolato dal vivo dai movimenti, così le cifre si auto-correggono se modifichi un movimento passato. Conta un movimento quando:</p>
+<ul>
+  <li>porta l'<strong>etichetta</strong> del budget;</li>
+  <li>ha la stessa <strong>direzione</strong> (uscita per un tetto di spesa, entrata per un obiettivo);</li>
+  <li>cade nel <strong>periodo</strong> corrente;</li>
+  <li>la sua fonte è nella stessa <strong>valuta</strong> del budget.</li>
+</ul>
+<p>I <strong>trasferimenti</strong> e i movimenti <strong>esclusi dalle statistiche</strong> non contano mai. Anche i movimenti <strong>esterni</strong> (senza fonte, quindi senza valuta) non contano.</p>
+
+<h6>Un budget per etichetta e valuta</h6>
+<p>Può esistere un solo budget <em>attivo</em> per combinazione di etichetta e valuta: mantiene il modello semplice. Se ti serve la stessa etichetta in due valute (per esempio "Spesa" in EUR e in USD), crea due budget.</p>
+
+<h6>Periodo</h6>
+<ul>
+  <li><strong>Settimanale</strong>: da lunedì a domenica.</li>
+  <li><strong>Mensile</strong>: dal primo all'ultimo giorno del mese.</li>
+  <li><strong>Trimestrale</strong>: blocchi di tre mesi allineati al calendario (gen–mar, apr–giu, …).</li>
+  <li><strong>Annuale</strong>: anno solare.</li>
+</ul>
+<p>I periodi sono allineati al calendario e si rinnovano da soli: non devi ricrearli ogni volta.</p>
+
+<h6>Riporto</h6>
+<p>Con il <strong>riporto</strong> attivo, l'avanzo o lo sforamento di un periodo passa al successivo (comportamento "a buste"). Se preventivi 400 e ne spendi 300, il mese dopo hai 500 disponibili; se sfori di 100, il mese dopo parti da 300. Senza riporto, ogni periodo riparte pulito dall'importo base.</p>
+
+<h6>Soglia di avviso</h6>
+<p>La <strong>soglia di avviso</strong> (in percentuale) fa scattare una notifica quando lo speso la raggiunge, e un'altra al superamento del 100%. Yfine avvisa una sola volta per banda nel periodo, così non ti sommerge. Imposta la soglia a <strong>0</strong> per disattivare gli avvisi di quel budget.</p>
+
+<h6>Ritmo e proiezione</h6>
+<p>Yfine confronta quanto sei avanti nel periodo con quanto hai già speso. Mostra quanto puoi spendere <strong>al giorno</strong> per i giorni che restano e una <strong>proiezione</strong> di fine periodo: se la proiezione supera il disponibile, il numero diventa rosso come allerta precoce.</p>
+
+<h6>Passo passo: creare un budget spesa</h6>
+<ol class="yn-help-steps">
+  <li>Assicurati di avere almeno un'<strong>etichetta</strong> (i budget si appoggiano alle etichette).</li>
+  <li>Clicca <span class="yn-help-chip primary"><i class="bi bi-plus-lg"></i> Nuovo Budget</span>.</li>
+  <li>Scegli l'<strong>etichetta</strong> (per esempio "Spesa") e la <strong>valuta</strong>.</li>
+  <li>Inserisci il <strong>limite per periodo</strong> e scegli <strong>Mensile</strong>.</li>
+  <li>Lascia il tipo su <strong>Tetto di spesa</strong>.</li>
+  <li>Opzionale: imposta la <strong>soglia di avviso</strong> (predefinita 80%) e attiva il <strong>riporto</strong>.</li>
+  <li>Salva. La scheda compare con lo speso del periodo corrente già calcolato.</li>
+</ol>
+
+<div class="yn-help-tip">
+  <i class="bi bi-info-circle-fill"></i>
+  <div>Perché un movimento conti in un budget deve portarne l'etichetta ed essere su una fonte della stessa valuta. Se un budget sembra fermo a zero, controlla che i movimenti abbiano l'etichetta giusta e non siano esclusi dalle statistiche.</div>
+</div>

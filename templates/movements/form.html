@@ -65,9 +65,16 @@
           {% endif %}
 
           <div class="mb-3">
-            <label for="amount" class="form-label">{{ _('amount') }}</label>
+            <label for="amount" class="form-label">{{ _('amount') }}{% if is_transfer %} <span id="from-amount-ccy" class="text-muted"></span>{% endif %}</label>
             <input type="number" step="0.01" min="0.01" inputmode="decimal" class="form-control" id="amount" value="{{ movement.amount if movement else '' }}" data-money required>
           </div>
+          {% if is_transfer %}
+          <div class="mb-3 d-none" id="to-amount-wrap">
+            <label for="to_amount" class="form-label">{{ _('amount_received') }} <span id="to-amount-ccy" class="text-muted"></span></label>
+            <input type="number" step="0.01" min="0.01" inputmode="decimal" class="form-control" id="to_amount" value="{{ transfer_to_amount if transfer_to_amount else '' }}" data-money>
+            <small class="text-muted" id="to-amount-hint"></small>
+          </div>
+          {% endif %}
           <div class="mb-3">
             <label for="date" class="form-label">{{ _('date') }}</label>
             <input type="text" class="form-control" id="date" value="{{ movement.date if movement else '' }}" required>
@@ -138,7 +145,67 @@
     {% if not is_transfer %}
     initAttachments({% if movement %}{{ movement.id }}{% else %}null{% endif %});
     {% endif %}
+
+    {% if is_transfer %}
+    initTransferCurrency();
+    {% endif %}
   });
+
+  {% if is_transfer %}
+  // --- Cross-currency transfers ---
+  var SOURCE_CCY = { {% for s in sources %}{{ s.id }}: {{ s.currency|tojson }}{% if not loop.last %}, {% endif %}{% endfor %} };
+  var TRANSFER_I18N = { no_rate: {{ _("transfer_no_rate")|tojson }}, converted: {{ _("converted_amount")|tojson }} };
+  var _toAmountEdited = false;
+
+  function _ccy(id) { return SOURCE_CCY[id] || null; }
+
+  async function updateToAmount() {
+    var fromId = document.getElementById('from_source_id').value;
+    var toId = document.getElementById('to_source_id').value;
+    var wrap = document.getElementById('to-amount-wrap');
+    var fromC = _ccy(fromId), toC = _ccy(toId);
+    var fromCcySpan = document.getElementById('from-amount-ccy');
+    if (fromCcySpan) fromCcySpan.textContent = fromC ? '(' + fromC + ')' : '';
+
+    if (fromId && toId && fromC && toC && fromC !== toC) {
+      wrap.classList.remove('d-none');
+      document.getElementById('to-amount-ccy').textContent = '(' + toC + ')';
+      var amt = parseFloat(document.getElementById('amount').value);
+      var toField = document.getElementById('to_amount');
+      var hint = document.getElementById('to-amount-hint');
+      if (amt && !_toAmountEdited) {
+        try {
+          var resp = await fetch('/api/exchange-rates/convert?amount=' + amt + '&from=' + encodeURIComponent(fromC) + '&to=' + encodeURIComponent(toC));
+          if (resp.ok) { var d = await resp.json(); toField.value = d.result; hint.textContent = TRANSFER_I18N.converted; }
+          else { hint.textContent = TRANSFER_I18N.no_rate; }
+        } catch (e) { hint.textContent = TRANSFER_I18N.no_rate; }
+      }
+    } else {
+      wrap.classList.add('d-none');
+    }
+  }
+
+  function initTransferCurrency() {
+    var from = document.getElementById('from_source_id');
+    var to = document.getElementById('to_source_id');
+    var amount = document.getElementById('amount');
+    var toField = document.getElementById('to_amount');
+    [from, to].forEach(function(el) {
+      if (el) el.addEventListener('change', function() { _toAmountEdited = false; updateToAmount(); });
+    });
+    if (amount) amount.addEventListener('input', function() { updateToAmount(); });
+    if (toField) toField.addEventListener('input', function() { _toAmountEdited = true; });
+    // Editing an existing cross-currency transfer: keep the loaded value.
+    if (toField && toField.value) _toAmountEdited = true;
+    updateToAmount();
+  }
+
+  function transferToAmount() {
+    var wrap = document.getElementById('to-amount-wrap');
+    var v = document.getElementById('to_amount').value;
+    return (wrap && !wrap.classList.contains('d-none') && v) ? parseFloat(v) : null;
+  }
+  {% endif %}
 
   // --- Attachments ---
   var ATT_MAX_SIZE = 10 * 1024 * 1024;
@@ -429,6 +496,7 @@
       from_source_id: parseInt(document.getElementById('from_source_id').value),
       to_source_id: parseInt(document.getElementById('to_source_id').value),
       amount: parseFloat(document.getElementById('amount').value),
+      to_amount: transferToAmount(),
       date: document.getElementById('date').value,
       note: document.getElementById('note').value || null,
       tag_ids: tagIds
@@ -444,6 +512,7 @@
       from_source_id: parseInt(document.getElementById('from_source_id').value),
       to_source_id: parseInt(document.getElementById('to_source_id').value),
       amount: parseFloat(document.getElementById('amount').value),
+      to_amount: transferToAmount(),
       date: document.getElementById('date').value,
       note: document.getElementById('note').value || null,
       tag_ids: tagIds

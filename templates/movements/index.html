@@ -61,7 +61,10 @@
       <div class="col-6 col-sm-auto">
         <input type="number" step="0.01" inputmode="decimal" class="form-control form-control-sm" id="filter-amount-max" placeholder="{{ _('amount_max') }}" value="{{ filter_amount_max or '' }}">
       </div>
-      {% if filter_date_from or filter_date_to or filter_amount_min or filter_amount_max or filter_source_id or filter_tag_ids or filter_direction %}
+      <div class="col-12 col-sm-auto flex-grow-1">
+        <input type="search" class="form-control form-control-sm" id="filter-q" placeholder="{{ _('search_notes') }}" value="{{ filter_q or '' }}">
+      </div>
+      {% if filter_date_from or filter_date_to or filter_amount_min or filter_amount_max or filter_source_id or filter_tag_ids or filter_direction or filter_q %}
       <div class="col-auto">
         <a href="/movements" class="btn btn-sm btn-outline-danger"><i class="bi bi-arrow-counterclockwise me-1"></i>{{ _('reset_filters') }}</a>
       </div>
@@ -114,9 +117,60 @@
             {% endfor %}
             {% if not tags %}<div class="text-muted small">{{ _('no_tags') }}</div>{% endif %}
           </li>
-          <li class="border-top px-2 py-2 d-flex gap-2">
+          <li class="border-top px-2 pt-2">
+            <div class="btn-group btn-group-sm w-100" role="group">
+              <input type="radio" class="btn-check" name="tag-match" id="tag-match-or" value="or" {% if filter_tag_match != 'and' %}checked{% endif %}>
+              <label class="btn btn-outline-secondary" for="tag-match-or">{{ _('match_any') }}</label>
+              <input type="radio" class="btn-check" name="tag-match" id="tag-match-and" value="and" {% if filter_tag_match == 'and' %}checked{% endif %}>
+              <label class="btn btn-outline-secondary" for="tag-match-and">{{ _('match_all') }}</label>
+            </div>
+          </li>
+          <li class="px-2 py-2 d-flex gap-2">
             <button type="button" class="btn btn-sm btn-outline-secondary flex-fill" onclick="clearTagFilter()">{{ _('reset_filters') }}</button>
             <button type="button" class="btn btn-sm btn-primary flex-fill" onclick="applyTagFilter()">{{ _('apply') }}</button>
+          </li>
+        </ul>
+      </div>
+      <div class="dropdown yn-filter-chip-wrap">
+        <button style="width:160px" class="btn btn-sm btn-outline-secondary yn-filter-chip dropdown-toggle d-inline-flex align-items-center" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+          <i class="bi bi-bookmark me-1"></i>{{ _('saved_views') }}
+        </button>
+        <ul class="dropdown-menu p-0" style="min-width:250px">
+          <li class="px-2 py-2">
+            {% if saved_views %}
+              {% for v in saved_views %}
+              <div class="d-flex align-items-center gap-1 mb-1">
+                <button type="button" class="btn btn-sm btn-outline-primary flex-fill text-start text-truncate view-load" data-params='{{ v.params|tojson }}'>{{ v.name }}</button>
+                <button type="button" class="btn btn-sm btn-outline-danger view-del flex-shrink-0" data-name="{{ v.name }}"><i class="bi bi-x"></i></button>
+              </div>
+              {% endfor %}
+            {% else %}
+              <div class="text-muted small px-1 py-1">{{ _('no_saved_views') }}</div>
+            {% endif %}
+          </li>
+          <li class="border-top px-2 py-2">
+            <button type="button" class="btn btn-sm btn-primary w-100" onclick="openSaveView()"><i class="bi bi-plus me-1"></i>{{ _('save_view') }}</button>
+          </li>
+        </ul>
+      </div>
+      <div class="dropdown yn-filter-chip-wrap">
+        <button style="width:160px" class="btn btn-sm btn-outline-success yn-filter-chip dropdown-toggle d-inline-flex align-items-center" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+          <i class="bi bi-lightning-charge me-1"></i>{{ _('quick_add') }}
+        </button>
+        <ul class="dropdown-menu p-0" style="min-width:260px">
+          <li class="px-2 py-2">
+            {% if movement_templates %}
+              {% for t in movement_templates %}
+              <button type="button" class="btn btn-sm btn-outline-primary w-100 text-start text-truncate mb-1 qa-use" data-tpl='{{ t|tojson }}'>
+                <i class="bi bi-{% if t.direction == 'in' %}arrow-down-circle text-success{% else %}arrow-up-circle text-danger{% endif %} me-1"></i>{{ t.name }}
+              </button>
+              {% endfor %}
+            {% else %}
+              <div class="text-muted small px-1 py-1">{{ _('no_templates') }}</div>
+            {% endif %}
+          </li>
+          <li class="border-top px-2 py-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary w-100" onclick="openManageTemplates()"><i class="bi bi-gear me-1"></i>{{ _('manage_templates') }}</button>
           </li>
         </ul>
       </div>
@@ -188,18 +242,20 @@
     <table class="table table-hover mb-0">
       <thead>
         <tr class="text-uppercase text-muted" style="font-size:.7rem;letter-spacing:.05em">
-          <th style="padding-left:3.5rem;width:20%">{{ _('source') }}</th>
+          <th style="width:36px;padding-left:1rem"><input type="checkbox" class="form-check-input bulk-all" title="{{ _('select_all') }}"></th>
+          <th style="width:18%">{{ _('source') }}</th>
           <th style="width:10%">{{ _('direction') }}</th>
           <th style="width:12%">{{ _('amount') }}</th>
           <th style="width:18%">{{ _('tags') }}</th>
           <th>{{ _('note') }}</th>
-          <th class="text-end" style="width:10%">{{ _('actions') }}</th>
+          <th class="text-end" style="width:12%">{{ _('actions') }}</th>
         </tr>
       </thead>
       <tbody>
         {% for m in day.movements %}
         <tr id="movement-row-{{ m.id }}">
-          <td style="padding-left:3.5rem">
+          <td style="padding-left:1rem"><input type="checkbox" class="form-check-input bulk-cb" value="{{ m.id }}" data-transfer="{{ 1 if m.transfer_pair_id else 0 }}"></td>
+          <td>
             {% if m.transfer_pair_id %}
               <span class="fw-bold">{{ m.source_name }}</span>
               <i class="bi bi-arrow-right text-info mx-1"></i>
@@ -221,6 +277,7 @@
           <td>{% for t in m.tags %}{% if t.color %}<span class="badge" style="background-color:{{ t.color }};color:#fff">{{ t.name }}</span>{% else %}<span class="badge bg-label-secondary">{{ t.name }}</span>{% endif %} {% endfor %}</td>
           <td><small class="text-muted">{{ m.note or '' }}</small>{% if m.attachment_count %} <a href="javascript:void(0)" class="yn-attach-flag ms-1" onclick="openAttachments({{ m.id }})" title="{{ _('attachments') }}"><i class="bi bi-paperclip"></i>{{ m.attachment_count }}</a>{% endif %}</td>
           <td class="text-end" style="white-space:nowrap">
+            {% if not m.transfer_pair_id %}<button class="btn btn-sm btn-outline-info me-1 mk-rec" data-id="{{ m.id }}" title="{{ _('make_recurring') }}"><i class="bi bi-arrow-repeat"></i></button>{% endif %}
             <a href="/movements/{{ m.id }}/edit" class="btn btn-sm btn-outline-warning me-1"><i class="bi bi-pencil"></i></a>
             <button class="btn btn-sm btn-outline-danger" onclick="deleteMovement({{ m.id }})"><i class="bi bi-trash"></i></button>
           </td>
@@ -232,7 +289,9 @@
   {# ── Mobile card list (hidden on desktop) ── #}
   <div class="d-md-none year-{{ year_group.year }}-child month-{{ month.year_month }}-child day-{{ day.date }}-child">
     {% for m in day.movements %}
-    <div class="px-3 py-2 border-top" id="movement-row-mobile-{{ m.id }}" onclick="location.href='/movements/{{ m.id }}/edit'" style="cursor:pointer">
+    <div class="px-3 py-2 border-top d-flex align-items-start gap-2" id="movement-row-mobile-{{ m.id }}" onclick="location.href='/movements/{{ m.id }}/edit'" style="cursor:pointer">
+      <input type="checkbox" class="form-check-input mt-1 bulk-cb flex-shrink-0" value="{{ m.id }}" data-transfer="{{ 1 if m.transfer_pair_id else 0 }}" onclick="event.stopPropagation()">
+      <div class="flex-grow-1 min-width-0">
       <div class="d-flex justify-content-between align-items-start">
         <div class="min-width-0">
           <div class="fw-bold text-truncate">
@@ -258,6 +317,7 @@
         <span class="{% if m.transfer_pair_id %}text-info{% elif m.direction == 'in' %}text-success{% else %}text-danger{% endif %} fw-bold flex-shrink-0 ms-2" style="font-size:.95rem">
           {% if m.transfer_pair_id %}{{ "%.2f"|format(m.amount) }}{% else %}{% if m.direction == 'in' %}+{% else %}-{% endif %}{{ "%.2f"|format(m.amount) }}{% endif %}
         </span>
+      </div>
       </div>
     </div>
     {% endfor %}
@@ -301,6 +361,162 @@
     </nav>
   </div>
   {% endif %}
+</div>
+
+<!-- Bulk selection toolbar -->
+<style>
+  /* Bulk-action toolbar: keep every control the same height and let wrapped
+     rows stay centered so the bar reads as one cohesive unit. */
+  #bulk-toolbar .btn { min-height: 2rem; }
+  #bulk-toolbar .bulk-badge { display: inline-flex; align-items: center; min-height: 2rem; }
+</style>
+<div id="bulk-toolbar" class="position-fixed bottom-0 start-50 translate-middle-x mb-3 p-2 bg-body border rounded-3 shadow d-none" style="z-index:1050;max-width:96vw">
+  <div class="d-flex align-items-center justify-content-center gap-2 flex-wrap">
+    <span class="badge bg-primary rounded-pill px-3 bulk-badge"><span id="bulk-count">0</span>&nbsp;{{ _('selected_count') }}</span>
+    <button class="btn btn-sm btn-outline-secondary" onclick="bulkClear()">{{ _('clear_selection') }}</button>
+    <div class="vr d-none d-sm-block"></div>
+    <button class="btn btn-sm btn-outline-danger" onclick="bulkDelete()"><i class="bi bi-trash me-1"></i>{{ _('delete') }}</button>
+    <div class="dropdown">
+      <button class="btn btn-sm btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" data-bs-auto-close="outside"><i class="bi bi-tag me-1"></i>{{ _('tags') }}</button>
+      <ul class="dropdown-menu p-2" style="min-width:240px">
+        <li class="mb-2">
+          <div class="btn-group btn-group-sm w-100" role="group">
+            <input type="radio" class="btn-check" name="bulk-tag-mode" id="btm-add" value="add" checked><label class="btn btn-outline-secondary" for="btm-add">{{ _('add_tags') }}</label>
+            <input type="radio" class="btn-check" name="bulk-tag-mode" id="btm-remove" value="remove"><label class="btn btn-outline-secondary" for="btm-remove">{{ _('remove_tags') }}</label>
+            <input type="radio" class="btn-check" name="bulk-tag-mode" id="btm-replace" value="replace"><label class="btn btn-outline-secondary" for="btm-replace">{{ _('replace_tags') }}</label>
+          </div>
+        </li>
+        <li style="max-height:200px;overflow:auto">
+          {% for t in tags %}
+          <div class="form-check"><input class="form-check-input bulk-tag-cb" type="checkbox" value="{{ t.id }}" id="btag-{{ t.id }}"><label class="form-check-label" for="btag-{{ t.id }}">{{ t.name }}</label></div>
+          {% endfor %}
+          {% if not tags %}<div class="text-muted small">{{ _('no_tags') }}</div>{% endif %}
+        </li>
+        <li class="border-top pt-2 mt-1"><button class="btn btn-sm btn-primary w-100" onclick="bulkTags()">{{ _('apply') }}</button></li>
+      </ul>
+    </div>
+    <div class="dropdown">
+      <button class="btn btn-sm btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown"><i class="bi bi-wallet2 me-1"></i>{{ _('change_source') }}</button>
+      <ul class="dropdown-menu" style="max-height:240px;overflow:auto">
+        <li><a class="dropdown-item" href="javascript:void(0)" onclick="bulkSource('')">{{ _('external') }}</a></li>
+        <li><hr class="dropdown-divider"></li>
+        {% for s in sources %}<li><a class="dropdown-item" href="javascript:void(0)" onclick="bulkSource('{{ s.id }}')">{{ s.name }} ({{ s.currency }})</a></li>{% endfor %}
+      </ul>
+    </div>
+    <div class="dropdown">
+      <button class="btn btn-sm btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown"><i class="bi bi-eye me-1"></i>{{ _('statistics') }}</button>
+      <ul class="dropdown-menu">
+        <li><a class="dropdown-item" href="javascript:void(0)" onclick="bulkExclude(true)"><i class="bi bi-eye-slash me-2"></i>{{ _('exclude_from_stats') }}</a></li>
+        <li><a class="dropdown-item" href="javascript:void(0)" onclick="bulkExclude(false)"><i class="bi bi-eye me-2"></i>{{ _('include_in_stats') }}</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Make recurring modal -->
+<div class="modal fade" id="makeRecurringModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header"><h6 class="modal-title"><i class="bi bi-arrow-repeat me-1"></i>{{ _('make_recurring') }}</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">{{ _('frequency') }}</label>
+          <select class="form-select" id="mkrec-frequency">
+            {% for f in ['daily','weekly','monthly','yearly'] %}<option value="{{ f }}" {% if f == 'monthly' %}selected{% endif %}>{{ _(f) }}</option>{% endfor %}
+          </select>
+        </div>
+        <div>
+          <label class="form-label">{{ _('apply_mode') }}</label>
+          <div>
+            <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="mkrec-mode" id="mkrec-confirm" value="confirm" checked><label class="form-check-label" for="mkrec-confirm">{{ _('manual_confirm') }}</label></div>
+            <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="mkrec-mode" id="mkrec-auto" value="auto"><label class="form-check-label" for="mkrec-auto">{{ _('automatic') }}</label></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ _('cancel') }}</button>
+        <button type="button" class="btn btn-primary" onclick="confirmMakeRecurring()">{{ _('save') }}</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Save view modal -->
+<div class="modal fade" id="saveViewModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header"><h6 class="modal-title"><i class="bi bi-bookmark me-1"></i>{{ _('save_view') }}</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <label class="form-label">{{ _('view_name') }}</label>
+        <input type="text" class="form-control" id="save-view-name" maxlength="200">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ _('cancel') }}</button>
+        <button type="button" class="btn btn-primary" onclick="confirmSaveView()">{{ _('save') }}</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Quick-add use modal -->
+<div class="modal fade" id="quickAddModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header"><h6 class="modal-title"><i class="bi bi-lightning-charge me-1"></i><span id="qa-title"></span></h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <div class="row g-2">
+          <div class="col-7">
+            <label class="form-label">{{ _('amount') }}</label>
+            <input type="number" step="0.01" min="0.01" inputmode="decimal" class="form-control" id="qa-amount" data-money>
+          </div>
+          <div class="col-5">
+            <label class="form-label">{{ _('date') }}</label>
+            <input type="text" class="form-control" id="qa-date">
+          </div>
+        </div>
+        <div class="small text-muted mt-2" id="qa-summary"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ _('cancel') }}</button>
+        <button type="button" class="btn btn-primary" onclick="confirmQuickAdd()">{{ _('save') }}</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Manage templates modal -->
+<div class="modal fade" id="manageTemplatesModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header"><h6 class="modal-title"><i class="bi bi-gear me-1"></i>{{ _('manage_templates') }}</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <div id="mt-list" class="mb-3"></div>
+        <hr>
+        <h6 class="mb-2">{{ _('add_template') }}</h6>
+        <div class="row g-2">
+          <div class="col-md-6"><label class="form-label small">{{ _('template_name') }}</label><input type="text" class="form-control form-control-sm" id="mt-name" maxlength="200"></div>
+          <div class="col-md-6"><label class="form-label small">{{ _('source') }}</label>
+            <select class="form-select form-select-sm" id="mt-source"><option value="">{{ _('external') }}</option>{% for s in sources %}<option value="{{ s.id }}">{{ s.name }} ({{ s.currency }})</option>{% endfor %}</select>
+          </div>
+          <div class="col-md-4"><label class="form-label small">{{ _('budget_type') if false else _('direction') }}</label>
+            <select class="form-select form-select-sm" id="mt-direction"><option value="out">{{ _('out') }}</option><option value="in">{{ _('in') }}</option></select>
+          </div>
+          <div class="col-md-4"><label class="form-label small">{{ _('amount_optional') }}</label><input type="number" step="0.01" min="0.01" class="form-control form-control-sm" id="mt-amount"></div>
+          <div class="col-md-4"><label class="form-label small">{{ _('note') }}</label><input type="text" class="form-control form-control-sm" id="mt-note" maxlength="1000"></div>
+          <div class="col-12">
+            <label class="form-label small">{{ _('tags') }}</label>
+            <div class="d-flex flex-wrap gap-2" style="max-height:120px;overflow:auto">
+              {% for t in tags %}<div class="form-check"><input class="form-check-input mt-tag-cb" type="checkbox" value="{{ t.id }}" id="mt-tag-{{ t.id }}"><label class="form-check-label small" for="mt-tag-{{ t.id }}">{{ t.name }}</label></div>{% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ _('cancel') }}</button>
+        <button type="button" class="btn btn-primary" onclick="addTemplate()"><i class="bi bi-plus me-1"></i>{{ _('add_template') }}</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Movements Calendar Modal -->
@@ -446,8 +662,9 @@
   document.addEventListener('DOMContentLoaded', function() {
     // Number inputs: apply after short delay
     let debounceTimer;
-    ['filter-amount-min', 'filter-amount-max'].forEach(id => {
-      document.getElementById(id).addEventListener('input', function() {
+    ['filter-amount-min', 'filter-amount-max', 'filter-q'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('input', function() {
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(applyFilters, 600);
       });
@@ -468,6 +685,10 @@
     if (dateTo) params.set('date_to', dateTo);
     if (amountMin) params.set('amount_min', amountMin);
     if (amountMax) params.set('amount_max', amountMax);
+    const qEl = document.getElementById('filter-q');
+    if (qEl && qEl.value.trim()) params.set('q', qEl.value.trim());
+    const tagMatchEl = document.querySelector('input[name="tag-match"]:checked');
+    if (tagMatchEl && tagMatchEl.value === 'and') params.set('tag_match', 'and');
     // Preserve currently-applied tag filter across other filter changes
     Array.from(document.querySelectorAll('.filter-tag-cb:checked')).forEach(cb => params.append('tag_ids', cb.value));
     return params;
@@ -811,5 +1032,239 @@
       else if (e.key === 'ArrowRight') _stepLightbox(1);
     });
   });
+
+  // ===================================================================
+  // Movements power UX: bulk ops, saved views, quick-add, make-recurring
+  // ===================================================================
+  const I18N = {
+    error: {{ _("error")|tojson }},
+    delete_label: {{ _("delete")|tojson }},
+    bulk_delete_confirm: {{ _("bulk_delete_confirm")|tojson }},
+    bulk_done: {{ _("bulk_done")|tojson }},
+    bulk_partial: {{ _("bulk_partial")|tojson }},
+    made_recurring: {{ _("made_recurring")|tojson }},
+    view_saved: {{ _("view_saved")|tojson }},
+    view_deleted: {{ _("view_deleted")|tojson }},
+    delete_view_confirm: {{ _("delete_view_confirm")|tojson }},
+    template_saved: {{ _("template_saved")|tojson }},
+    template_deleted: {{ _("template_deleted")|tojson }},
+    delete_template_confirm: {{ _("delete_template_confirm")|tojson }},
+    no_templates: {{ _("no_templates")|tojson }},
+    quick_added: {{ _("quick_added")|tojson }},
+    invalid_amount: {{ _("amount")|tojson }},
+    dir_in: {{ _("in")|tojson }},
+    dir_out: {{ _("out")|tojson }},
+  };
+  const _VIEWS = {{ saved_views|tojson }};
+  const _TEMPLATES = {{ movement_templates|tojson }};
+
+  // --- Selection / bulk toolbar ---
+  const _selected = new Set();
+  function _updateBulkBar() {
+    document.getElementById('bulk-count').textContent = _selected.size;
+    document.getElementById('bulk-toolbar').classList.toggle('d-none', _selected.size === 0);
+  }
+  document.addEventListener('change', function(e) {
+    var cb = e.target.closest('.bulk-cb');
+    if (cb) {
+      var id = parseInt(cb.value);
+      if (cb.checked) _selected.add(id); else _selected.delete(id);
+      // keep desktop + mobile twins in sync
+      document.querySelectorAll('.bulk-cb[value="' + cb.value + '"]').forEach(function(x) { x.checked = cb.checked; });
+      _updateBulkBar();
+      return;
+    }
+    var all = e.target.closest('.bulk-all');
+    if (all) {
+      var table = all.closest('table');
+      table.querySelectorAll('.bulk-cb').forEach(function(x) {
+        x.checked = all.checked;
+        var id = parseInt(x.value);
+        if (all.checked) _selected.add(id); else _selected.delete(id);
+      });
+      _updateBulkBar();
+    }
+  });
+  function bulkClear() {
+    _selected.clear();
+    document.querySelectorAll('.bulk-cb, .bulk-all').forEach(function(x) { x.checked = false; });
+    _updateBulkBar();
+  }
+  function _ids() { return Array.from(_selected); }
+  async function _bulkPost(path, body) {
+    var resp = await fetch('/api/movements/bulk/' + path, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+    });
+    if (!resp.ok) { await handleApiError(resp); return null; }
+    return await resp.json();
+  }
+  function _bulkToast(res) {
+    if (res.skipped && res.skipped.length) {
+      showToast(I18N.bulk_partial.replace('{affected}', res.affected).replace('{skipped}', res.skipped.length), 'warning');
+    } else {
+      showToast(I18N.bulk_done.replace('{affected}', res.affected), 'success');
+    }
+  }
+  async function bulkDelete() {
+    var ids = _ids(); if (!ids.length) return;
+    if (!(await confirmDialog(I18N.bulk_delete_confirm.replace('{count}', ids.length), { icon: 'warning', confirmColor: 'danger', confirmText: I18N.delete_label }))) return;
+    var res = await _bulkPost('delete', { ids }); if (!res) return;
+    _bulkToast(res); location.reload();
+  }
+  async function bulkTags() {
+    var ids = _ids(); if (!ids.length) return;
+    var mode = document.querySelector('input[name="bulk-tag-mode"]:checked').value;
+    var tag_ids = Array.from(document.querySelectorAll('.bulk-tag-cb:checked')).map(function(cb) { return parseInt(cb.value); });
+    var res = await _bulkPost('tags', { ids, tag_ids, mode }); if (!res) return;
+    _bulkToast(res); location.reload();
+  }
+  async function bulkSource(val) {
+    var ids = _ids(); if (!ids.length) return;
+    var res = await _bulkPost('source', { ids, source_id: val === '' ? null : parseInt(val) }); if (!res) return;
+    _bulkToast(res); location.reload();
+  }
+  async function bulkExclude(val) {
+    var ids = _ids(); if (!ids.length) return;
+    var res = await _bulkPost('exclude', { ids, exclude_from_stats: val }); if (!res) return;
+    _bulkToast(res); location.reload();
+  }
+
+  // --- Make recurring ---
+  var _mkRecId = null, _mkRecModal = null;
+  document.addEventListener('click', function(e) {
+    var btn = e.target.closest('.mk-rec');
+    if (!btn) return;
+    _mkRecId = parseInt(btn.dataset.id);
+    if (!_mkRecModal) _mkRecModal = new bootstrap.Modal(document.getElementById('makeRecurringModal'));
+    _mkRecModal.show();
+  });
+  async function confirmMakeRecurring() {
+    if (!_mkRecId) return;
+    var frequency = document.getElementById('mkrec-frequency').value;
+    var apply_mode = document.querySelector('input[name="mkrec-mode"]:checked').value;
+    var resp = await fetch('/api/movements/' + _mkRecId + '/make-recurring', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ frequency, apply_mode })
+    });
+    if (resp.ok) { _mkRecModal.hide(); showToast(I18N.made_recurring, 'success'); }
+    else { await handleApiError(resp); }
+  }
+
+  // --- Saved views ---
+  function openSaveView() {
+    document.getElementById('save-view-name').value = '';
+    new bootstrap.Modal(document.getElementById('saveViewModal')).show();
+  }
+  function _currentViewParams() {
+    var p = getFilterParams();
+    var obj = {};
+    for (var pair of p.entries()) {
+      var k = pair[0], v = pair[1];
+      if (k === 'tag_ids') { (obj.tag_ids = obj.tag_ids || []).push(parseInt(v)); }
+      else obj[k] = v;
+    }
+    return obj;
+  }
+  async function _putSettings(body) {
+    var resp = await fetch('/api/settings', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    return resp.ok;
+  }
+  async function confirmSaveView() {
+    var name = document.getElementById('save-view-name').value.trim();
+    if (!name) return;
+    var views = _VIEWS.slice();
+    views.push({ name: name, params: _currentViewParams() });
+    if (await _putSettings({ saved_views_json: JSON.stringify(views) })) { showToast(I18N.view_saved, 'success'); location.reload(); }
+    else showToast(I18N.error, 'error');
+  }
+  document.addEventListener('click', async function(e) {
+    var load = e.target.closest('.view-load');
+    if (load) {
+      var params = JSON.parse(load.dataset.params || '{}');
+      var sp = new URLSearchParams();
+      Object.keys(params).forEach(function(k) {
+        if (k === 'tag_ids' && Array.isArray(params[k])) params[k].forEach(function(v) { sp.append('tag_ids', v); });
+        else sp.set(k, params[k]);
+      });
+      window.location.href = '/movements' + (sp.toString() ? '?' + sp.toString() : '');
+      return;
+    }
+    var del = e.target.closest('.view-del');
+    if (del) {
+      var name = del.dataset.name;
+      if (!(await confirmDialog(I18N.delete_view_confirm + ' "' + name + '"?', { icon: 'warning', confirmColor: 'danger', confirmText: I18N.delete_label }))) return;
+      var views = _VIEWS.filter(function(v) { return v.name !== name; });
+      if (await _putSettings({ saved_views_json: JSON.stringify(views) })) { showToast(I18N.view_deleted, 'success'); location.reload(); }
+    }
+  });
+
+  // --- Quick-add templates ---
+  var _qaTpl = null, _qaModal = null, _qaFp = null;
+  document.addEventListener('click', function(e) {
+    var btn = e.target.closest('.qa-use');
+    if (!btn) return;
+    _qaTpl = JSON.parse(btn.dataset.tpl || '{}');
+    if (!_qaModal) _qaModal = new bootstrap.Modal(document.getElementById('quickAddModal'));
+    document.getElementById('qa-title').textContent = _qaTpl.name || '';
+    document.getElementById('qa-amount').value = (_qaTpl.amount != null) ? _qaTpl.amount : '';
+    document.getElementById('qa-summary').textContent = (_qaTpl.direction === 'in') ? I18N.dir_in : I18N.dir_out;
+    if (!_qaFp) _qaFp = flatpickr('#qa-date', { dateFormat: 'Y-m-d', altInput: true, altFormat: _fpAltFormat, defaultDate: 'today' });
+    else _qaFp.setDate('today', true);
+    _qaModal.show();
+  });
+  async function confirmQuickAdd() {
+    var amount = parseFloat(document.getElementById('qa-amount').value);
+    if (!amount || amount <= 0) { showToast(I18N.invalid_amount, 'error'); return; }
+    var body = {
+      amount: amount,
+      direction: _qaTpl.direction || 'out',
+      date: document.getElementById('qa-date').value,
+      source_id: (_qaTpl.source_id != null) ? _qaTpl.source_id : null,
+      note: _qaTpl.note || null,
+      tag_ids: _qaTpl.tag_ids || [],
+    };
+    var resp = await fetch('/api/movements', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    if (resp.ok) { _qaModal.hide(); showToast(I18N.quick_added, 'success'); location.reload(); }
+    else await handleApiError(resp);
+  }
+
+  // --- Manage templates ---
+  function _renderTemplates() {
+    var box = document.getElementById('mt-list');
+    if (!_TEMPLATES.length) { box.innerHTML = '<div class="text-muted small">' + I18N.no_templates + '</div>'; return; }
+    box.innerHTML = _TEMPLATES.map(function(t, i) {
+      var icon = t.direction === 'in' ? 'arrow-down-circle text-success' : 'arrow-up-circle text-danger';
+      var amt = (t.amount != null) ? ' · ' + t.amount : '';
+      return '<div class="d-flex align-items-center justify-content-between border rounded px-2 py-1 mb-1">' +
+        '<span class="text-truncate"><i class="bi bi-' + icon + ' me-1"></i>' + escapeHtml(t.name) + amt + '</span>' +
+        '<button class="btn btn-sm btn-outline-danger" onclick="deleteTemplate(' + i + ')"><i class="bi bi-x"></i></button></div>';
+    }).join('');
+  }
+  function openManageTemplates() {
+    _renderTemplates();
+    new bootstrap.Modal(document.getElementById('manageTemplatesModal')).show();
+  }
+  async function addTemplate() {
+    var name = document.getElementById('mt-name').value.trim();
+    if (!name) return;
+    var srcVal = document.getElementById('mt-source').value;
+    var amtVal = document.getElementById('mt-amount').value;
+    var tpl = {
+      name: name,
+      direction: document.getElementById('mt-direction').value,
+      source_id: srcVal ? parseInt(srcVal) : null,
+      amount: amtVal ? parseFloat(amtVal) : null,
+      note: document.getElementById('mt-note').value.trim() || null,
+      tag_ids: Array.from(document.querySelectorAll('.mt-tag-cb:checked')).map(function(cb) { return parseInt(cb.value); }),
+    };
+    var arr = _TEMPLATES.slice(); arr.push(tpl);
+    if (await _putSettings({ movement_templates_json: JSON.stringify(arr) })) { showToast(I18N.template_saved, 'success'); location.reload(); }
+    else showToast(I18N.error, 'error');
+  }
+  async function deleteTemplate(i) {
+    var t = _TEMPLATES[i]; if (!t) return;
+    if (!(await confirmDialog(I18N.delete_template_confirm + ' "' + t.name + '"?', { icon: 'warning', confirmColor: 'danger', confirmText: I18N.delete_label }))) return;
+    var arr = _TEMPLATES.slice(); arr.splice(i, 1);
+    if (await _putSettings({ movement_templates_json: JSON.stringify(arr) })) { showToast(I18N.template_deleted, 'success'); location.reload(); }
+  }
 </script>
 {% endblock %}

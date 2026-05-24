@@ -49,10 +49,15 @@ def delete_batch(session: Session, token: str) -> int | None:
         .where(Movement.created_at >= created_from)
         .where(Movement.created_at <= created_to)
     )
+    from services.attachments import delete_attachments_for_movement
+
     movements = session.exec(stmt).all()
     count = 0
     for m in movements:
         session.exec(delete(MovementTag).where(MovementTag.movement_id == m.id))
+        # Remove attachment rows AND their files on disk — a bare delete would
+        # cascade the rows (FK ON) but leak the files.
+        delete_attachments_for_movement(session, m.id)
         session.delete(m)
         count += 1
     session.commit()

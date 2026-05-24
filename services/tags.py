@@ -40,6 +40,8 @@ def update_tag(session: Session, tag_id: int, data: TagUpdate) -> Tag:
 
 
 def delete_tag(session: Session, tag_id: int) -> None:
+    from services.budgets import delete_budgets_for_tag
+
     tag = get_tag(session, tag_id)
     # Remove all movement-tag links for this tag
     links = session.exec(
@@ -47,5 +49,8 @@ def delete_tag(session: Session, tag_id: int) -> None:
     ).all()
     for link in links:
         session.delete(link)
+    # Drop any budgets that targeted this tag (SQLite FK is on, but cascade
+    # the app-level invariant explicitly so the rule never outlives its tag).
+    delete_budgets_for_tag(session, tag_id)
     session.delete(tag)
     session.commit()

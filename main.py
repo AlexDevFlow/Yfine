@@ -117,6 +117,7 @@ def _load_settings_into_i18n():
     from i18n import (
         set_theme, set_hide_net_worth, set_last_source_id, set_mobile_nav_mode,
         set_ui_scale, set_hotkeys_enabled, set_hotkeys_json, set_nav_layout_json,
+        set_saved_views_json, set_movement_templates_json,
     )
 
     with Session(engine) as session:
@@ -131,6 +132,8 @@ def _load_settings_into_i18n():
         set_hotkeys_enabled(settings.hotkeys_enabled)
         set_hotkeys_json(settings.hotkeys_json)
         set_nav_layout_json(settings.nav_layout_json)
+        set_saved_views_json(settings.saved_views_json)
+        set_movement_templates_json(settings.movement_templates_json)
         return settings
 
 
@@ -327,6 +330,7 @@ templates.env.globals["get_locale"] = get_locale
 from i18n import (
     get_theme, get_hide_net_worth, get_last_source_id, get_mobile_nav_mode, get_ui_scale,
     get_hotkeys_enabled, get_hotkeys_json, get_nav_items,
+    get_saved_views_json, get_movement_templates_json,
 )
 templates.env.globals["get_theme"] = get_theme
 templates.env.globals["get_hide_net_worth"] = get_hide_net_worth
@@ -336,6 +340,8 @@ templates.env.globals["get_ui_scale"] = get_ui_scale
 templates.env.globals["get_hotkeys_enabled"] = get_hotkeys_enabled
 templates.env.globals["get_hotkeys_json"] = get_hotkeys_json
 templates.env.globals["get_nav_items"] = get_nav_items
+templates.env.globals["get_saved_views_json"] = get_saved_views_json
+templates.env.globals["get_movement_templates_json"] = get_movement_templates_json
 
 from plugins.registry import get_menu_items
 templates.env.globals["plugin_menu_items"] = get_menu_items
@@ -471,7 +477,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 # ---------------------------------------------------------------------------
 # Register routers
 # ---------------------------------------------------------------------------
-from routers import pages, sources, movements, tags, recurring, notifications, data, settings, whims, savings, exchange_rates, portfolios, imports, goals  # noqa: E402
+from routers import pages, sources, movements, tags, recurring, notifications, data, settings, whims, savings, exchange_rates, portfolios, imports, goals, budgets  # noqa: E402
 from routers import plugins as plugins_router  # noqa: E402
 
 app.include_router(pages.router)
@@ -479,6 +485,7 @@ app.include_router(sources.router)
 app.include_router(movements.router)
 app.include_router(tags.router)
 app.include_router(recurring.router)
+app.include_router(budgets.router)
 app.include_router(notifications.router)
 app.include_router(data.router)
 app.include_router(settings.router)

@@ -1,0 +1,90 @@
+<h5>Presupuestos</h5>
+<p class="yn-help-lead">Un presupuesto es un límite de gasto (o un objetivo de ingresos) ligado a una etiqueta y una moneda que se renueva solo cada periodo. Yfine calcula en vivo cuánto has gastado a partir de los movimientos que llevan esa etiqueta, para que siempre sepas cuánto te queda.</p>
+
+<h6>Qué ves</h6>
+<ul>
+  <li>Arriba, las <strong>flechas de navegación de periodo</strong>: ‹ anterior · actual · siguiente ›. La navegación avanza cada presupuesto en su propia cadencia (uno semanal una semana, uno anual un año).</li>
+  <li>Un <strong>resumen por moneda</strong>: gastado / presupuestado y lo que queda, agrupado por moneda para que los presupuestos de distintas monedas sigan siendo legibles.</li>
+  <li>Una cuadrícula de <strong>tarjetas</strong>, una por presupuesto, ordenadas con los de mayor riesgo primero (primero los excedidos, luego los cercanos al umbral).</li>
+  <li>Cada tarjeta muestra: etiqueta y color, moneda, <strong>gastado / disponible</strong>, una <strong>barra de progreso</strong>, el porcentaje, cuánto <strong>queda</strong> (o cuánto te has <em>excedido</em>), el <strong>periodo</strong> con su rango de fechas y — si está activo — el <strong>arrastre</strong>.</li>
+  <li>Indicadores de <strong>ritmo</strong>: cuánto puedes gastar al día durante los días que quedan y una <strong>proyección</strong> de fin de periodo si mantienes el ritmo actual.</li>
+</ul>
+
+<h6>Acciones</h6>
+<div class="yn-help-actions">
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-plus-lg"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Nuevo presupuesto</span>
+      <span class="yn-help-action-desc">Elige etiqueta, importe, moneda, periodo y tipo (límite de gasto u objetivo de ingresos).</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon muted"><i class="bi bi-list-ul"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Ver movimientos</span>
+      <span class="yn-help-action-desc">Abre la lista de movimientos ya filtrada por la etiqueta del presupuesto, para ver qué lo compone.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon"><i class="bi bi-pencil"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Editar</span>
+      <span class="yn-help-action-desc">Cambia importe, periodo, umbral o arrastre. Cambiar la regla reinicia la banda de aviso ya notificada.</span>
+    </div>
+  </div>
+  <div class="yn-help-action">
+    <span class="yn-help-action-icon danger"><i class="bi bi-trash"></i></span>
+    <div class="yn-help-action-body">
+      <span class="yn-help-action-label">Eliminar</span>
+      <span class="yn-help-action-desc">Quita el presupuesto. Tus movimientos no se tocan.</span>
+    </div>
+  </div>
+</div>
+
+<h6>Cómo funciona</h6>
+<p>Un presupuesto no materializa nada por periodo: el <strong>gastado</strong> se recalcula en vivo a partir de los movimientos, así las cifras se autocorrigen si editas un movimiento pasado. Un movimiento cuenta cuando:</p>
+<ul>
+  <li>lleva la <strong>etiqueta</strong> del presupuesto;</li>
+  <li>coincide en <strong>dirección</strong> (salida para un límite de gasto, entrada para un objetivo);</li>
+  <li>cae en el <strong>periodo</strong> actual;</li>
+  <li>su fuente está en la <strong>moneda</strong> del presupuesto.</li>
+</ul>
+<p>Las <strong>transferencias</strong> y los movimientos <strong>excluidos de las estadísticas</strong> nunca cuentan. Los movimientos <strong>externos</strong> (sin fuente, por tanto sin moneda) tampoco cuentan.</p>
+
+<h6>Un presupuesto por etiqueta y moneda</h6>
+<p>Solo puede haber un presupuesto <em>activo</em> por par etiqueta-moneda — mantiene el modelo simple. Si necesitas la misma etiqueta en dos monedas (p. ej. "Supermercado" en EUR y en USD), crea dos presupuestos.</p>
+
+<h6>Periodo</h6>
+<ul>
+  <li><strong>Semanal</strong>: de lunes a domingo.</li>
+  <li><strong>Mensual</strong>: del primer al último día del mes.</li>
+  <li><strong>Trimestral</strong>: bloques de tres meses alineados al calendario (ene–mar, abr–jun, …).</li>
+  <li><strong>Anual</strong>: el año natural.</li>
+</ul>
+<p>Los periodos están alineados al calendario y se renuevan solos — nunca los recreas.</p>
+
+<h6>Arrastre</h6>
+<p>Con el <strong>arrastre</strong> activado, el sobrante o el exceso de un periodo pasa al siguiente (estilo "sobres"). Presupuesta 400 y gasta 300, y el periodo siguiente tienes 500 disponibles; excédete en 100, y el siguiente empieza en 300. Sin arrastre, cada periodo empieza limpio con el importe base.</p>
+
+<h6>Umbral de aviso</h6>
+<p>El <strong>umbral de aviso</strong> (un porcentaje) lanza una notificación cuando el gasto lo alcanza, y otra al superar el 100%. Yfine avisa una vez por banda y periodo, para no inundarte. Pon el umbral a <strong>0</strong> para desactivar los avisos de ese presupuesto.</p>
+
+<h6>Ritmo y proyección</h6>
+<p>Yfine compara cuánto has avanzado en el periodo con cuánto llevas gastado. Muestra cuánto puedes gastar <strong>al día</strong> los días que quedan y una <strong>proyección</strong> de fin de periodo: si la proyección supera lo disponible, el número se pone rojo como aviso temprano.</p>
+
+<h6>Paso a paso: crear un presupuesto de gasto</h6>
+<ol class="yn-help-steps">
+  <li>Asegúrate de tener al menos una <strong>etiqueta</strong> (los presupuestos se apoyan en etiquetas).</li>
+  <li>Pulsa <span class="yn-help-chip primary"><i class="bi bi-plus-lg"></i> Nuevo presupuesto</span>.</li>
+  <li>Elige la <strong>etiqueta</strong> (p. ej. "Supermercado") y la <strong>moneda</strong>.</li>
+  <li>Introduce el <strong>límite por periodo</strong> y elige <strong>Mensual</strong>.</li>
+  <li>Deja el tipo en <strong>Límite de gasto</strong>.</li>
+  <li>Opcional: ajusta el <strong>umbral de aviso</strong> (por defecto 80%) y activa el <strong>arrastre</strong>.</li>
+  <li>Guarda. La tarjeta aparece con el gasto del periodo actual ya calculado.</li>
+</ol>
+
+<div class="yn-help-tip">
+  <i class="bi bi-info-circle-fill"></i>
+  <div>Para que un movimiento cuente en un presupuesto debe llevar su etiqueta y estar en una fuente de la misma moneda. Si un presupuesto parece quedarse a cero, comprueba que los movimientos tengan la etiqueta correcta y no estén excluidos de las estadísticas.</div>
+</div>

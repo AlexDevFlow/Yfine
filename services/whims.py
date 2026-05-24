@@ -94,6 +94,15 @@ def purchase_whim(session: Session, whim_id: int, data: WhimPurchase) -> Whim:
     if not source:
         raise HTTPException(status_code=404, detail="Source not found")
 
+    # The purchase movement is booked in the source's currency, so the source
+    # must match the whim's currency — otherwise e.g. a 50 USD whim would silently
+    # subtract 50 from a EUR account.
+    if (source.currency or "").upper() != (whim.currency or "").upper():
+        raise HTTPException(
+            status_code=422,
+            detail=f"Currency mismatch: source is {source.currency}, whim is {whim.currency}.",
+        )
+
     # Drain the linked goal onto the chosen source first, if applicable.
     # We drain whenever the goal isn't cancelled, regardless of active/
     # completed status — the only thing that matters is "does it still have

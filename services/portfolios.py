@@ -297,6 +297,36 @@ def upsert_price_snapshot(session: Session, holding: Holding, snapshot_date: Opt
         ))
 
 
+def snapshot_dates_for_source(
+    session: Session,
+    source_id: int,
+    start: Optional[date] = None,
+    end: Optional[date] = None,
+) -> list[date]:
+    """Distinct HoldingPriceSnapshot dates for the source's holdings, within [start, end]."""
+    source = session.get(Source, source_id)
+    if source is None:
+        return []
+    holding_ids = list(session.exec(
+        select(Holding.id)
+        .join(Portfolio, Holding.portfolio_id == Portfolio.id)
+        .where(Portfolio.source_id == source_id)
+        .where(Portfolio.base_currency == source.currency)
+    ).all())
+    if not holding_ids:
+        return []
+    q = (
+        select(HoldingPriceSnapshot.date)
+        .where(col(HoldingPriceSnapshot.holding_id).in_(holding_ids))
+        .distinct()
+    )
+    if start is not None:
+        q = q.where(HoldingPriceSnapshot.date >= start)
+    if end is not None:
+        q = q.where(HoldingPriceSnapshot.date <= end)
+    return sorted(set(session.exec(q).all()))
+
+
 def portfolio_value_by_source_over_time(
     session: Session, source_id: int, dates: list[date]
 ) -> dict[date, float]:

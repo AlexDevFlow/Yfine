@@ -53,6 +53,9 @@ class TransferCreate(BaseModel):
     from_source_id: int
     to_source_id: int
     amount: float = Field(gt=0)
+    # Amount landing in the destination. When the two sources differ in currency
+    # this holds the converted figure; None means a 1:1 transfer (in-leg == amount).
+    to_amount: Optional[float] = Field(default=None, gt=0)
     date: dt.date
     note: Optional[str] = None
     tag_ids: list[int] = []
@@ -71,6 +74,7 @@ class TransferUpdate(BaseModel):
     from_source_id: Optional[int] = None
     to_source_id: Optional[int] = None
     amount: Optional[float] = Field(default=None, gt=0)
+    to_amount: Optional[float] = Field(default=None, gt=0)
     date: Optional[dt.date] = None
     note: Optional[str] = None
     tag_ids: Optional[list[int]] = None
@@ -79,3 +83,37 @@ class TransferUpdate(BaseModel):
     @classmethod
     def check_note(cls, v):
         return validate_note(v)
+
+
+# ── Bulk operations ──────────────────────────────────────────────
+
+class BulkDelete(BaseModel):
+    ids: list[int] = Field(min_length=1, max_length=1000)
+
+
+class BulkTags(BaseModel):
+    ids: list[int] = Field(min_length=1, max_length=1000)
+    tag_ids: list[int] = []
+    mode: Literal["add", "remove", "replace"] = "add"
+
+
+class BulkSource(BaseModel):
+    ids: list[int] = Field(min_length=1, max_length=1000)
+    source_id: Optional[int] = None  # None = external
+
+
+class BulkExclude(BaseModel):
+    ids: list[int] = Field(min_length=1, max_length=1000)
+    exclude_from_stats: bool
+
+
+class BulkResult(BaseModel):
+    affected: int
+    skipped: list[int] = []
+
+
+# ── Make recurring (from an existing movement) ───────────────────
+
+class MakeRecurring(BaseModel):
+    frequency: Literal["daily", "weekly", "monthly", "yearly"] = "monthly"
+    apply_mode: Literal["auto", "confirm"] = "confirm"

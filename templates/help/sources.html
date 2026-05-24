@@ -79,6 +79,15 @@
 <h6>Merging sources</h6>
 <p>Merging keeps all the data: every movement from the merged source moves over to the target, and both cash balances add up. Useful when you stop using an account and want to fold it into an active one.</p>
 
+<h6>Interest / Yield</h6>
+<p>A source can earn <strong>periodic interest</strong> on its own, like a deposit account. In the source form you set a <strong>yield rate per period</strong> and how many months between credits: on each due date Yfine posts an income movement of cash balance × rate, and compounds (later interest is computed on the updated balance).</p>
+<ul>
+  <li>The rate is the percentage <em>per period</em>, not annualised: 1% every month and 12% every 12 months are not the same.</li>
+  <li>Interest accrues only on a <strong>positive cash balance</strong> — the value of linked portfolios doesn't count, and a balance in the red is never charged.</li>
+  <li>If the app stays closed, on startup Yfine catches up every period that came due in one go (never paying the same period twice).</li>
+  <li>Leave the rate at <strong>0</strong> to turn it off. When yield is active, the form shows the <strong>next accrual date</strong>.</li>
+</ul>
+
 <h6>Step by step: first source</h6>
 <ol class="yn-help-steps">
   <li>Click <span class="yn-help-chip primary"><i class="bi bi-plus-lg"></i> New Source</span>.</li>

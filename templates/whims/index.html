@@ -114,7 +114,7 @@
               {% endif %}
 
               <div class="d-flex gap-1 flex-wrap">
-                <button class="btn btn-sm btn-success text-nowrap" onclick="openPurchaseModal({{ w.id }}, '{{ w.name|e }}', {{ w.amount }}, '{{ w.currency }}', {{ w.source_id or 'null' }}, {{ w.linked_goal_id or 'null' }}, {{ w.linked_goal_allocated or 'null' }})" title="{{ _('whim_buy') }}">
+                <button class="btn btn-sm btn-success text-nowrap" onclick='openPurchaseModal({{ w.id }}, {{ w.name|tojson }}, {{ w.amount }}, {{ w.currency|tojson }}, {{ w.source_id or "null" }}, {{ w.linked_goal_id or "null" }}, {{ w.linked_goal_allocated or "null" }})' title="{{ _('whim_buy') }}">
                   <i class="bi bi-cart me-1"></i>{{ _('whim_buy') }}
                 </button>
                 {% if not w.linked_goal_id %}

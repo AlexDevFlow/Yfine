@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% set active_page = "budgets" %}
+
+{% block title %}{% if budget %}{{ _('edit_budget') }}{% else %}{{ _('new_budget') }}{% endif %}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title mb-0">{% if budget %}{{ _('edit_budget') }}{% else %}{{ _('new_budget') }}{% endif %}</h5>
+      </div>
+      <div class="card-body">
+        {% if not tags %}
+        <div class="alert alert-warning mb-0">
+          {{ _('budgets_need_tags') }} <a href="/tags">{{ _('tags') }}</a>.
+        </div>
+        {% else %}
+        <form id="budget-form">
+          <div class="mb-3">
+            <label for="tag_id" class="form-label">{{ _('tag') }}</label>
+            <select class="form-select" id="tag_id" required>
+              {% for t in tags %}
+              <option value="{{ t.id }}" {% if budget and budget.tag_id == t.id %}selected{% endif %}>{{ t.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="amount" class="form-label">{{ _('budget_amount') }}</label>
+              <input type="number" step="0.01" min="0.01" inputmode="decimal" class="form-control" id="amount" value="{{ budget.amount if budget else '' }}" data-money required>
+            </div>
+            <div class="col-md-6">
+              <label for="currency" class="form-label">{{ _('currency') }}</label>
+              <select class="form-select" id="currency" required>
+                {% set currencies = ['EUR', 'USD', 'GBP', 'CHF', 'JPY', 'CAD', 'AUD', 'CNY', 'INR', 'BRL', 'KRW', 'MXN', 'SEK', 'NOK', 'DKK', 'PLN', 'CZK', 'HUF', 'RON', 'BGN', 'TRY', 'RUB', 'ZAR', 'NZD', 'SGD', 'HKD', 'THB', 'IDR', 'MYR', 'PHP', 'ARS', 'BTC', 'ETH'] %}
+                {% for c in currencies %}
+                <option value="{{ c }}" {% if (budget and budget.currency == c) or (not budget and c == 'EUR') %}selected{% endif %}>{{ flag(c) }} {{ c }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="period" class="form-label">{{ _('budget_period') }}</label>
+              <select class="form-select" id="period">
+                {% for p in ['weekly', 'monthly', 'quarterly', 'yearly'] %}
+                <option value="{{ p }}" {% if (budget and budget.period == p) or (not budget and p == 'monthly') %}selected{% endif %}>{{ _('period_' ~ p) }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">{{ _('budget_type') }}</label>
+              <div>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" name="direction" id="dir-out" value="out" {% if not budget or budget.direction == 'out' %}checked{% endif %}>
+                  <label class="form-check-label text-danger" for="dir-out">{{ _('spending_cap') }}</label>
+                </div>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" name="direction" id="dir-in" value="in" {% if budget and budget.direction == 'in' %}checked{% endif %}>
+                  <label class="form-check-label text-success" for="dir-in">{{ _('income_target') }}</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="alert_threshold_pct" class="form-label">{{ _('alert_threshold') }}</label>
+            <div class="input-group">
+              <input type="number" min="0" max="100" step="1" inputmode="numeric" class="form-control" id="alert_threshold_pct" value="{{ budget.alert_threshold_pct if budget else 80 }}">
+              <span class="input-group-text">%</span>
+            </div>
+            <small class="text-muted">{{ _('alert_threshold_hint') }}</small>
+          </div>
+
+          <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" id="rollover" {% if budget and budget.rollover %}checked{% endif %}>
+            <label class="form-check-label" for="rollover">{{ _('rollover') }}</label>
+            <small class="d-block text-muted">{{ _('rollover_hint') }}</small>
+          </div>
+
+          {% if budget %}
+          <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" id="active" {% if budget.active %}checked{% endif %}>
+            <label class="form-check-label" for="active">{{ _('active') }}</label>
+          </div>
+          {% endif %}
+
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">{{ _('save') }}</button>
+            <a href="/budgets" class="btn btn-outline-secondary">{{ _('cancel') }}</a>
+          </div>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block page_js %}
+<script>
+  var _form = document.getElementById('budget-form');
+  if (_form) _form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const data = {
+      tag_id: parseInt(document.getElementById('tag_id').value, 10),
+      amount: parseFloat(document.getElementById('amount').value),
+      currency: document.getElementById('currency').value,
+      period: document.getElementById('period').value,
+      direction: document.querySelector('input[name="direction"]:checked').value,
+      alert_threshold_pct: parseInt(document.getElementById('alert_threshold_pct').value, 10) || 0,
+      rollover: document.getElementById('rollover').checked
+    };
+    {% if budget %}
+    const activeEl = document.getElementById('active');
+    if (activeEl) data.active = activeEl.checked;
+    const resp = await fetch('/api/budgets/{{ budget.id }}', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    {% else %}
+    const resp = await fetch('/api/budgets', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    {% endif %}
+    if (resp.ok) {
+      setTimeout(function () { window.location.assign('/budgets'); }, 100);
+    } else {
+      await handleApiError(resp);
+    }
+  });
+</script>
+{% endblock %}

@@ -79,6 +79,15 @@
 <h6>Fusionar fuentes</h6>
 <p>Fusionar conserva todos los datos: cada movimiento de la fuente fusionada pasa a la fuente de destino y los dos saldos de efectivo se suman. Útil cuando dejas de usar una cuenta y quieres integrarla en otra activa.</p>
 
+<h6>Interés / Rendimiento</h6>
+<p>Una fuente puede generar <strong>intereses periódicos</strong> por sí sola, como una cuenta de depósito. En el formulario de la fuente fijas una <strong>tasa de rendimiento por periodo</strong> y cada cuántos meses abonarla: en cada vencimiento Yfine crea un movimiento de ingreso igual a saldo de efectivo × tasa, y capitaliza (los intereses siguientes se calculan sobre el saldo actualizado).</p>
+<ul>
+  <li>La tasa es el porcentaje <em>por periodo</em>, no anualizada: 1% al mes y 12% cada 12 meses no son equivalentes.</li>
+  <li>Los intereses se generan solo sobre un <strong>saldo de efectivo positivo</strong> — el valor de las carteras vinculadas no cuenta y un saldo en rojo nunca se cobra.</li>
+  <li>Si la app permanece cerrada, al arrancar Yfine recupera de una vez todos los periodos vencidos (sin pagar dos veces el mismo periodo).</li>
+  <li>Deja la tasa en <strong>0</strong> para desactivarlo. Cuando el rendimiento está activo, el formulario muestra la <strong>próxima fecha de abono</strong>.</li>
+</ul>
+
 <h6>Paso a paso: primera fuente</h6>
 <ol class="yn-help-steps">
   <li>Pulsa <span class="yn-help-chip primary"><i class="bi bi-plus-lg"></i> Nueva Fuente</span>.</li>

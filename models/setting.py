@@ -22,5 +22,9 @@ class Setting(SQLModel, table=True):
     lan_access: bool = Field(default=False)
     portfolio_prices_enabled: bool = Field(default=False)
     portfolio_prices_prompted: bool = Field(default=False)
+    # Movements power UX (JSON blobs, like hotkeys_json/nav_layout_json):
+    # saved filter views and quick-add movement templates.
+    saved_views_json: str = Field(default="[]")
+    movement_templates_json: str = Field(default="[]")
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)

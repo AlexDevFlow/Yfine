@@ -1,5 +1,6 @@
 from datetime import datetime, date, timedelta
 
+from dateutil.relativedelta import relativedelta
 from fastapi import HTTPException
 from sqlmodel import Session, select, func, col  # noqa: F401 — col used in get_balances_batch
 
@@ -7,6 +8,23 @@ from models.movement import Movement, MovementTag
 from models.notification import Notification
 from models.source import Source
 from schemas.source import SourceCreate, SourceUpdate
+
+
+def _resync_yield_schedule(source: Source, today: date | None = None) -> None:
+    """(Re)compute ``yield_next_date`` from the source's current yield config.
+
+    Called whenever the rate or period changes. When yield is active, the next
+    accrual is anchored to the last credited date (so an active schedule keeps
+    its cadence) or to today for a freshly enabled source. A zero/empty rate
+    clears the schedule so the scheduler skips the source entirely.
+    """
+    today = today or date.today()
+    active = (source.yield_rate or 0) > 0 and (source.yield_period_months or 0) > 0
+    if active:
+        anchor = source.yield_last_date or today
+        source.yield_next_date = anchor + relativedelta(months=source.yield_period_months)
+    else:
+        source.yield_next_date = None
 
 
 def list_sources(
@@ -30,6 +48,7 @@ def get_source(session: Session, source_id: int) -> Source:
 
 def create_source(session: Session, data: SourceCreate) -> Source:
     source = Source(**data.model_dump())
+    _resync_yield_schedule(source)
     session.add(source)
     session.commit()
     session.refresh(source)
@@ -39,8 +58,13 @@ def create_source(session: Session, data: SourceCreate) -> Source:
 def update_source(session: Session, source_id: int, data: SourceUpdate) -> Source:
     source = get_source(session, source_id)
     update_data = data.model_dump(exclude_unset=True)
+    # Only re-anchor the accrual schedule when the yield config actually changes,
+    # so unrelated edits (rename, currency) don't reset the countdown.
+    yield_touched = "yield_rate" in update_data or "yield_period_months" in update_data
     for key, value in update_data.items():
         setattr(source, key, value)
+    if yield_touched:
+        _resync_yield_schedule(source)
     source.updated_at = datetime.utcnow()
     session.add(source)
     session.commit()
@@ -105,7 +129,20 @@ def delete_source(session: Session, source_id: int, action: str = "delete_all") 
 
     if action.startswith("move_to:"):
         target_id = int(action.split(":")[1])
+        if target_id == source_id:
+            raise HTTPException(status_code=400, detail="Cannot move a source into itself.")
         target = get_source(session, target_id)
+        # Reassigning movements to a different-currency source would silently
+        # re-denominate their amounts (balance is computed in the target's
+        # currency). Block it, like merge_sources does.
+        if target.currency != source.currency:
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    f"Cannot move into a source with a different currency "
+                    f"({source.currency} → {target.currency})."
+                ),
+            )
         # Reassign movements
         movements = session.exec(
             select(Movement).where(Movement.source_id == source_id)
@@ -386,33 +423,118 @@ def get_balance_history(
     else:
         running = source.starting_balance
 
-    # Build a cash-balance-per-date sequence first
-    cash_points: list[tuple[date, float]] = []
+    # Cash balance after each movement date (end-of-day)
+    starting_cash = running
+    cash_by_movement_date: dict[date, float] = {}
     for m in movements:
         if m.direction == "in":
             running = round(running + m.amount, 2)
         else:
             running = round(running - m.amount, 2)
-        cash_points.append((m.date, round(running, 2)))
+        cash_by_movement_date[m.date] = round(running, 2)
 
-    # Always include "today" so the line extends to the present even without a
-    # movement today — this is the date against which live portfolio values apply.
-    if not cash_points or cash_points[-1][0] < today:
-        cash_points.append((today, round(running, 2)))
+    # Pull holding-price-snapshot dates within the range so the line reflects
+    # market-value evolution even when the source has no cash movements.
+    range_start = today - range_map[range_str] if range_str in range_map else None
+    snap_dates = portfolio_service.snapshot_dates_for_source(
+        session, source_id, start=range_start, end=today
+    )
 
-    # Fetch portfolio values for the unique dates in one pass
-    unique_dates = sorted({d for d, _ in cash_points})
+    all_dates = sorted({*cash_by_movement_date.keys(), *snap_dates, today})
+
+    # Forward-fill cash: the balance on a given date equals the running balance
+    # after the latest movement on or before that date (or the starting cash).
+    sorted_mov_dates = sorted(cash_by_movement_date.keys())
+
+    def cash_on(d: date) -> float:
+        c = starting_cash
+        for md in sorted_mov_dates:
+            if md <= d:
+                c = cash_by_movement_date[md]
+            else:
+                break
+        return round(c, 2)
+
     pf_values = portfolio_service.portfolio_value_by_source_over_time(
-        session, source_id, unique_dates
+        session, source_id, all_dates
     )
 
     history = [
         {
             "date": d.isoformat(),
-            "balance": round(cash + pf_values.get(d, 0.0), 2),
-            "cash": cash,
+            "balance": round(cash_on(d) + pf_values.get(d, 0.0), 2),
+            "cash": cash_on(d),
             "portfolios": round(pf_values.get(d, 0.0), 2),
         }
-        for d, cash in cash_points
+        for d in all_dates
     ]
     return history
+
+
+def accrue_source_yields(session: Session, today: date | None = None) -> int:
+    """Credit periodic interest to every source whose accrual is due.
+
+    For each source with ``yield_rate > 0`` and a due ``yield_next_date``, post an
+    "in" movement of ``cash_balance * (yield_rate / 100)`` dated on the accrual
+    day, then advance the schedule by ``yield_period_months``. Catches up every
+    missed period in one run (compounding on the running balance), guarding
+    against double-payment via ``yield_last_date`` and against runaway loops with
+    an iteration cap. Returns the number of interest movements created.
+
+    Interest is computed on the *cash* balance only (a deposit account earns on
+    deposited capital, not on the market value of any linked portfolio), and only
+    a positive balance accrues — a source in the red is never charged interest.
+    """
+    from i18n import _
+
+    today = today or date.today()
+    label = _("interest_accrual")
+
+    sources = session.exec(
+        select(Source).where(
+            Source.yield_rate > 0,
+            col(Source.yield_next_date).is_not(None),
+        )
+    ).all()
+
+    created = 0
+    for source in sources:
+        period = source.yield_period_months or 12
+        iterations = 0
+        while (
+            source.yield_next_date is not None
+            and source.yield_next_date <= today
+            and iterations < 600
+        ):
+            accrual_date = source.yield_next_date
+            # Idempotency: never credit the same due date twice (e.g. startup run
+            # overlapping the interval job, or a partially-applied previous tick).
+            if source.yield_last_date == accrual_date:
+                break
+
+            balance = get_balance(session, source.id)
+            interest = round(balance * (source.yield_rate / 100.0), 2)
+            if interest > 0:
+                session.add(Movement(
+                    source_id=source.id,
+                    amount=interest,
+                    direction="in",
+                    date=accrual_date,
+                    note=f"{label} ({source.yield_rate:g}% · {period}m)",
+                ))
+                session.add(Notification(
+                    type="info",
+                    title=f"💰 {source.name}",
+                    body=f"{label}: +{interest:.2f} {source.currency}",
+                    related_entity=f"source:{source.id}",
+                ))
+                created += 1
+
+            source.yield_last_date = accrual_date
+            source.yield_next_date = accrual_date + relativedelta(months=period)
+            source.updated_at = datetime.utcnow()
+            session.add(source)
+            iterations += 1
+
+    session.commit()
+    return created

@@ -24,6 +24,10 @@ env/
 # Auth config (contains password hash and session secret)
 .yfine-auth.json
 
+# TLS certificate + private key (generated per machine at runtime)
+certs/
+*.pem
+
 # IDE
 .vscode/
 .idea/
@@ -91,3 +95,7 @@ migration_warning.txt
 *.orig
 *.rej
 attachments/
+
+# Migration target — new Tauri 2 + React + TS rewrite (work-in-progress)
+# Excluded from main repo until ready to replace the Python app
+yfine-next/

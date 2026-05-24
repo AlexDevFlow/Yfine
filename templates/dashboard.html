@@ -184,8 +184,8 @@
                 <small class="fw-bold d-block">{{ m.source_name }}</small>
                 <small class="text-muted">{{ m.date|fdate }}</small>
               </div>
-              <span class="{% if m.direction == 'in' %}text-success{% else %}text-danger{% endif %} fw-bold">
-                {% if m.direction == 'in' %}+{% else %}-{% endif %}{{ "%.2f"|format(m.amount) }}
+              <span class="{% if m.transfer_pair_id %}text-info{% elif m.direction == 'in' %}text-success{% else %}text-danger{% endif %} fw-bold">
+                {% if m.transfer_pair_id %}<i class="bi bi-arrow-left-right me-1"></i>{{ "%.2f"|format(m.amount) }}{% else %}{% if m.direction == 'in' %}+{% else %}-{% endif %}{{ "%.2f"|format(m.amount) }}{% endif %}
               </span>
             </div>
           </li>

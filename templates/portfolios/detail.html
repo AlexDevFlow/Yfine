@@ -153,7 +153,7 @@
             </td>
             <td class="text-end">
               <button class="btn btn-sm btn-outline-warning" onclick='editHolding({{ h | tojson }})' title="{{ _('edit') }}"><i class="bi bi-pencil"></i></button>
-              <button class="btn btn-sm btn-outline-danger" onclick="deleteHolding({{ h.id }}, '{{ h.symbol }}')" title="{{ _('delete') }}"><i class="bi bi-trash"></i></button>
+              <button class="btn btn-sm btn-outline-danger" onclick='deleteHolding({{ h.id }}, {{ h.symbol|tojson }})' title="{{ _('delete') }}"><i class="bi bi-trash"></i></button>
             </td>
           </tr>
           {% endfor %}

@@ -10,6 +10,22 @@ from services import sources as source_service
 router = APIRouter(prefix="/api/sources", tags=["sources"])
 
 
+def _to_read(s, current_balance: float) -> SourceRead:
+    """Build the API representation of a source with its computed balance."""
+    return SourceRead(
+        id=s.id,
+        name=s.name,
+        currency=s.currency,
+        starting_balance=s.starting_balance,
+        current_balance=current_balance,
+        yield_rate=s.yield_rate,
+        yield_period_months=s.yield_period_months,
+        yield_next_date=s.yield_next_date,
+        created_at=s.created_at,
+        updated_at=s.updated_at,
+    )
+
+
 class MergeBody(BaseModel):
     from_source_id: int
     into_source_id: int
@@ -21,49 +37,23 @@ def list_sources(
 ):
     items = source_service.list_sources(session, skip, limit)
     balances = source_service.get_balances_batch(session, items)
-    result = []
-    for s in items:
-        result.append(
-            SourceRead(
-                id=s.id,
-                name=s.name,
-                currency=s.currency,
-                starting_balance=s.starting_balance,
-                current_balance=balances.get(s.id, s.starting_balance),
-                created_at=s.created_at,
-                updated_at=s.updated_at,
-            )
-        )
-    return result
+    return [
+        _to_read(s, balances.get(s.id, s.starting_balance))
+        for s in items
+    ]
 
 
 @router.post("", response_model=SourceRead, status_code=201)
 def create_source(data: SourceCreate, session: Session = Depends(get_session)):
     s = source_service.create_source(session, data)
-    return SourceRead(
-        id=s.id,
-        name=s.name,
-        currency=s.currency,
-        starting_balance=s.starting_balance,
-        current_balance=s.starting_balance,
-        created_at=s.created_at,
-        updated_at=s.updated_at,
-    )
+    return _to_read(s, s.starting_balance)
 
 
 @router.get("/{source_id}", response_model=SourceRead)
 def get_source(source_id: int, session: Session = Depends(get_session)):
     s = source_service.get_source(session, source_id)
     balance = source_service.get_balance(session, s.id)
-    return SourceRead(
-        id=s.id,
-        name=s.name,
-        currency=s.currency,
-        starting_balance=s.starting_balance,
-        current_balance=balance,
-        created_at=s.created_at,
-        updated_at=s.updated_at,
-    )
+    return _to_read(s, balance)
 
 
 @router.put("/{source_id}", response_model=SourceRead)
@@ -72,15 +62,7 @@ def update_source(
 ):
     s = source_service.update_source(session, source_id, data)
     balance = source_service.get_balance(session, s.id)
-    return SourceRead(
-        id=s.id,
-        name=s.name,
-        currency=s.currency,
-        starting_balance=s.starting_balance,
-        current_balance=balance,
-        created_at=s.created_at,
-        updated_at=s.updated_at,
-    )
+    return _to_read(s, balance)
 
 
 @router.get("/{source_id}/dependencies")
@@ -107,15 +89,7 @@ def delete_source(
 def merge_sources(body: MergeBody, session: Session = Depends(get_session)):
     s = source_service.merge_sources(session, body.from_source_id, body.into_source_id)
     balance = source_service.get_balance(session, s.id)
-    return SourceRead(
-        id=s.id,
-        name=s.name,
-        currency=s.currency,
-        starting_balance=s.starting_balance,
-        current_balance=balance,
-        created_at=s.created_at,
-        updated_at=s.updated_at,
-    )
+    return _to_read(s, balance)
 
 
 @router.get("/{source_id}/history")
