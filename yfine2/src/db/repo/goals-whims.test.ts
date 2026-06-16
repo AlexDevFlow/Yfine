@@ -101,6 +101,17 @@ describe("whims", () => {
     expect(await fundBalance(db)).toBe(0);
   });
 
+  it("purchase honors a price override and records it on the whim", async () => {
+    const { db } = await makeMemDb();
+    const acct = await eurAccount(db, 1000);
+    const wid = await whims.createWhim(db, { name: "Camera", amount: 800, currency: "EUR" });
+    await whims.purchaseWhim(db, wid, { sourceId: acct.id, amount: 720 }); // price dropped
+    expect(await getBalance(db, acct.id)).toBe(280); // 720 booked, not 800
+    const w = (await whims.getWhim(db, wid))!;
+    expect(w.status).toBe("purchased");
+    expect(w.amount).toBe(720); // whim reflects the actual price paid
+  });
+
   it("restore only works on dismissed; delete clears the goal back-reference", async () => {
     const { db } = await makeMemDb();
     const wid = await whims.createWhim(db, { name: "Camera", amount: 800, currency: "EUR" });

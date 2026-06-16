@@ -18,6 +18,7 @@ import { consolidatedNetWorth } from "./repo/consolidate";
 import { searchAll, type SearchItem } from "./repo/search";
 import * as tags from "./repo/tags";
 import * as savings from "./repo/savings";
+import * as history from "./repo/history";
 import { round2 } from "@/domain/money";
 import { monthEnd, monthStart, todayISO } from "@/lib/date";
 import type { SourceRow, TagRow } from "./schema-types";
@@ -25,7 +26,7 @@ import { withTx } from "./tx";
 
 // Every money-derived view; mutations that move money invalidate the lot
 // (cheap against the local DB, and avoids stale budgets/forecast/consolidated).
-const MONEY_KEYS = ["movements", "sources", "dashboard", "budgets", "goals", "whims", "recurring", "forecast", "consolidated", "portfolios", "notifications", "savings"];
+const MONEY_KEYS = ["movements", "sources", "dashboard", "budgets", "goals", "whims", "recurring", "forecast", "consolidated", "portfolios", "notifications", "savings", "history", "movementCounts"];
 function invalidateMoney(qc: ReturnType<typeof useQueryClient>) {
   for (const k of MONEY_KEYS) void qc.invalidateQueries({ queryKey: [k] });
 }
@@ -150,6 +151,27 @@ export function useSavings() {
 }
 export const useCreateSaving = () => useBroadMutation((db, data: savings.NewSaving) => savings.createSaving(db, data));
 export const useDeleteSaving = () => useBroadMutation((db, id: number) => savings.deleteSaving(db, id));
+
+// ---- history (charts / sparklines) ----
+export function useNetWorthHistory(currency: string | null) {
+  return useQuery({
+    queryKey: ["history", "networth", currency],
+    enabled: currency != null,
+    queryFn: async () => (currency ? history.netWorthHistory(await getDb(), currency) : []),
+  });
+}
+export function useSourceHistory(sourceId: number) {
+  return useQuery({
+    queryKey: ["history", "source", sourceId],
+    queryFn: async () => history.sourceBalanceHistory(await getDb(), sourceId),
+  });
+}
+export function useMovementCounts() {
+  return useQuery({
+    queryKey: ["movementCounts"],
+    queryFn: async () => Object.fromEntries(await history.movementCounts(await getDb())) as Record<number, number>,
+  });
+}
 
 // ---- movements ----
 export function useMovements(filters: movements.MovementFilters, pageSize = 200) {
@@ -299,7 +321,7 @@ export function useWhims() {
 }
 export const useCreateWhim = () => useBroadMutation((db, data: whims.NewWhim) => whims.createWhim(db, data));
 export const useUpdateWhim = () => useBroadMutation((db, v: { id: number; patch: whims.WhimPatch }) => whims.updateWhim(db, v.id, v.patch));
-export const usePurchaseWhim = () => useBroadMutation((db, v: { id: number; sourceId: number; note?: string; tagIds?: number[] }) => whims.purchaseWhim(db, v.id, { sourceId: v.sourceId, note: v.note, tagIds: v.tagIds }));
+export const usePurchaseWhim = () => useBroadMutation((db, v: { id: number; sourceId: number; note?: string; tagIds?: number[]; amount?: number }) => whims.purchaseWhim(db, v.id, { sourceId: v.sourceId, note: v.note, tagIds: v.tagIds, amount: v.amount }));
 export const useDismissWhim = () => useBroadMutation((db, id: number) => whims.dismissWhim(db, id));
 export const useRestoreWhim = () => useBroadMutation((db, id: number) => whims.restoreWhim(db, id));
 export const useDeleteWhim = () => useBroadMutation((db, id: number) => whims.deleteWhim(db, id));

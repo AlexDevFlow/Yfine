@@ -77,7 +77,7 @@ export async function updateWhim(db: SqlExecutor, id: number, patch: WhimPatch):
 export async function purchaseWhim(
   db: SqlExecutor,
   id: number,
-  input: { sourceId: number; note?: string | null; tagIds?: number[] },
+  input: { sourceId: number; note?: string | null; tagIds?: number[]; amount?: number },
 ): Promise<void> {
   const whim = await getWhim(db, id);
   if (!whim) throw new DomainError("not_found");
@@ -85,6 +85,10 @@ export async function purchaseWhim(
   const source = await getSource(db, input.sourceId);
   if (!source) throw new DomainError("not_found");
   if (source.currency.toUpperCase() !== whim.currency.toUpperCase()) throw new DomainError("currency_mismatch");
+
+  // The actual price paid may differ from the wishlisted amount — honor an
+  // override and record it on the whim so its history matches reality.
+  const price = input.amount != null && input.amount > 0 ? input.amount : whim.amount;
 
   // Save-for-then-buy: drain a still-funded linked goal into the purchase source.
   if (whim.linked_goal_id != null) {
@@ -101,13 +105,13 @@ export async function purchaseWhim(
   const mv = await db.select<{ id: number }>(
     `INSERT INTO movements (source_id,amount,direction,date,note,transfer_pair_id,exclude_from_stats,is_savings_contribution,created_at,updated_at)
      VALUES (?,?, 'out', ?, ?, NULL, 0, 0, ?, ?) RETURNING id`,
-    [input.sourceId, whim.amount, ts.slice(0, 10), input.note || whim.name, ts, ts],
+    [input.sourceId, price, ts.slice(0, 10), input.note || whim.name, ts, ts],
   );
   for (const tagId of input.tagIds ?? []) {
     await db.execute(`INSERT OR IGNORE INTO movement_tag (movement_id,tag_id) VALUES (?,?)`, [mv[0].id, tagId]);
   }
-  await db.execute(`UPDATE whims SET status = 'purchased', purchased_at = ?, updated_at = ? WHERE id = ?`, [ts, ts, id]);
-  await createNotification(db, { type: "info", title: `Purchased: ${whim.name}`, body: `−${whim.amount} ${whim.currency}`, related_entity: `whim:${id}` });
+  await db.execute(`UPDATE whims SET status = 'purchased', amount = ?, purchased_at = ?, updated_at = ? WHERE id = ?`, [price, ts, ts, id]);
+  await createNotification(db, { type: "info", title: `Purchased: ${whim.name}`, body: `−${price} ${whim.currency}`, related_entity: `whim:${id}` });
 }
 
 export async function dismissWhim(db: SqlExecutor, id: number): Promise<void> {

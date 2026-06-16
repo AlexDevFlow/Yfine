@@ -1,4 +1,4 @@
-import { ArrowDownLeft, ArrowLeftRight, ArrowUpRight, Layers, ListChecks, Pencil, Plus, Search, Trash2, X } from "lucide-react";
+import { ArrowDownLeft, ArrowLeftRight, ArrowUpRight, ChevronDown, ChevronRight, Layers, ListChecks, Pencil, Plus, Search, Trash2, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -167,6 +167,16 @@ export function MovementsPage() {
 
   const groups = useMemo(() => groupMovementsHierarchically(data?.items ?? []), [data]);
 
+  // Collapsible month/day groups (like the original). Keys are collapsed; default open.
+  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
+  const toggleCollapse = (key: string) =>
+    setCollapsed((s) => {
+      const n = new Set(s);
+      if (n.has(key)) n.delete(key);
+      else n.add(key);
+      return n;
+    });
+
   const openEdit = (m: EnrichedMovement) => {
     setFormError(undefined);
     if (isTransfer(m)) setTrModal({ open: true, editing: m });
@@ -275,37 +285,66 @@ export function MovementsPage() {
 
       {groups.map((year) => (
         <div key={year.year} className="space-y-3">
-          {year.months.map((month) => (
-            <Card key={month.month} className="overflow-hidden">
-              <div className="flex items-center justify-between border-b border-border bg-surface-2/40 px-5 py-2.5">
-                <h3 className="text-sm font-semibold text-foreground">{monthLabel(month.month, locale)}</h3>
-                <div className="flex items-center gap-3 text-xs">
-                  {month.totalIn > 0 && <span className="num text-positive">+{month.totalIn.toFixed(2)}</span>}
-                  {month.totalOut > 0 && <span className="num text-muted">−{month.totalOut.toFixed(2)}</span>}
-                </div>
-              </div>
-              <div className="px-5">
-                {month.days.map((day) => (
-                  <div key={day.date} className="border-b border-border last:border-0">
-                    <p className="pt-3 text-xs font-medium uppercase tracking-wide text-muted-2">{dayLabel(day.date, locale)}</p>
-                    <ul className="divide-y divide-border">
-                      {day.items.map((m) => (
-                        <MovementRow
-                          key={m.id}
-                          m={m}
-                          locale={locale}
-                          onEdit={() => openEdit(m)}
-                          onDelete={() => setDeleting(m)}
-                          selected={selectMode ? selected.has(m.id) : undefined}
-                          onToggleSelect={selectMode ? () => toggleSel(m.id) : undefined}
-                        />
-                      ))}
-                    </ul>
+          {year.months.map((month) => {
+            const monthKey = `month:${month.month}`;
+            const monthCollapsed = collapsed.has(monthKey);
+            return (
+              <Card key={month.month} className="overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => toggleCollapse(monthKey)}
+                  className="flex w-full items-center justify-between border-b border-border bg-surface-2/40 px-5 py-2.5 text-left transition-colors hover:bg-surface-2/70"
+                  aria-expanded={!monthCollapsed}
+                >
+                  <h3 className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
+                    {monthCollapsed ? <ChevronRight className="h-4 w-4 text-muted" /> : <ChevronDown className="h-4 w-4 text-muted" />}
+                    {monthLabel(month.month, locale)}
+                  </h3>
+                  <div className="flex items-center gap-3 text-xs">
+                    {month.totalIn > 0 && <span className="num text-positive">+{month.totalIn.toFixed(2)}</span>}
+                    {month.totalOut > 0 && <span className="num text-muted">−{month.totalOut.toFixed(2)}</span>}
                   </div>
-                ))}
-              </div>
-            </Card>
-          ))}
+                </button>
+                {!monthCollapsed && (
+                  <div className="px-5">
+                    {month.days.map((day) => {
+                      const dayKey = `day:${day.date}`;
+                      const dayCollapsed = collapsed.has(dayKey);
+                      return (
+                        <div key={day.date} className="border-b border-border last:border-0">
+                          <button
+                            type="button"
+                            onClick={() => toggleCollapse(dayKey)}
+                            className="flex w-full items-center gap-1 pt-3 pb-1 text-left text-xs font-medium uppercase tracking-wide text-muted-2 hover:text-foreground"
+                            aria-expanded={!dayCollapsed}
+                          >
+                            {dayCollapsed ? <ChevronRight className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+                            {dayLabel(day.date, locale)}
+                            {dayCollapsed && <span className="ml-1 normal-case text-muted-2">· {t("n_items", { defaultValue: "{{n}} items", n: day.items.length })}</span>}
+                          </button>
+                          {!dayCollapsed && (
+                            <ul className="divide-y divide-border">
+                              {day.items.map((m) => (
+                                <MovementRow
+                                  key={m.id}
+                                  m={m}
+                                  locale={locale}
+                                  onEdit={() => openEdit(m)}
+                                  onDelete={() => setDeleting(m)}
+                                  selected={selectMode ? selected.has(m.id) : undefined}
+                                  onToggleSelect={selectMode ? () => toggleSel(m.id) : undefined}
+                                />
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </Card>
+            );
+          })}
         </div>
       ))}
 

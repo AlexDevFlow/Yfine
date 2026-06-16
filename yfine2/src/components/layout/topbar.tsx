@@ -2,7 +2,6 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { Bell, Search } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Brand } from "./brand";
-import { LangPicker } from "./lang-picker";
 import { ALL_NAV } from "./nav";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { useUnreadCount } from "@/db/queries";
@@ -66,7 +65,6 @@ export function Topbar({ onOpenSearch }: { onOpenSearch: () => void }) {
 
       <div className="flex items-center gap-1">
         <NotificationBell />
-        <LangPicker />
         <ThemeToggle />
       </div>
     </header>

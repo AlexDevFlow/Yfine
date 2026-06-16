@@ -64,17 +64,19 @@ function WhimForm({ initial, onCancel, onSubmit, pending, error }: {
 }
 
 function PurchaseDialog({ whim, sources, onClose, onConfirm, pending, error }: {
-  whim: EnrichedWhim; sources: SourceWithBalance[]; onClose: () => void; onConfirm: (sourceId: number, note: string) => void; pending: boolean; error?: string;
+  whim: EnrichedWhim; sources: SourceWithBalance[]; onClose: () => void; onConfirm: (sourceId: number, note: string, amount: number) => void; pending: boolean; error?: string;
 }) {
   const { t } = useTranslation();
   const opts = sources.filter((s) => s.currency === whim.currency);
   const [sourceId, setSourceId] = useState(String(whim.source_id ?? opts[0]?.id ?? ""));
   const [note, setNote] = useState("");
+  // Price defaults to the wishlisted amount but is editable — the real price may have changed.
+  const [amount, setAmount] = useState(String(whim.amount));
   return (
     <Modal open onClose={onClose} title={`${t("buy", { defaultValue: "Buy" })}: ${whim.name}`}
       footer={<>
         <Button variant="ghost" onClick={onClose}>{t("cancel", { defaultValue: "Cancel" })}</Button>
-        <Button disabled={pending || !sourceId} onClick={() => onConfirm(Number(sourceId), note)}>{t("buy", { defaultValue: "Buy" })}</Button>
+        <Button disabled={pending || !sourceId || !(Number(amount) > 0)} onClick={() => onConfirm(Number(sourceId), note, Number(amount))}>{t("buy", { defaultValue: "Buy" })}</Button>
       </>}>
       <div className="space-y-4">
         {whim.linked_goal_allocated != null && whim.linked_goal_allocated > 0 && (
@@ -82,11 +84,19 @@ function PurchaseDialog({ whim, sources, onClose, onConfirm, pending, error }: {
             {t("whim_drain_hint", { defaultValue: "Your saved {{amt}} will be moved into the chosen account first.", amt: formatMoney(whim.linked_goal_allocated, whim.currency) })}
           </p>
         )}
-        <Field label={t("pay_from", { defaultValue: "Pay from" })} htmlFor="p-src">
-          <Select id="p-src" value={sourceId} onChange={(e) => setSourceId(e.target.value)}>
-            {opts.map((s) => <option key={s.id} value={s.id}>{s.name} · {formatMoney(s.balance, s.currency)}</option>)}
-          </Select>
-        </Field>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label={`${t("price", { defaultValue: "Price" })} (${whim.currency})`} htmlFor="p-amt">
+            <Input id="p-amt" type="number" step="0.01" min="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} className="num" />
+          </Field>
+          <Field label={t("pay_from", { defaultValue: "Pay from" })} htmlFor="p-src">
+            <Select id="p-src" value={sourceId} onChange={(e) => setSourceId(e.target.value)}>
+              {opts.map((s) => <option key={s.id} value={s.id}>{s.name} · {formatMoney(s.balance, s.currency)}</option>)}
+            </Select>
+          </Field>
+        </div>
+        {Number(amount) > 0 && Number(amount) !== whim.amount && (
+          <p className="text-xs text-muted">{t("price_changed_hint", { defaultValue: "Was {{old}} — buying at {{now}}.", old: formatMoney(whim.amount, whim.currency), now: formatMoney(Number(amount), whim.currency) })}</p>
+        )}
         <Field label={t("note", { defaultValue: "Note" })} htmlFor="p-note"><Input id="p-note" value={note} onChange={(e) => setNote(e.target.value)} /></Field>
         {opts.length === 0 && <p className="text-xs text-warning">{t("no_compatible_sources", { defaultValue: "No compatible accounts (same currency)." })}</p>}
         {error ? <p className="text-sm text-negative">{error}</p> : null}
@@ -199,7 +209,7 @@ export function WhimsPage() {
       {buying && (
         <PurchaseDialog whim={buying} sources={sources ?? []} pending={purchase.isPending} error={buyError}
           onClose={() => setBuying(undefined)}
-          onConfirm={(sourceId, note) => purchase.mutate({ id: buying.id, sourceId, note }, { onSuccess: () => setBuying(undefined), onError: (e) => setBuyError(errText(e)) })} />
+          onConfirm={(sourceId, note, amount) => purchase.mutate({ id: buying.id, sourceId, note, amount }, { onSuccess: () => setBuying(undefined), onError: (e) => setBuyError(errText(e)) })} />
       )}
     </div>
   );

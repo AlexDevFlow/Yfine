@@ -1,24 +1,48 @@
-import { Eye, EyeOff, Pencil, Plus, Sparkles, Trash2, Wallet } from "lucide-react";
+import { Eye, EyeOff, LineChart as LineChartIcon, Pencil, Plus, Sparkles, Trash2, Wallet } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Field, Input, Select } from "@/components/ui/input";
+import { LineChart } from "@/components/ui/line-chart";
 import { Modal } from "@/components/ui/modal";
 import { isPreviewDb } from "@/db/connection";
 import { useErrorText } from "@/lib/use-error-text";
 import {
   useCreateSource,
   useDeleteSource,
+  useMovementCounts,
   useSetFundVisibility,
+  useSourceHistory,
   useSources,
   useUpdateSource,
   type SourceWithBalance,
 } from "@/db/queries";
 import type { DeleteAction } from "@/db/repo/sources";
 import { cn } from "@/lib/cn";
+import { dayLabel } from "@/lib/date";
 import { formatMoney } from "@/lib/format";
+
+/** Lazily-loaded balance-over-time chart for one source (rendered when expanded). */
+function SourceHistoryChart({ source, locale }: { source: SourceWithBalance; locale?: string }) {
+  const { t } = useTranslation();
+  const { data, isLoading } = useSourceHistory(source.id);
+  if (isLoading) return <div className="px-4 pb-4 text-xs text-muted">{t("loading", { defaultValue: "Loading…" })}</div>;
+  if (!data || data.length < 2) {
+    return <div className="px-4 pb-4 text-xs text-muted">{t("not_enough_history", { defaultValue: "Not enough history to chart yet." })}</div>;
+  }
+  return (
+    <div className="px-4 pb-3">
+      <LineChart
+        points={data}
+        height={120}
+        format={(n) => formatMoney(n, source.currency, locale)}
+        formatDate={(d) => dayLabel(d, locale)}
+      />
+    </div>
+  );
+}
 
 interface FormValues {
   name: string;
@@ -192,42 +216,61 @@ function DeleteDialog({
 function SourceCard({
   source,
   locale,
+  count,
   onEdit,
   onDelete,
 }: {
   source: SourceWithBalance;
   locale?: string;
+  count: number;
   onEdit: () => void;
   onDelete: () => void;
 }) {
   const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
   return (
-    <Card className="flex items-center justify-between gap-4 p-4">
-      <div className="flex min-w-0 items-center gap-3">
-        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[var(--radius-control)] bg-accent-soft text-primary">
-          <Wallet className="h-5 w-5" />
-        </span>
-        <div className="min-w-0">
-          <p className="truncate font-medium text-foreground">{source.name}</p>
-          <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
-            <Badge>{source.currency}</Badge>
-            {source.yield_rate > 0 && (
-              <Badge tone="primary">{source.yield_rate}% / {source.yield_period_months}m</Badge>
-            )}
+    <Card className="overflow-hidden">
+      <div className="flex items-center justify-between gap-4 p-4">
+        <div className="flex min-w-0 items-center gap-3">
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[var(--radius-control)] bg-accent-soft text-primary">
+            <Wallet className="h-5 w-5" />
+          </span>
+          <div className="min-w-0">
+            <p className="truncate font-medium text-foreground">{source.name}</p>
+            <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
+              <Badge>{source.currency}</Badge>
+              {source.yield_rate > 0 && (
+                <Badge tone="primary">{source.yield_rate}% / {source.yield_period_months}m</Badge>
+              )}
+              <span className="text-xs text-muted">{t("n_movements", { defaultValue: "{{n}} movements", n: count })}</span>
+            </div>
           </div>
         </div>
+        <div className="flex items-center gap-2">
+          <span className={cn("num text-right text-lg font-semibold", source.balance < 0 ? "text-negative" : "text-foreground")}>
+            {formatMoney(source.balance, source.currency, locale)}
+          </span>
+          <button
+            onClick={() => setOpen((o) => !o)}
+            aria-label={t("history", { defaultValue: "History" })}
+            aria-expanded={open}
+            className={cn("rounded-md p-2 hover:bg-surface-2 hover:text-foreground", open ? "text-primary" : "text-muted")}
+          >
+            <LineChartIcon className="h-4 w-4" />
+          </button>
+          <button onClick={onEdit} aria-label={t("edit", { defaultValue: "Edit" })} className="rounded-md p-2 text-muted hover:bg-surface-2 hover:text-foreground">
+            <Pencil className="h-4 w-4" />
+          </button>
+          <button onClick={onDelete} aria-label={t("delete", { defaultValue: "Delete" })} className="rounded-md p-2 text-muted hover:bg-negative-soft hover:text-negative">
+            <Trash2 className="h-4 w-4" />
+          </button>
+        </div>
       </div>
-      <div className="flex items-center gap-2">
-        <span className={cn("num text-right text-lg font-semibold", source.balance < 0 ? "text-negative" : "text-foreground")}>
-          {formatMoney(source.balance, source.currency, locale)}
-        </span>
-        <button onClick={onEdit} aria-label={t("edit", { defaultValue: "Edit" })} className="rounded-md p-2 text-muted hover:bg-surface-2 hover:text-foreground">
-          <Pencil className="h-4 w-4" />
-        </button>
-        <button onClick={onDelete} aria-label={t("delete", { defaultValue: "Delete" })} className="rounded-md p-2 text-muted hover:bg-negative-soft hover:text-negative">
-          <Trash2 className="h-4 w-4" />
-        </button>
-      </div>
+      {open && (
+        <div className="border-t border-border pt-2">
+          <SourceHistoryChart source={source} locale={locale} />
+        </div>
+      )}
     </Card>
   );
 }
@@ -236,6 +279,7 @@ export function SourcesPage() {
   const { t, i18n } = useTranslation();
   const locale = i18n.resolvedLanguage;
   const { data: sources, isLoading, error } = useSources();
+  const { data: counts } = useMovementCounts();
   const create = useCreateSource();
   const update = useUpdateSource();
   const setVisibility = useSetFundVisibility();
@@ -330,6 +374,7 @@ export function SourcesPage() {
                   key={s.id}
                   source={s}
                   locale={locale}
+                  count={counts?.[s.id] ?? 0}
                   onEdit={() => openEdit(s)}
                   onDelete={() => setDeleting(s)}
                 />
@@ -356,6 +401,7 @@ export function SourcesPage() {
                         {f.hidden_from_sources === 1 && (
                           <Badge>{t("hidden", { defaultValue: "Hidden" })}</Badge>
                         )}
+                        <span className="text-xs text-muted">{t("n_movements", { defaultValue: "{{n}} movements", n: counts?.[f.id] ?? 0 })}</span>
                       </div>
                     </div>
                   </div>
