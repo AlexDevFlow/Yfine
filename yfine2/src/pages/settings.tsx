@@ -1,14 +1,16 @@
-import { Download, FileSpreadsheet, FileJson, Monitor, Moon, Sun, Upload, FileUp } from "lucide-react";
+import { Download, FileSpreadsheet, FileJson, FileText, Monitor, Moon, Sun, Upload, FileUp } from "lucide-react";
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Field, Select } from "@/components/ui/input";
+import { Modal } from "@/components/ui/modal";
 import { Slot } from "@/components/ui/slot";
 import { useTheme, type Theme } from "@/components/theme/theme-provider";
 import { SUPPORTED_LANGS } from "@/i18n";
 import { getDb, isPreviewDb } from "@/db/connection";
 import { exportArchive, exportJson, exportMovementsCsv } from "@/db/backup";
+import { exportExcel, exportPdf, EXPORT_SECTIONS, type SectionKey } from "@/db/exports";
 import { previewCsv, type PreviewResult } from "@/db/importers/csv";
 import { useCommitCsv, useImportBackup, usePreferences, useSources, useUpdatePreferences } from "@/db/queries";
 import { cn } from "@/lib/cn";
@@ -76,9 +78,48 @@ function PreferencesCard() {
   );
 }
 
+function SectionExportDialog({ mode, onClose }: { mode: "excel" | "pdf"; onClose: () => void }) {
+  const { t } = useTranslation();
+  const [selected, setSelected] = useState<Set<SectionKey>>(new Set(EXPORT_SECTIONS.map((s) => s.key)));
+  const [busy, setBusy] = useState(false);
+  const toggle = (k: SectionKey) => setSelected((s) => { const n = new Set(s); n.has(k) ? n.delete(k) : n.add(k); return n; });
+
+  const go = async () => {
+    setBusy(true);
+    try {
+      const db = await getDb();
+      const keys = [...selected];
+      if (mode === "excel") downloadBytes(`yfine-export-${todayISO()}.xlsx`, await exportExcel(db, keys), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+      else downloadBytes(`yfine-export-${todayISO()}.pdf`, await exportPdf(db, keys), "application/pdf");
+      onClose();
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <Modal open onClose={onClose} title={mode === "excel" ? t("export_excel", { defaultValue: "Export to Excel" }) : t("export_pdf", { defaultValue: "Export to PDF" })}
+      footer={<>
+        <Button variant="ghost" onClick={onClose}>{t("cancel", { defaultValue: "Cancel" })}</Button>
+        <Button disabled={busy || selected.size === 0} onClick={go}>{t("export", { defaultValue: "Export" })}</Button>
+      </>}>
+      <div className="space-y-2">
+        <p className="text-sm text-muted">{t("export_sections_hint", { defaultValue: "Choose which sections to include." })}</p>
+        {EXPORT_SECTIONS.map((s) => (
+          <label key={s.key} className="flex cursor-pointer items-center gap-2 text-sm text-foreground">
+            <input type="checkbox" checked={selected.has(s.key)} onChange={() => toggle(s.key)} />
+            {t(s.key, { defaultValue: s.label })}
+          </label>
+        ))}
+      </div>
+    </Modal>
+  );
+}
+
 function ExportCard() {
   const { t } = useTranslation();
   const [busy, setBusy] = useState(false);
+  const [sectionMode, setSectionMode] = useState<"excel" | "pdf" | null>(null);
   const run = async (fn: () => Promise<void>) => { setBusy(true); try { await fn(); } finally { setBusy(false); } };
   return (
     <Card>
@@ -93,7 +134,14 @@ function ExportCard() {
         <Button variant="outline" disabled={busy} onClick={() => run(async () => downloadText(`yfine-movements-${todayISO()}.csv`, await exportMovementsCsv(await getDb()), "text/csv"))}>
           <FileSpreadsheet className="h-4 w-4" /> {t("movements_csv", { defaultValue: "Movements CSV" })}
         </Button>
+        <Button variant="outline" onClick={() => setSectionMode("excel")}>
+          <FileSpreadsheet className="h-4 w-4" /> {t("excel", { defaultValue: "Excel" })}
+        </Button>
+        <Button variant="outline" onClick={() => setSectionMode("pdf")}>
+          <FileText className="h-4 w-4" /> {t("pdf", { defaultValue: "PDF" })}
+        </Button>
       </CardContent>
+      {sectionMode && <SectionExportDialog mode={sectionMode} onClose={() => setSectionMode(null)} />}
     </Card>
   );
 }
