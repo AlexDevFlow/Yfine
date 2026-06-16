@@ -6,6 +6,7 @@ import {
 import { AppShell } from "@/components/layout/app-shell";
 import { Dashboard } from "@/pages/dashboard";
 import { SourcesPage } from "@/pages/sources";
+import { SourceDetail } from "@/pages/source-detail";
 import { MovementsPage } from "@/pages/movements";
 import { RecurringPage } from "@/pages/recurring";
 import { NotificationsPage } from "@/pages/notifications";
@@ -29,6 +30,12 @@ const sourcesRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/sources",
   component: SourcesPage,
+});
+
+const sourceDetailRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/sources/$id",
+  component: SourceDetail,
 });
 
 const movementsRoute = createRoute({
@@ -60,6 +67,7 @@ const settingsRoute = createRoute({ getParentRoute: () => rootRoute, path: "/set
 const routeTree = rootRoute.addChildren([
   indexRoute,
   sourcesRoute,
+  sourceDetailRoute,
   movementsRoute,
   recurringRoute,
   notificationsRoute,

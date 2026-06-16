@@ -1,16 +1,18 @@
-import { Plus, TrendingUp, Trash2, Pencil, AlertTriangle } from "lucide-react";
+import { Plus, TrendingUp, Trash2, Pencil, AlertTriangle, LineChart as LineChartIcon } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Field, Input, Select } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
+import { RangeChart } from "@/components/ui/range-chart";
 import { isPreviewDb } from "@/db/connection";
 import {
   useCreateHolding,
   useCreatePortfolio,
   useDeleteHolding,
   useDeletePortfolio,
+  usePortfolioHistory,
   usePortfolios,
   useSources,
   useUpdateHolding,
@@ -18,8 +20,22 @@ import {
 } from "@/db/queries";
 import type { EnrichedHolding, NewHolding, NewPortfolio, PortfolioSummary } from "@/db/repo/portfolios";
 import { cn } from "@/lib/cn";
+import { dayLabel } from "@/lib/date";
 import { formatMoney, formatSigned } from "@/lib/format";
 import { useErrorText } from "@/lib/use-error-text";
+
+/** Lazily-loaded portfolio value-over-time chart (rendered when expanded). */
+function PortfolioHistory({ id, currency, locale }: { id: number; currency: string; locale?: string }) {
+  const { t } = useTranslation();
+  const { data, isLoading } = usePortfolioHistory(id);
+  if (isLoading) return <p className="pb-2 text-xs text-muted">{t("loading", { defaultValue: "Loading…" })}</p>;
+  if (!data || data.length < 2) return <p className="pb-2 text-xs text-muted">{t("not_enough_history", { defaultValue: "Not enough history to chart yet." })}</p>;
+  return (
+    <div className="pb-1">
+      <RangeChart points={data} height={140} format={(n) => formatMoney(n, currency, locale)} formatDate={(d) => dayLabel(d, locale)} />
+    </div>
+  );
+}
 
 const CURRENCIES = ["EUR", "USD", "GBP", "CHF", "JPY", "CAD", "AUD", "CNY", "BTC", "ETH"];
 
@@ -125,6 +141,14 @@ export function PortfoliosPage() {
   const [pForm, setPForm] = useState(false);
   const [hForm, setHForm] = useState<{ portfolio: PortfolioSummary; editing?: EnrichedHolding }>();
   const [err, setErr] = useState<string>();
+  const [chartOpen, setChartOpen] = useState<Set<number>>(new Set());
+  const toggleChart = (id: number) =>
+    setChartOpen((s) => {
+      const n = new Set(s);
+      if (n.has(id)) n.delete(id);
+      else n.add(id);
+      return n;
+    });
 
   return (
     <div className="space-y-4">
@@ -147,11 +171,17 @@ export function PortfoliosPage() {
                   <p className="num text-base font-semibold text-foreground">{formatMoney(p.total_value, p.portfolio.base_currency, locale)}</p>
                   {p.total_pnl != null && <p className={cn("num text-xs", p.total_pnl >= 0 ? "text-positive" : "text-negative")}>{formatSigned(p.total_pnl, p.portfolio.base_currency, locale)} ({p.total_pnl_pct}%)</p>}
                 </div>
+                <button onClick={() => toggleChart(p.portfolio.id)} aria-label={t("history", { defaultValue: "History" })} aria-expanded={chartOpen.has(p.portfolio.id)} className={cn("rounded-md p-1.5 hover:bg-surface-2 hover:text-foreground", chartOpen.has(p.portfolio.id) ? "text-primary" : "text-muted")}><LineChartIcon className="h-4 w-4" /></button>
                 <button onClick={() => delP.mutate(p.portfolio.id)} className="rounded-md p-1.5 text-muted hover:bg-negative-soft hover:text-negative"><Trash2 className="h-4 w-4" /></button>
               </div>
             }
           />
           <CardContent className="pt-3">
+            {chartOpen.has(p.portfolio.id) && (
+              <div className="mb-3 border-b border-border pb-2">
+                <PortfolioHistory id={p.portfolio.id} currency={p.portfolio.base_currency} locale={locale} />
+              </div>
+            )}
             {p.has_unconverted && (
               <p className="mb-2 flex items-center gap-1.5 text-xs text-warning"><AlertTriangle className="h-3.5 w-3.5" />{t("missing_fx", { defaultValue: "Some holdings use a currency with no exchange rate — totals may be approximate." })}</p>
             )}

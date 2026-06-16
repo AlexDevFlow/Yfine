@@ -1,4 +1,4 @@
-import { ArrowDownLeft, ArrowLeftRight, ArrowUpRight, ChevronDown, ChevronRight, Layers, ListChecks, Pencil, Plus, Search, SlidersHorizontal, Tag as TagIcon, Trash2, X } from "lucide-react";
+import { ArrowDownLeft, ArrowLeftRight, ArrowUpRight, CalendarDays, ChevronDown, ChevronRight, Layers, ListChecks, Pencil, Plus, Repeat, Search, SlidersHorizontal, Tag as TagIcon, Trash2, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -6,12 +6,14 @@ import { Card } from "@/components/ui/card";
 import { Input, Select } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
 import { SplitForm } from "@/components/split-form";
+import { MovementsCalendar } from "./movements-calendar";
 import { isPreviewDb } from "@/db/connection";
 import {
   useBulkDelete,
   useBulkSetSource,
   useBulkSetTags,
   useCreateMovement,
+  useCreateRecurring,
   useCreateSplit,
   useCreateTransfer,
   useDeleteMovement,
@@ -44,6 +46,7 @@ function MovementRow({
   locale,
   onEdit,
   onDelete,
+  onMakeRecurring,
   selected,
   onToggleSelect,
 }: {
@@ -51,6 +54,7 @@ function MovementRow({
   locale?: string;
   onEdit: () => void;
   onDelete: () => void;
+  onMakeRecurring?: () => void;
   selected?: boolean;
   onToggleSelect?: () => void;
 }) {
@@ -101,6 +105,11 @@ function MovementRow({
         <span className={cn("num mr-1 text-sm font-semibold", transfer ? "text-muted" : m.direction === "in" ? "text-positive" : "text-foreground")}>
           {amountText}
         </span>
+        {onMakeRecurring && !transfer && (
+          <button onClick={onMakeRecurring} aria-label={t("make_recurring", { defaultValue: "Make recurring" })} className="rounded-md p-1.5 text-muted opacity-0 transition-opacity hover:bg-surface-2 hover:text-foreground group-hover:opacity-100">
+            <Repeat className="h-4 w-4" />
+          </button>
+        )}
         <button onClick={onEdit} aria-label={t("edit", { defaultValue: "Edit" })} className="rounded-md p-1.5 text-muted opacity-0 transition-opacity hover:bg-surface-2 hover:text-foreground group-hover:opacity-100">
           <Pencil className="h-4 w-4" />
         </button>
@@ -156,6 +165,7 @@ export function MovementsPage() {
   const realSources = useMemo(() => (sources ?? []).filter((s) => s.is_savings_fund === 0 || true), [sources]);
 
   const createMovement = useCreateMovement();
+  const createRecurring = useCreateRecurring();
   const updateMovement = useUpdateMovement();
   const createTransfer = useCreateTransfer();
   const updateTransfer = useUpdateTransfer();
@@ -164,8 +174,11 @@ export function MovementsPage() {
   const [mvModal, setMvModal] = useState<{ open: boolean; editing?: EnrichedMovement }>({ open: false });
   const [trModal, setTrModal] = useState<{ open: boolean; editing?: EnrichedMovement }>({ open: false });
   const [deleting, setDeleting] = useState<EnrichedMovement>();
+  const [recurringFrom, setRecurringFrom] = useState<EnrichedMovement>();
+  const [recFreq, setRecFreq] = useState("monthly");
   const [formError, setFormError] = useState<string>();
   const [splitOpen, setSplitOpen] = useState(false);
+  const [calendarOpen, setCalendarOpen] = useState(false);
   const [selectMode, setSelectMode] = useState(false);
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [bulkMoveTo, setBulkMoveTo] = useState("");
@@ -280,6 +293,9 @@ export function MovementsPage() {
         </Button>
         <Button variant="outline" onClick={() => { setFormError(undefined); setSplitOpen(true); }}>
           <Layers className="h-4 w-4" /> {t("split", { defaultValue: "Split" })}
+        </Button>
+        <Button variant="outline" onClick={() => setCalendarOpen(true)}>
+          <CalendarDays className="h-4 w-4" /> {t("calendar", { defaultValue: "Calendar" })}
         </Button>
         <Button variant={selectMode ? "secondary" : "ghost"} onClick={() => { setSelectMode((s) => !s); clearSel(); }}>
           <ListChecks className="h-4 w-4" /> {t("select", { defaultValue: "Select" })}
@@ -419,6 +435,7 @@ export function MovementsPage() {
                                   locale={locale}
                                   onEdit={() => openEdit(m)}
                                   onDelete={() => setDeleting(m)}
+                                  onMakeRecurring={() => { setRecFreq("monthly"); setRecurringFrom(m); }}
                                   selected={selectMode ? selected.has(m.id) : undefined}
                                   onToggleSelect={selectMode ? () => toggleSel(m.id) : undefined}
                                 />
@@ -529,6 +546,60 @@ export function MovementsPage() {
               ? t("confirm_delete_transfer", { defaultValue: "This will remove both legs of the transfer." })
               : t("confirm_delete_movement", { defaultValue: "This movement will be permanently deleted." })}
           </p>
+        </Modal>
+      )}
+
+      {calendarOpen && <MovementsCalendar onClose={() => setCalendarOpen(false)} locale={locale} />}
+
+      {recurringFrom && (
+        <Modal
+          open
+          onClose={() => setRecurringFrom(undefined)}
+          title={t("make_recurring", { defaultValue: "Make recurring" })}
+          footer={
+            <>
+              <Button variant="ghost" onClick={() => setRecurringFrom(undefined)}>{t("cancel", { defaultValue: "Cancel" })}</Button>
+              <Button
+                disabled={createRecurring.isPending}
+                onClick={() => {
+                  const m = recurringFrom;
+                  createRecurring.mutate(
+                    {
+                      name: m.note || m.source_name || t("recurring", { defaultValue: "Recurring" }),
+                      amount: m.amount,
+                      direction: m.direction,
+                      currency: m.source_currency ?? "EUR",
+                      frequency: recFreq,
+                      start_date: m.date,
+                      end_date: null,
+                      source_id: m.source_id,
+                      apply_mode: "confirm",
+                      alert_days_before: 7,
+                      alert_if_insufficient: m.direction === "out",
+                    },
+                    { onSuccess: () => setRecurringFrom(undefined), onError: (e) => setFormError(errText(e)) },
+                  );
+                }}
+              >
+                {t("create", { defaultValue: "Create" })}
+              </Button>
+            </>
+          }
+        >
+          <div className="space-y-4">
+            <p className="text-sm text-muted">
+              {t("make_recurring_hint", { defaultValue: "Create a recurring rule from \"{{name}}\" ({{amt}}).", name: recurringFrom.note || recurringFrom.source_name || "—", amt: recurringFrom.source_currency ? formatSigned(recurringFrom.direction === "in" ? recurringFrom.amount : -recurringFrom.amount, recurringFrom.source_currency, locale) : String(recurringFrom.amount) })}
+            </p>
+            <div>
+              <p className="mb-1 text-sm font-medium text-foreground">{t("frequency", { defaultValue: "Frequency" })}</p>
+              <Select value={recFreq} onChange={(e) => setRecFreq(e.target.value)}>
+                {(["daily", "weekly", "monthly", "yearly"] as const).map((f) => (
+                  <option key={f} value={f}>{t(`freq_${f}`, { defaultValue: f })}</option>
+                ))}
+              </Select>
+            </div>
+            {formError ? <p className="text-sm text-negative">{formError}</p> : null}
+          </div>
         </Modal>
       )}
     </div>

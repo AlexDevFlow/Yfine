@@ -338,6 +338,12 @@ export const useDeleteWhim = () => useBroadMutation((db, id: number) => whims.de
 export const useStartSaving = () => useBroadMutation((db, id: number) => whims.startSavingForWhim(db, id));
 
 // ---- portfolios ----
+export function usePortfolioHistory(id: number) {
+  return useQuery({
+    queryKey: ["history", "portfolio", id],
+    queryFn: async () => portfolios.portfolioValueHistory(await getDb(), id, 3650),
+  });
+}
 export function usePortfolios() {
   return useQuery({
     queryKey: ["portfolios"],

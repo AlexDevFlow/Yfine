@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { LineChart } from "@/components/ui/line-chart";
+import { RangeChart } from "@/components/ui/range-chart";
 import { useSourceHistory } from "@/db/queries";
 import { dayLabel } from "@/lib/date";
 import { formatMoney } from "@/lib/format";
@@ -19,7 +19,7 @@ export function BalanceHistoryChart({ sourceId, currency, locale, height = 120 }
   }
   return (
     <div className="px-4 pb-3">
-      <LineChart
+      <RangeChart
         points={data}
         height={height}
         format={(n) => formatMoney(n, currency, locale)}

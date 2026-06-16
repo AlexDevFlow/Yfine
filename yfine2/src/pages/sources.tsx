@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { Eye, EyeOff, LineChart as LineChartIcon, Pencil, Plus, Sparkles, Trash2, Wallet } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -214,7 +215,7 @@ function SourceCard({
             <Wallet className="h-5 w-5" />
           </span>
           <div className="min-w-0">
-            <p className="truncate font-medium text-foreground">{source.name}</p>
+            <Link to="/sources/$id" params={{ id: String(source.id) }} className="truncate font-medium text-foreground hover:text-primary hover:underline">{source.name}</Link>
             <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
               <Badge>{source.currency}</Badge>
               {source.yield_rate > 0 && (
