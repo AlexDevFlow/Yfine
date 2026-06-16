@@ -39,6 +39,11 @@ export function useErrorText() {
     if (err instanceof DomainError) {
       return t(`err_${err.code}`, { defaultValue: MESSAGES[err.code] });
     }
-    return (err as Error)?.message ?? "Something went wrong.";
+    // tauri-plugin-sql rejects with a plain string, not an Error — so reading
+    // `.message` alone would drop the real SQLite message and show the fallback.
+    if (typeof err === "string" && err.trim()) return err;
+    const msg = (err as { message?: unknown } | null)?.message;
+    if (typeof msg === "string" && msg.trim()) return msg;
+    return "Something went wrong.";
   };
 }
