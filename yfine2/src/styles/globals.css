@@ -1,0 +1,141 @@
+@import "tailwindcss";
+
+/*
+ * Yfine design system — usability-first finance aesthetic.
+ * Calm, high-legibility, light + dark, tabular numerals for money, semantic
+ * in/out colors that never rely on color alone. WCAG AA contrast.
+ *
+ * Theme is driven by [data-theme="light"|"dark"] on <html> (ThemeProvider).
+ */
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* ---- semantic palette (changes with theme) ---- */
+:root,
+[data-theme="light"] {
+  --background: #f6f7f9;
+  --surface: #ffffff;
+  --surface-2: #f1f3f6;
+  --foreground: #0d1220;
+  --muted: #5b6472;
+  --muted-2: #8b93a1;
+  --border: #e4e7ec;
+  --border-strong: #d3d8e0;
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
+  --primary-foreground: #ffffff;
+  --accent-soft: #eef0fe;
+  --positive: #08875d;
+  --positive-soft: #e3f5ec;
+  --negative: #d6336c;
+  --negative-soft: #fde8ef;
+  --warning: #b7791f;
+  --warning-soft: #fcf3e3;
+  --ring: #4f46e5;
+  --shadow-color: 220 40% 12%;
+}
+
+[data-theme="dark"] {
+  --background: #0a0e16;
+  --surface: #121826;
+  --surface-2: #1a2030;
+  --foreground: #eef1f6;
+  --muted: #9aa3b2;
+  --muted-2: #6b7484;
+  --border: #232b3b;
+  --border-strong: #303a4d;
+  --primary: #7c83ff;
+  --primary-hover: #9197ff;
+  --primary-foreground: #0a0e16;
+  --accent-soft: #1b2138;
+  --positive: #34d399;
+  --positive-soft: #102a22;
+  --negative: #fb7099;
+  --negative-soft: #2c1320;
+  --warning: #f1b24a;
+  --warning-soft: #2a2110;
+  --ring: #7c83ff;
+  --shadow-color: 220 60% 2%;
+}
+
+/* ---- map semantic vars into Tailwind utilities (bg-surface, text-muted, ...) ---- */
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-2: var(--muted-2);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent-soft: var(--accent-soft);
+  --color-positive: var(--positive);
+  --color-positive-soft: var(--positive-soft);
+  --color-negative: var(--negative);
+  --color-negative-soft: var(--negative-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-ring: var(--ring);
+
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  --radius-card: 1rem;
+  --radius-control: 0.625rem;
+
+  --shadow-card: 0 1px 2px hsl(var(--shadow-color) / 0.06),
+    0 4px 16px hsl(var(--shadow-color) / 0.06);
+  --shadow-pop: 0 8px 32px hsl(var(--shadow-color) / 0.16);
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+  html {
+    color-scheme: light dark;
+  }
+  body {
+    margin: 0;
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-feature-settings: "cv11" 1;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  /* money + figures: aligned tabular numerals everywhere */
+  .num {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+  ::selection {
+    background: color-mix(in srgb, var(--primary) 28%, transparent);
+  }
+  /* thin, themed scrollbars */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}

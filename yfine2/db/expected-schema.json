@@ -1,0 +1,1614 @@
+{
+  "head": "b3c4d5e6f7a8",
+  "tables": {
+    "sources": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": true,
+          "pk": 1,
+          "heal_default": null
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "''"
+        },
+        {
+          "name": "currency",
+          "type": "VARCHAR",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "''"
+        },
+        {
+          "name": "starting_balance",
+          "type": "FLOAT",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "0"
+        },
+        {
+          "name": "exclude_from_stats",
+          "type": "BOOLEAN",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "0"
+        },
+        {
+          "name": "is_savings_fund",
+          "type": "BOOLEAN",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "0"
+        },
+        {
+          "name": "hidden_from_sources",
+          "type": "BOOLEAN",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "0"
+        },
+        {
+          "name": "yield_rate",
+          "type": "FLOAT",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "0"
+        },
+        {
+          "name": "yield_period_months",
+          "type": "INTEGER",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "12"
+        },
+        {
+          "name": "yield_next_date",
+          "type": "DATE",
+          "notnull": false,
+          "pk": 0,
+          "heal_default": null
+        },
+        {
+          "name": "yield_last_date",
+          "type": "DATE",
+          "notnull": false,
+          "pk": 0,
+          "heal_default": null
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "'1970-01-01 00:00:00'"
+        },
+        {
+          "name": "updated_at",
+          "type": "DATETIME",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "'1970-01-01 00:00:00'"
+        }
+      ],
+      "indexes": [],
+      "foreign_keys": []
+    },
+    "tags": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": true,
+          "pk": 1,
+          "heal_default": null
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "''"
+        },
+        {
+          "name": "color",
+          "type": "VARCHAR",
+          "notnull": false,
+          "pk": 0,
+          "heal_default": null
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "'1970-01-01 00:00:00'"
+        },
+        {
+          "name": "updated_at",
+          "type": "DATETIME",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "'1970-01-01 00:00:00'"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "sqlite_autoindex_tags_1",
+          "unique": true,
+          "origin": "u",
+          "columns": [
+            "name"
+          ],
+          "sql": null
+        }
+      ],
+      "foreign_keys": []
+    },
+    "movements": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": true,
+          "pk": 1,
+          "heal_default": null
+        },
+        {
+          "name": "source_id",
+          "type": "INTEGER",
+          "notnull": false,
+          "pk": 0,
+          "heal_default": null
+        },
+        {
+          "name": "amount",
+          "type": "FLOAT",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "0"
+        },
+        {
+          "name": "direction",
+          "type": "VARCHAR",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "''"
+        },
+        {
+          "name": "date",
+          "type": "DATE",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "0"
+        },
+        {
+          "name": "note",
+          "type": "VARCHAR",
+          "notnull": false,
+          "pk": 0,
+          "heal_default": null
+        },
+        {
+          "name": "transfer_pair_id",
+          "type": "INTEGER",
+          "notnull": false,
+          "pk": 0,
+          "heal_default": null
+        },
+        {
+          "name": "exclude_from_stats",
+          "type": "BOOLEAN",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "0"
+        },
+        {
+          "name": "is_savings_contribution",
+          "type": "BOOLEAN",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "0"
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "'1970-01-01 00:00:00'"
+        },
+        {
+          "name": "updated_at",
+          "type": "DATETIME",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "'1970-01-01 00:00:00'"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "ix_movements_source_id_direction",
+          "unique": false,
+          "origin": "c",
+          "columns": [
+            "source_id",
+            "direction"
+          ],
+          "sql": "CREATE INDEX ix_movements_source_id_direction ON movements (source_id, direction)"
+        },
+        {
+          "name": "ix_movements_date",
+          "unique": false,
+          "origin": "c",
+          "columns": [
+            "date"
+          ],
+          "sql": "CREATE INDEX ix_movements_date ON movements (date)"
+        },
+        {
+          "name": "ix_movements_source_id",
+          "unique": false,
+          "origin": "c",
+          "columns": [
+            "source_id"
+          ],
+          "sql": "CREATE INDEX ix_movements_source_id ON movements (source_id)"
+        },
+        {
+          "name": "ix_movements_transfer_pair_id",
+          "unique": false,
+          "origin": "c",
+          "columns": [
+            "transfer_pair_id"
+          ],
+          "sql": "CREATE INDEX ix_movements_transfer_pair_id ON movements (transfer_pair_id)"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "table": "movements",
+          "from": "transfer_pair_id",
+          "to": "id",
+          "on_delete": "SET NULL"
+        },
+        {
+          "table": "sources",
+          "from": "source_id",
+          "to": "id",
+          "on_delete": "NO ACTION"
+        }
+      ]
+    },
+    "movement_tag": {
+      "columns": [
+        {
+          "name": "movement_id",
+          "type": "INTEGER",
+          "notnull": true,
+          "pk": 1,
+          "heal_default": null
+        },
+        {
+          "name": "tag_id",
+          "type": "INTEGER",
+          "notnull": true,
+          "pk": 2,
+          "heal_default": null
+        }
+      ],
+      "indexes": [
+        {
+          "name": "sqlite_autoindex_movement_tag_1",
+          "unique": true,
+          "origin": "pk",
+          "columns": [
+            "movement_id",
+            "tag_id"
+          ],
+          "sql": null
+        }
+      ],
+      "foreign_keys": [
+        {
+          "table": "tags",
+          "from": "tag_id",
+          "to": "id",
+          "on_delete": "CASCADE"
+        },
+        {
+          "table": "movements",
+          "from": "movement_id",
+          "to": "id",
+          "on_delete": "CASCADE"
+        }
+      ]
+    },
+    "movement_attachments": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": true,
+          "pk": 1,
+          "heal_default": null
+        },
+        {
+          "name": "movement_id",
+          "type": "INTEGER",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "0"
+        },
+        {
+          "name": "filename",
+          "type": "VARCHAR",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "''"
+        },
+        {
+          "name": "stored_name",
+          "type": "VARCHAR",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "''"
+        },
+        {
+          "name": "mime_type",
+          "type": "VARCHAR",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "''"
+        },
+        {
+          "name": "size_bytes",
+          "type": "INTEGER",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "0"
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "'1970-01-01 00:00:00'"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "ix_movement_attachments_movement_id",
+          "unique": false,
+          "origin": "c",
+          "columns": [
+            "movement_id"
+          ],
+          "sql": "CREATE INDEX ix_movement_attachments_movement_id ON movement_attachments (movement_id)"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "table": "movements",
+          "from": "movement_id",
+          "to": "id",
+          "on_delete": "CASCADE"
+        }
+      ]
+    },
+    "recurring_items": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": true,
+          "pk": 1,
+          "heal_default": null
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "''"
+        },
+        {
+          "name": "amount",
+          "type": "FLOAT",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "0"
+        },
+        {
+          "name": "direction",
+          "type": "VARCHAR",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "''"
+        },
+        {
+          "name": "currency",
+          "type": "VARCHAR",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "''"
+        },
+        {
+          "name": "frequency",
+          "type": "VARCHAR",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "''"
+        },
+        {
+          "name": "start_date",
+          "type": "DATE",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "0"
+        },
+        {
+          "name": "end_date",
+          "type": "DATE",
+          "notnull": false,
+          "pk": 0,
+          "heal_default": null
+        },
+        {
+          "name": "source_id",
+          "type": "INTEGER",
+          "notnull": false,
+          "pk": 0,
+          "heal_default": null
+        },
+        {
+          "name": "apply_mode",
+          "type": "VARCHAR",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "'confirm'"
+        },
+        {
+          "name": "next_due_date",
+          "type": "DATE",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "0"
+        },
+        {
+          "name": "alert_days_before",
+          "type": "INTEGER",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "7"
+        },
+        {
+          "name": "alert_if_insufficient",
+          "type": "BOOLEAN",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "1"
+        },
+        {
+          "name": "last_fired_date",
+          "type": "DATE",
+          "notnull": false,
+          "pk": 0,
+          "heal_default": null
+        },
+        {
+          "name": "last_alert_date",
+          "type": "DATE",
+          "notnull": false,
+          "pk": 0,
+          "heal_default": null
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "'1970-01-01 00:00:00'"
+        },
+        {
+          "name": "updated_at",
+          "type": "DATETIME",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "'1970-01-01 00:00:00'"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "ix_recurring_items_source_id",
+          "unique": false,
+          "origin": "c",
+          "columns": [
+            "source_id"
+          ],
+          "sql": "CREATE INDEX ix_recurring_items_source_id ON recurring_items (source_id)"
+        },
+        {
+          "name": "ix_recurring_items_next_due_date",
+          "unique": false,
+          "origin": "c",
+          "columns": [
+            "next_due_date"
+          ],
+          "sql": "CREATE INDEX ix_recurring_items_next_due_date ON recurring_items (next_due_date)"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "table": "sources",
+          "from": "source_id",
+          "to": "id",
+          "on_delete": "NO ACTION"
+        }
+      ]
+    },
+    "notifications": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": true,
+          "pk": 1,
+          "heal_default": null
+        },
+        {
+          "name": "type",
+          "type": "VARCHAR",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "''"
+        },
+        {
+          "name": "title",
+          "type": "VARCHAR",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "''"
+        },
+        {
+          "name": "body",
+          "type": "VARCHAR",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "''"
+        },
+        {
+          "name": "related_entity",
+          "type": "VARCHAR",
+          "notnull": false,
+          "pk": 0,
+          "heal_default": null
+        },
+        {
+          "name": "is_read",
+          "type": "BOOLEAN",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "0"
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "'1970-01-01 00:00:00'"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "ix_notifications_is_read",
+          "unique": false,
+          "origin": "c",
+          "columns": [
+            "is_read"
+          ],
+          "sql": "CREATE INDEX ix_notifications_is_read ON notifications (is_read)"
+        },
+        {
+          "name": "ix_notifications_related_entity_type",
+          "unique": false,
+          "origin": "c",
+          "columns": [
+            "related_entity",
+            "type"
+          ],
+          "sql": "CREATE INDEX ix_notifications_related_entity_type ON notifications (related_entity, type)"
+        },
+        {
+          "name": "ix_notifications_created_at",
+          "unique": false,
+          "origin": "c",
+          "columns": [
+            "created_at"
+          ],
+          "sql": "CREATE INDEX ix_notifications_created_at ON notifications (created_at)"
+        }
+      ],
+      "foreign_keys": []
+    },
+    "settings": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": true,
+          "pk": 1,
+          "heal_default": null
+        },
+        {
+          "name": "locale",
+          "type": "VARCHAR",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "'en'"
+        },
+        {
+          "name": "date_format",
+          "type": "VARCHAR",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "'dd/mm/yyyy'"
+        },
+        {
+          "name": "base_currency",
+          "type": "VARCHAR",
+          "notnull": false,
+          "pk": 0,
+          "heal_default": null
+        },
+        {
+          "name": "theme",
+          "type": "VARCHAR",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "'light'"
+        },
+        {
+          "name": "hide_net_worth",
+          "type": "BOOLEAN",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "0"
+        },
+        {
+          "name": "last_source_id",
+          "type": "INTEGER",
+          "notnull": false,
+          "pk": 0,
+          "heal_default": null
+        },
+        {
+          "name": "mobile_nav_mode",
+          "type": "VARCHAR",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "'sidebar'"
+        },
+        {
+          "name": "ui_scale",
+          "type": "VARCHAR",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "'normal'"
+        },
+        {
+          "name": "hotkeys_enabled",
+          "type": "BOOLEAN",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "1"
+        },
+        {
+          "name": "hotkeys_json",
+          "type": "VARCHAR",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "'{}'"
+        },
+        {
+          "name": "nav_layout_json",
+          "type": "VARCHAR",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "'[]'"
+        },
+        {
+          "name": "lan_access",
+          "type": "BOOLEAN",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "0"
+        },
+        {
+          "name": "portfolio_prices_enabled",
+          "type": "BOOLEAN",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "0"
+        },
+        {
+          "name": "portfolio_prices_prompted",
+          "type": "BOOLEAN",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "0"
+        },
+        {
+          "name": "saved_views_json",
+          "type": "VARCHAR",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "'[]'"
+        },
+        {
+          "name": "movement_templates_json",
+          "type": "VARCHAR",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "'[]'"
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "'1970-01-01 00:00:00'"
+        },
+        {
+          "name": "updated_at",
+          "type": "DATETIME",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "'1970-01-01 00:00:00'"
+        }
+      ],
+      "indexes": [],
+      "foreign_keys": []
+    },
+    "whims": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": true,
+          "pk": 1,
+          "heal_default": null
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "''"
+        },
+        {
+          "name": "amount",
+          "type": "FLOAT",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "0"
+        },
+        {
+          "name": "currency",
+          "type": "VARCHAR",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "''"
+        },
+        {
+          "name": "priority",
+          "type": "VARCHAR",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "'medium'"
+        },
+        {
+          "name": "source_id",
+          "type": "INTEGER",
+          "notnull": false,
+          "pk": 0,
+          "heal_default": null
+        },
+        {
+          "name": "status",
+          "type": "VARCHAR",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "'pending'"
+        },
+        {
+          "name": "note",
+          "type": "VARCHAR",
+          "notnull": false,
+          "pk": 0,
+          "heal_default": null
+        },
+        {
+          "name": "url",
+          "type": "VARCHAR",
+          "notnull": false,
+          "pk": 0,
+          "heal_default": null
+        },
+        {
+          "name": "purchased_at",
+          "type": "DATETIME",
+          "notnull": false,
+          "pk": 0,
+          "heal_default": null
+        },
+        {
+          "name": "linked_goal_id",
+          "type": "INTEGER",
+          "notnull": false,
+          "pk": 0,
+          "heal_default": null
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "'1970-01-01 00:00:00'"
+        },
+        {
+          "name": "updated_at",
+          "type": "DATETIME",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "'1970-01-01 00:00:00'"
+        }
+      ],
+      "indexes": [],
+      "foreign_keys": [
+        {
+          "table": "sources",
+          "from": "source_id",
+          "to": "id",
+          "on_delete": "NO ACTION"
+        }
+      ]
+    },
+    "savings": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": true,
+          "pk": 1,
+          "heal_default": null
+        },
+        {
+          "name": "amount",
+          "type": "FLOAT",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "0"
+        },
+        {
+          "name": "currency",
+          "type": "VARCHAR",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "''"
+        },
+        {
+          "name": "date",
+          "type": "DATE",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "0"
+        },
+        {
+          "name": "description",
+          "type": "VARCHAR",
+          "notnull": false,
+          "pk": 0,
+          "heal_default": null
+        },
+        {
+          "name": "note",
+          "type": "VARCHAR",
+          "notnull": false,
+          "pk": 0,
+          "heal_default": null
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "'1970-01-01 00:00:00'"
+        },
+        {
+          "name": "updated_at",
+          "type": "DATETIME",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "'1970-01-01 00:00:00'"
+        }
+      ],
+      "indexes": [],
+      "foreign_keys": []
+    },
+    "saving_tag": {
+      "columns": [
+        {
+          "name": "saving_id",
+          "type": "INTEGER",
+          "notnull": true,
+          "pk": 1,
+          "heal_default": null
+        },
+        {
+          "name": "tag_id",
+          "type": "INTEGER",
+          "notnull": true,
+          "pk": 2,
+          "heal_default": null
+        }
+      ],
+      "indexes": [
+        {
+          "name": "sqlite_autoindex_saving_tag_1",
+          "unique": true,
+          "origin": "pk",
+          "columns": [
+            "saving_id",
+            "tag_id"
+          ],
+          "sql": null
+        }
+      ],
+      "foreign_keys": [
+        {
+          "table": "tags",
+          "from": "tag_id",
+          "to": "id",
+          "on_delete": "CASCADE"
+        },
+        {
+          "table": "savings",
+          "from": "saving_id",
+          "to": "id",
+          "on_delete": "CASCADE"
+        }
+      ]
+    },
+    "exchange_rates": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": true,
+          "pk": 1,
+          "heal_default": null
+        },
+        {
+          "name": "from_currency",
+          "type": "VARCHAR",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "''"
+        },
+        {
+          "name": "to_currency",
+          "type": "VARCHAR",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "''"
+        },
+        {
+          "name": "rate",
+          "type": "FLOAT",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "0"
+        },
+        {
+          "name": "updated_at",
+          "type": "DATETIME",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "'1970-01-01 00:00:00'"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "ix_exchange_rates_pair",
+          "unique": true,
+          "origin": "c",
+          "columns": [
+            "from_currency",
+            "to_currency"
+          ],
+          "sql": "CREATE UNIQUE INDEX ix_exchange_rates_pair ON exchange_rates (from_currency, to_currency)"
+        }
+      ],
+      "foreign_keys": []
+    },
+    "portfolios": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": true,
+          "pk": 1,
+          "heal_default": null
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "''"
+        },
+        {
+          "name": "kind",
+          "type": "VARCHAR",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "'mixed'"
+        },
+        {
+          "name": "base_currency",
+          "type": "VARCHAR",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "'EUR'"
+        },
+        {
+          "name": "source_id",
+          "type": "INTEGER",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "0"
+        },
+        {
+          "name": "note",
+          "type": "VARCHAR",
+          "notnull": false,
+          "pk": 0,
+          "heal_default": null
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "'1970-01-01 00:00:00'"
+        },
+        {
+          "name": "updated_at",
+          "type": "DATETIME",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "'1970-01-01 00:00:00'"
+        }
+      ],
+      "indexes": [],
+      "foreign_keys": [
+        {
+          "table": "sources",
+          "from": "source_id",
+          "to": "id",
+          "on_delete": "RESTRICT"
+        }
+      ]
+    },
+    "holdings": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": true,
+          "pk": 1,
+          "heal_default": null
+        },
+        {
+          "name": "portfolio_id",
+          "type": "INTEGER",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "0"
+        },
+        {
+          "name": "asset_class",
+          "type": "VARCHAR",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "''"
+        },
+        {
+          "name": "symbol",
+          "type": "VARCHAR",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "''"
+        },
+        {
+          "name": "display_name",
+          "type": "VARCHAR",
+          "notnull": false,
+          "pk": 0,
+          "heal_default": null
+        },
+        {
+          "name": "quantity",
+          "type": "FLOAT",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "0"
+        },
+        {
+          "name": "avg_cost",
+          "type": "FLOAT",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "0"
+        },
+        {
+          "name": "currency",
+          "type": "VARCHAR",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "'EUR'"
+        },
+        {
+          "name": "last_price",
+          "type": "FLOAT",
+          "notnull": false,
+          "pk": 0,
+          "heal_default": null
+        },
+        {
+          "name": "last_price_at",
+          "type": "DATETIME",
+          "notnull": false,
+          "pk": 0,
+          "heal_default": null
+        },
+        {
+          "name": "manual_price",
+          "type": "BOOLEAN",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "0"
+        },
+        {
+          "name": "note",
+          "type": "VARCHAR",
+          "notnull": false,
+          "pk": 0,
+          "heal_default": null
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "'1970-01-01 00:00:00'"
+        },
+        {
+          "name": "updated_at",
+          "type": "DATETIME",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "'1970-01-01 00:00:00'"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "ix_holdings_portfolio_id",
+          "unique": false,
+          "origin": "c",
+          "columns": [
+            "portfolio_id"
+          ],
+          "sql": "CREATE INDEX ix_holdings_portfolio_id ON holdings (portfolio_id)"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "table": "portfolios",
+          "from": "portfolio_id",
+          "to": "id",
+          "on_delete": "CASCADE"
+        }
+      ]
+    },
+    "holding_price_snapshots": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": true,
+          "pk": 1,
+          "heal_default": null
+        },
+        {
+          "name": "holding_id",
+          "type": "INTEGER",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "0"
+        },
+        {
+          "name": "date",
+          "type": "DATE",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "0"
+        },
+        {
+          "name": "price",
+          "type": "FLOAT",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "0"
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "'1970-01-01 00:00:00'"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "ix_holding_price_snapshots_holding_date",
+          "unique": false,
+          "origin": "c",
+          "columns": [
+            "holding_id",
+            "date"
+          ],
+          "sql": "CREATE INDEX ix_holding_price_snapshots_holding_date ON holding_price_snapshots (holding_id, date)"
+        },
+        {
+          "name": "sqlite_autoindex_holding_price_snapshots_1",
+          "unique": true,
+          "origin": "u",
+          "columns": [
+            "holding_id",
+            "date"
+          ],
+          "sql": null
+        }
+      ],
+      "foreign_keys": [
+        {
+          "table": "holdings",
+          "from": "holding_id",
+          "to": "id",
+          "on_delete": "CASCADE"
+        }
+      ]
+    },
+    "goals": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": true,
+          "pk": 1,
+          "heal_default": null
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "''"
+        },
+        {
+          "name": "target_amount",
+          "type": "FLOAT",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "0"
+        },
+        {
+          "name": "currency",
+          "type": "VARCHAR",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "''"
+        },
+        {
+          "name": "target_date",
+          "type": "DATE",
+          "notnull": false,
+          "pk": 0,
+          "heal_default": null
+        },
+        {
+          "name": "source_id",
+          "type": "INTEGER",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "0"
+        },
+        {
+          "name": "status",
+          "type": "VARCHAR",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "'active'"
+        },
+        {
+          "name": "note",
+          "type": "VARCHAR",
+          "notnull": false,
+          "pk": 0,
+          "heal_default": null
+        },
+        {
+          "name": "linked_whim_id",
+          "type": "INTEGER",
+          "notnull": false,
+          "pk": 0,
+          "heal_default": null
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "'1970-01-01 00:00:00'"
+        },
+        {
+          "name": "updated_at",
+          "type": "DATETIME",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "'1970-01-01 00:00:00'"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "ix_goals_source_id",
+          "unique": false,
+          "origin": "c",
+          "columns": [
+            "source_id"
+          ],
+          "sql": "CREATE INDEX ix_goals_source_id ON goals (source_id)"
+        },
+        {
+          "name": "ix_goals_status",
+          "unique": false,
+          "origin": "c",
+          "columns": [
+            "status"
+          ],
+          "sql": "CREATE INDEX ix_goals_status ON goals (status)"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "table": "whims",
+          "from": "linked_whim_id",
+          "to": "id",
+          "on_delete": "SET NULL"
+        },
+        {
+          "table": "sources",
+          "from": "source_id",
+          "to": "id",
+          "on_delete": "RESTRICT"
+        }
+      ]
+    },
+    "goal_allocations": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": true,
+          "pk": 1,
+          "heal_default": null
+        },
+        {
+          "name": "goal_id",
+          "type": "INTEGER",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "0"
+        },
+        {
+          "name": "movement_id",
+          "type": "INTEGER",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "0"
+        },
+        {
+          "name": "amount",
+          "type": "FLOAT",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "0"
+        },
+        {
+          "name": "date",
+          "type": "DATE",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "0"
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "'1970-01-01 00:00:00'"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "ix_goal_allocations_movement_id",
+          "unique": false,
+          "origin": "c",
+          "columns": [
+            "movement_id"
+          ],
+          "sql": "CREATE INDEX ix_goal_allocations_movement_id ON goal_allocations (movement_id)"
+        },
+        {
+          "name": "ix_goal_allocations_goal_id",
+          "unique": false,
+          "origin": "c",
+          "columns": [
+            "goal_id"
+          ],
+          "sql": "CREATE INDEX ix_goal_allocations_goal_id ON goal_allocations (goal_id)"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "table": "movements",
+          "from": "movement_id",
+          "to": "id",
+          "on_delete": "CASCADE"
+        },
+        {
+          "table": "goals",
+          "from": "goal_id",
+          "to": "id",
+          "on_delete": "CASCADE"
+        }
+      ]
+    },
+    "budgets": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": true,
+          "pk": 1,
+          "heal_default": null
+        },
+        {
+          "name": "tag_id",
+          "type": "INTEGER",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "0"
+        },
+        {
+          "name": "amount",
+          "type": "FLOAT",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "0"
+        },
+        {
+          "name": "currency",
+          "type": "VARCHAR",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "''"
+        },
+        {
+          "name": "period",
+          "type": "VARCHAR",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "'monthly'"
+        },
+        {
+          "name": "direction",
+          "type": "VARCHAR",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "'out'"
+        },
+        {
+          "name": "rollover",
+          "type": "BOOLEAN",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "0"
+        },
+        {
+          "name": "alert_threshold_pct",
+          "type": "INTEGER",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "80"
+        },
+        {
+          "name": "active",
+          "type": "BOOLEAN",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "1"
+        },
+        {
+          "name": "start_date",
+          "type": "DATE",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "0"
+        },
+        {
+          "name": "last_alert_period",
+          "type": "VARCHAR",
+          "notnull": false,
+          "pk": 0,
+          "heal_default": null
+        },
+        {
+          "name": "last_alert_level",
+          "type": "INTEGER",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "0"
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "'1970-01-01 00:00:00'"
+        },
+        {
+          "name": "updated_at",
+          "type": "DATETIME",
+          "notnull": true,
+          "pk": 0,
+          "heal_default": "'1970-01-01 00:00:00'"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "ix_budgets_tag_id",
+          "unique": false,
+          "origin": "c",
+          "columns": [
+            "tag_id"
+          ],
+          "sql": "CREATE INDEX ix_budgets_tag_id ON budgets (tag_id)"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "table": "tags",
+          "from": "tag_id",
+          "to": "id",
+          "on_delete": "NO ACTION"
+        }
+      ]
+    }
+  }
+}

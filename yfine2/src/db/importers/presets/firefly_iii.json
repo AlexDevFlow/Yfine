@@ -1,0 +1,25 @@
+{
+  "id": "firefly_iii",
+  "display_name": "Firefly III",
+  "bank": null,
+  "format": "csv",
+  "currency_hint": null,
+  "source_hint": "Firefly III",
+  "detect": {
+    "headers": ["type", "amount", "description", "date", "currency_code"]
+  },
+  "options": {
+    "encoding": "utf-8",
+    "delimiter": ",",
+    "decimal_separator": ".",
+    "date_format": "%Y-%m-%d",
+    "column_map": {
+      "date": "date",
+      "amount": "amount",
+      "note": "description",
+      "currency": "currency_code",
+      "direction": "type"
+    },
+    "sign_convention": "positive_with_type"
+  }
+}

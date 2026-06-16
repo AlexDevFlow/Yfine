@@ -1,0 +1,54 @@
+name: Build Yfine desktop installers
+
+# Produces native installers (.AppImage/.deb, .dmg, .msi) on tag push.
+# No code signing/notarization — local-use builds.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: ubuntu-22.04
+          - platform: macos-latest
+          - platform: windows-latest
+    runs-on: ${{ matrix.platform }}
+    defaults:
+      run:
+        working-directory: yfine2
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Linux deps
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf build-essential
+
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: yfine2/pnpm-lock.yaml
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: yfine2/src-tauri
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test
+      - run: pnpm typecheck
+
+      - uses: tauri-apps/tauri-action@v0
+        with:
+          projectPath: yfine2
+          tagName: ${{ github.ref_name }}
+          releaseName: "Yfine ${{ github.ref_name }}"
+          releaseDraft: true
+          prerelease: false
