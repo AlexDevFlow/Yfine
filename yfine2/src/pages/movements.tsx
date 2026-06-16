@@ -1,4 +1,4 @@
-import { ArrowDownLeft, ArrowLeftRight, ArrowUpRight, ChevronDown, ChevronRight, Layers, ListChecks, Pencil, Plus, Search, Trash2, X } from "lucide-react";
+import { ArrowDownLeft, ArrowLeftRight, ArrowUpRight, ChevronDown, ChevronRight, Layers, ListChecks, Pencil, Plus, Search, SlidersHorizontal, Tag as TagIcon, Trash2, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { isPreviewDb } from "@/db/connection";
 import {
   useBulkDelete,
   useBulkSetSource,
+  useBulkSetTags,
   useCreateMovement,
   useCreateSplit,
   useCreateTransfer,
@@ -119,6 +120,19 @@ export function MovementsPage() {
   const [q, setQ] = useState("");
   const [filterSource, setFilterSource] = useState("");
   const [filterDir, setFilterDir] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [amtMin, setAmtMin] = useState("");
+  const [amtMax, setAmtMax] = useState("");
+  const [filterTagIds, setFilterTagIds] = useState<number[]>([]);
+  const [tagMatch, setTagMatch] = useState<"or" | "and">("or");
+
+  const advancedCount =
+    (dateFrom ? 1 : 0) + (dateTo ? 1 : 0) + (amtMin ? 1 : 0) + (amtMax ? 1 : 0) + (filterTagIds.length ? 1 : 0);
+  const clearAdvanced = () => {
+    setDateFrom(""); setDateTo(""); setAmtMin(""); setAmtMax(""); setFilterTagIds([]); setTagMatch("or");
+  };
 
   const filters = useMemo<MovementFilters>(
     () => ({
@@ -126,8 +140,14 @@ export function MovementsPage() {
       q: q.trim() || undefined,
       sourceId: filterSource === "" ? undefined : Number(filterSource),
       direction: (filterDir || undefined) as "in" | "out" | undefined,
+      dateFrom: dateFrom || undefined,
+      dateTo: dateTo || undefined,
+      amountMin: amtMin ? Number(amtMin) : undefined,
+      amountMax: amtMax ? Number(amtMax) : undefined,
+      tagIds: filterTagIds.length ? filterTagIds : undefined,
+      tagMatch,
     }),
-    [q, filterSource, filterDir],
+    [q, filterSource, filterDir, dateFrom, dateTo, amtMin, amtMax, filterTagIds, tagMatch],
   );
 
   const { data, isLoading, error } = useMovements(filters);
@@ -152,6 +172,12 @@ export function MovementsPage() {
   const createSplit = useCreateSplit();
   const bulkDelete = useBulkDelete();
   const bulkMove = useBulkSetSource();
+  const bulkSetTags = useBulkSetTags();
+  const [bulkTagOpen, setBulkTagOpen] = useState(false);
+  const [bulkTagIds, setBulkTagIds] = useState<number[]>([]);
+  const [bulkTagMode, setBulkTagMode] = useState<"add" | "remove" | "replace">("add");
+  const toggleBulkTag = (id: number) =>
+    setBulkTagIds((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
   const toggleSel = (id: number) =>
     setSelected((s) => {
       const n = new Set(s);
@@ -245,6 +271,10 @@ export function MovementsPage() {
           <option value="in">{t("income", { defaultValue: "Income" })}</option>
           <option value="out">{t("expense", { defaultValue: "Expense" })}</option>
         </Select>
+        <Button variant={showFilters || advancedCount > 0 ? "secondary" : "outline"} onClick={() => setShowFilters((s) => !s)}>
+          <SlidersHorizontal className="h-4 w-4" /> {t("filters", { defaultValue: "Filters" })}
+          {advancedCount > 0 && <span className="ml-1 grid h-4 min-w-4 place-items-center rounded-full bg-primary px-1 text-[10px] text-primary-foreground">{advancedCount}</span>}
+        </Button>
         <Button variant="outline" onClick={() => { setFormError(undefined); setTrModal({ open: true }); }} disabled={(realSources?.length ?? 0) < 2}>
           <ArrowLeftRight className="h-4 w-4" /> {t("transfer", { defaultValue: "Transfer" })}
         </Button>
@@ -259,6 +289,61 @@ export function MovementsPage() {
         </Button>
       </div>
 
+      {showFilters && (
+        <Card className="space-y-3 p-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div>
+              <p className="mb-1 text-xs font-medium text-muted">{t("date_from", { defaultValue: "From date" })}</p>
+              <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
+            </div>
+            <div>
+              <p className="mb-1 text-xs font-medium text-muted">{t("date_to", { defaultValue: "To date" })}</p>
+              <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
+            </div>
+            <div>
+              <p className="mb-1 text-xs font-medium text-muted">{t("amount_min", { defaultValue: "Min amount" })}</p>
+              <Input type="number" step="0.01" min="0" value={amtMin} onChange={(e) => setAmtMin(e.target.value)} className="num" />
+            </div>
+            <div>
+              <p className="mb-1 text-xs font-medium text-muted">{t("amount_max", { defaultValue: "Max amount" })}</p>
+              <Input type="number" step="0.01" min="0" value={amtMax} onChange={(e) => setAmtMax(e.target.value)} className="num" />
+            </div>
+          </div>
+          {(tags?.length ?? 0) > 0 && (
+            <div>
+              <div className="mb-1.5 flex items-center justify-between">
+                <p className="text-xs font-medium text-muted">{t("tags", { defaultValue: "Tags" })}</p>
+                {filterTagIds.length > 1 && (
+                  <div className="flex items-center gap-1 text-xs">
+                    {(["or", "and"] as const).map((m) => (
+                      <button key={m} onClick={() => setTagMatch(m)} className={cn("rounded-full px-2 py-0.5 font-medium", tagMatch === m ? "bg-accent-soft text-primary" : "text-muted hover:text-foreground")}>
+                        {m === "or" ? t("match_any", { defaultValue: "Any" }) : t("match_all", { defaultValue: "All" })}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {(tags ?? []).map((tg) => {
+                  const on = filterTagIds.includes(tg.id);
+                  return (
+                    <button key={tg.id} onClick={() => setFilterTagIds((s) => (on ? s.filter((x) => x !== tg.id) : [...s, tg.id]))} className={cn("rounded-full border px-2.5 py-1 text-xs font-medium transition-colors", on ? "border-primary bg-accent-soft text-primary" : "border-border text-muted hover:text-foreground")}>
+                      <span className="mr-1 inline-block h-2 w-2 rounded-full align-middle" style={{ background: tg.color ?? "var(--muted-2)" }} />
+                      {tg.name}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+          {advancedCount > 0 && (
+            <div className="flex justify-end">
+              <Button size="sm" variant="ghost" onClick={clearAdvanced}><X className="h-4 w-4" /> {t("clear_filters", { defaultValue: "Clear filters" })}</Button>
+            </div>
+          )}
+        </Card>
+      )}
+
       {selectMode && selected.size > 0 && (
         <div className="sticky top-16 z-20 flex flex-wrap items-center gap-2 rounded-[var(--radius-control)] border border-border bg-surface p-2 shadow-[var(--shadow-card)]">
           <span className="px-1 text-sm font-medium text-foreground">{t("n_selected", { defaultValue: "{{n}} selected", n: selected.size })}</span>
@@ -268,6 +353,9 @@ export function MovementsPage() {
           </Select>
           <Button size="sm" variant="outline" disabled={!bulkMoveTo || bulkMove.isPending} onClick={() => bulkMove.mutate({ ids: [...selected], sourceId: Number(bulkMoveTo) }, { onSuccess: () => { clearSel(); setBulkMoveTo(""); } })}>
             {t("move", { defaultValue: "Move" })}
+          </Button>
+          <Button size="sm" variant="outline" disabled={(tags?.length ?? 0) === 0} onClick={() => { setBulkTagIds([]); setBulkTagMode("add"); setBulkTagOpen(true); }}>
+            <TagIcon className="h-4 w-4" /> {t("tags", { defaultValue: "Tags" })}
           </Button>
           <Button size="sm" variant="danger" disabled={bulkDelete.isPending} onClick={() => bulkDelete.mutate([...selected], { onSuccess: clearSel })}>
             <Trash2 className="h-4 w-4" /> {t("delete", { defaultValue: "Delete" })}
@@ -370,6 +458,45 @@ export function MovementsPage() {
           onCancel={() => setTrModal({ open: false })}
           onSubmit={submitTransfer}
         />
+      </Modal>
+
+      <Modal
+        open={bulkTagOpen}
+        onClose={() => setBulkTagOpen(false)}
+        title={t("bulk_tag_title", { defaultValue: "Tag {{n}} movements", n: selected.size })}
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setBulkTagOpen(false)}>{t("cancel", { defaultValue: "Cancel" })}</Button>
+            <Button
+              disabled={bulkSetTags.isPending || bulkTagIds.length === 0}
+              onClick={() => bulkSetTags.mutate({ ids: [...selected], tagIds: bulkTagIds, mode: bulkTagMode }, { onSuccess: () => { setBulkTagOpen(false); clearSel(); } })}
+            >
+              {t("apply", { defaultValue: "Apply" })}
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <div className="grid grid-cols-3 gap-2">
+            {(["add", "remove", "replace"] as const).map((m) => (
+              <button key={m} type="button" onClick={() => setBulkTagMode(m)} className={cn("h-9 rounded-[var(--radius-control)] border text-sm font-medium", bulkTagMode === m ? "border-primary bg-accent-soft text-primary" : "border-border text-muted")}>
+                {t(`tag_mode_${m}`, { defaultValue: m })}
+              </button>
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {(tags ?? []).map((tg) => {
+              const on = bulkTagIds.includes(tg.id);
+              return (
+                <button key={tg.id} type="button" onClick={() => toggleBulkTag(tg.id)} className={cn("rounded-full border px-2.5 py-1 text-xs font-medium transition-colors", on ? "border-primary bg-accent-soft text-primary" : "border-border text-muted hover:text-foreground")}>
+                  <span className="mr-1 inline-block h-2 w-2 rounded-full align-middle" style={{ background: tg.color ?? "var(--muted-2)" }} />
+                  {tg.name}
+                </button>
+              );
+            })}
+          </div>
+          <p className="text-xs text-muted">{t("bulk_tag_hint", { defaultValue: "Add appends, Remove strips, Replace sets exactly these tags." })}</p>
+        </div>
       </Modal>
 
       <Modal open={splitOpen} onClose={() => setSplitOpen(false)} title={t("split_transaction", { defaultValue: "Split transaction" })}>

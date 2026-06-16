@@ -1,4 +1,4 @@
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Pencil, Plus, Trash2 } from "lucide-react";
 import { useMemo, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +10,7 @@ import { isPreviewDb } from "@/db/connection";
 import { useBudgets, useCreateBudget, useDeleteBudget, useTags, useUpdateBudget } from "@/db/queries";
 import type { BudgetStatus, NewBudget } from "@/db/repo/budgets";
 import type { Period } from "@/domain/period";
+import { round2 } from "@/domain/money";
 import { cn } from "@/lib/cn";
 import { formatMoney } from "@/lib/format";
 import { useErrorText } from "@/lib/use-error-text";
@@ -77,7 +78,8 @@ export function BudgetsPage() {
   const { t, i18n } = useTranslation();
   const locale = i18n.resolvedLanguage;
   const errText = useErrorText();
-  const { data, isLoading } = useBudgets();
+  const [offset, setOffset] = useState(0);
+  const { data, isLoading } = useBudgets(offset);
   const { data: tags } = useTags();
   const create = useCreateBudget();
   const update = useUpdateBudget();
@@ -85,6 +87,19 @@ export function BudgetsPage() {
   const [modal, setModal] = useState<{ open: boolean; editing?: BudgetStatus }>({ open: false });
   const [formError, setFormError] = useState<string>();
   const tagName = useMemo(() => new Map((tags ?? []).map((tg) => [tg.id, tg.name])), [tags]);
+
+  // Per-currency rollup across all budgets in the viewed period.
+  const summary = useMemo(() => {
+    const m = new Map<string, { actual: number; available: number; remaining: number }>();
+    for (const st of data ?? []) {
+      const e = m.get(st.budget.currency) ?? { actual: 0, available: 0, remaining: 0 };
+      e.actual = round2(e.actual + st.actual);
+      e.available = round2(e.available + st.available);
+      e.remaining = round2(e.remaining + st.remaining);
+      m.set(st.budget.currency, e);
+    }
+    return [...m.entries()];
+  }, [data]);
 
   const submit = (v: NewBudget) => {
     setFormError(undefined);
@@ -104,6 +119,28 @@ export function BudgetsPage() {
           <Plus className="h-4 w-4" /> {t("new_budget", { defaultValue: "New Budget" })}
         </Button>
       </div>
+
+      {/* Period navigation + per-currency rollup */}
+      {data && data.length > 0 && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-card)] border border-border bg-surface p-3">
+          <div className="flex items-center gap-1.5">
+            <button onClick={() => setOffset((o) => o - 1)} aria-label={t("previous", { defaultValue: "Previous" })} className="grid h-8 w-8 place-items-center rounded-[var(--radius-control)] text-muted hover:bg-surface-2 hover:text-foreground"><ChevronLeft className="h-4 w-4" /></button>
+            <button onClick={() => setOffset(0)} className={cn("rounded-[var(--radius-control)] px-3 py-1 text-sm font-medium", offset === 0 ? "text-foreground" : "text-primary hover:bg-surface-2")}>
+              {offset === 0 ? t("current_period", { defaultValue: "Current period" }) : offset > 0 ? t("periods_ahead", { defaultValue: "+{{n}} period", n: offset }) : t("periods_ago", { defaultValue: "{{n}} period", n: offset })}
+            </button>
+            <button onClick={() => setOffset((o) => o + 1)} aria-label={t("next", { defaultValue: "Next" })} className="grid h-8 w-8 place-items-center rounded-[var(--radius-control)] text-muted hover:bg-surface-2 hover:text-foreground"><ChevronRight className="h-4 w-4" /></button>
+          </div>
+          <div className="flex flex-wrap items-center gap-3 text-sm">
+            {summary.map(([ccy, s]) => (
+              <span key={ccy} className="num rounded-[var(--radius-control)] bg-surface-2 px-2.5 py-1">
+                <span className={cn("font-semibold", s.remaining < 0 ? "text-negative" : "text-foreground")}>{formatMoney(s.actual, ccy, locale)}</span>
+                <span className="text-muted"> / {formatMoney(s.available, ccy, locale)}</span>
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
       {isLoading && <Card className="p-8 text-center text-sm text-muted">{t("loading", { defaultValue: "Loading…" })}</Card>}
       {data && data.length === 0 && <Card className="p-10 text-center text-sm text-muted">{t("no_budgets", { defaultValue: "No budgets yet." })}</Card>}
 
@@ -131,11 +168,19 @@ export function BudgetsPage() {
             <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-surface-2">
               <div className={cn("h-full rounded-full", TONE[st.status])} style={{ width: `${Math.min(100, Math.max(0, st.spentPct))}%` }} />
             </div>
-            <p className="num mt-1 text-xs text-muted">
-              {st.remaining >= 0
-                ? t("remaining_amt", { defaultValue: "{{amt}} left", amt: formatMoney(st.remaining, st.budget.currency, locale) })
-                : t("over_by", { defaultValue: "{{amt}} over", amt: formatMoney(-st.remaining, st.budget.currency, locale) })}
-            </p>
+            <div className="mt-1 flex items-center justify-between text-xs text-muted">
+              <span className="num">
+                {st.remaining >= 0
+                  ? t("remaining_amt", { defaultValue: "{{amt}} left", amt: formatMoney(st.remaining, st.budget.currency, locale) })
+                  : t("over_by", { defaultValue: "{{amt}} over", amt: formatMoney(-st.remaining, st.budget.currency, locale) })}
+              </span>
+              {st.daysRemaining > 0 && <span>{t("days_left", { defaultValue: "{{n}}d left", n: st.daysRemaining })}</span>}
+            </div>
+            {st.projected > 0 && st.daysRemaining > 0 && (
+              <p className={cn("num mt-0.5 text-xs", st.projected > st.available ? "text-negative" : "text-muted-2")}>
+                {t("projected_spend", { defaultValue: "Projected: {{amt}}", amt: formatMoney(st.projected, st.budget.currency, locale) })}
+              </p>
+            )}
           </Card>
         ))}
       </div>

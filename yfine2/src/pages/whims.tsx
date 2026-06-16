@@ -124,6 +124,9 @@ export function WhimsPage() {
   const [formError, setFormError] = useState<string>();
   const [buyError, setBuyError] = useState<string>();
 
+  const [prioFilter, setPrioFilter] = useState<"all" | "high" | "medium" | "low">("all");
+  const [sort, setSort] = useState<"priority" | "amount" | "name" | "newest">("priority");
+
   const groups = useMemo(() => {
     const list = whimList ?? [];
     return {
@@ -132,6 +135,20 @@ export function WhimsPage() {
       dismissed: list.filter((w) => w.status === "dismissed"),
     };
   }, [whimList]);
+
+  const pendingView = useMemo(() => {
+    const rank = { high: 0, medium: 1, low: 2 } as const;
+    let list = groups.pending;
+    if (prioFilter !== "all") list = list.filter((w) => w.priority === prioFilter);
+    const sorted = [...list];
+    sorted.sort((a, b) => {
+      if (sort === "amount") return b.amount - a.amount;
+      if (sort === "name") return a.name.localeCompare(b.name);
+      if (sort === "newest") return (b.created_at ?? "").localeCompare(a.created_at ?? "");
+      return rank[a.priority] - rank[b.priority]; // priority
+    });
+    return sorted;
+  }, [groups.pending, prioFilter, sort]);
 
   const submit = (v: NewWhim) => {
     setFormError(undefined);
@@ -185,10 +202,25 @@ export function WhimsPage() {
         <Button onClick={() => { setFormError(undefined); setForm({ open: true }); }}><Plus className="h-4 w-4" /> {t("new_whim", { defaultValue: "New Whim" })}</Button>
       </div>
 
+      {groups.pending.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2">
+          <Select value={prioFilter} onChange={(e) => setPrioFilter(e.target.value as typeof prioFilter)} className="w-auto">
+            <option value="all">{t("all_priorities", { defaultValue: "All priorities" })}</option>
+            {PRIORITIES.map((p) => <option key={p} value={p}>{t(`priority_${p}`, { defaultValue: p })}</option>)}
+          </Select>
+          <Select value={sort} onChange={(e) => setSort(e.target.value as typeof sort)} className="w-auto">
+            <option value="priority">{t("sort_priority", { defaultValue: "Sort: Priority" })}</option>
+            <option value="amount">{t("sort_amount", { defaultValue: "Sort: Amount" })}</option>
+            <option value="name">{t("sort_name", { defaultValue: "Sort: Name" })}</option>
+            <option value="newest">{t("sort_newest", { defaultValue: "Sort: Newest" })}</option>
+          </Select>
+        </div>
+      )}
+
       {isLoading && <Card className="p-8 text-center text-sm text-muted">{t("loading", { defaultValue: "Loading…" })}</Card>}
       {whimList && whimList.length === 0 && <Card className="p-10 text-center text-sm text-muted">{t("no_whims", { defaultValue: "No whims yet." })}</Card>}
 
-      {groups.pending.length > 0 && <div className="grid grid-cols-1 gap-3 md:grid-cols-2">{groups.pending.map(card)}</div>}
+      {pendingView.length > 0 && <div className="grid grid-cols-1 gap-3 md:grid-cols-2">{pendingView.map(card)}</div>}
       {groups.purchased.length > 0 && (
         <div className="space-y-3">
           <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground"><Check className="h-4 w-4 text-positive" /> {t("whim_purchased", { defaultValue: "Purchased" })}</h2>

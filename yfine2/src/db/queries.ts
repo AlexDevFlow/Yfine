@@ -287,6 +287,7 @@ function useNotifMutation<TArgs, TResult>(fn: (db: import("./types").SqlExecutor
 export const useMarkRead = () => useNotifMutation((db, id: number) => notifications.markRead(db, id));
 export const useMarkAllRead = () => useNotifMutation((db, _: void) => notifications.markAllRead(db));
 export const useDeleteNotification = () => useNotifMutation((db, id: number) => notifications.deleteNotification(db, id));
+export const useDeleteAllRead = () => useNotifMutation((db, _: void) => notifications.deleteAllRead(db));
 
 // ---- budgets / goals / whims (money-moving → broad invalidation) ----
 function useBroadMutation<TArgs, TResult>(fn: (db: import("./types").SqlExecutor, a: TArgs) => Promise<TResult>) {

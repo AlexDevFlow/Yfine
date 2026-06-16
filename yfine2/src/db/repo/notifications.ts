@@ -60,3 +60,7 @@ export async function markAllRead(db: SqlExecutor): Promise<void> {
 export async function deleteNotification(db: SqlExecutor, id: number): Promise<void> {
   await db.execute(`DELETE FROM notifications WHERE id = ?`, [id]);
 }
+
+export async function deleteAllRead(db: SqlExecutor): Promise<void> {
+  await db.execute(`DELETE FROM notifications WHERE is_read = 1`);
+}
