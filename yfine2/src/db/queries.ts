@@ -19,6 +19,7 @@ import { searchAll, type SearchItem } from "./repo/search";
 import * as tags from "./repo/tags";
 import * as savings from "./repo/savings";
 import * as history from "./repo/history";
+import * as attachments from "./repo/attachments";
 import { round2 } from "@/domain/money";
 import { monthEnd, monthStart, todayISO } from "@/lib/date";
 import type { SourceRow, TagRow } from "./schema-types";
@@ -171,6 +172,42 @@ export function useMovementCounts() {
   return useQuery({
     queryKey: ["movementCounts"],
     queryFn: async () => Object.fromEntries(await history.movementCounts(await getDb())) as Record<number, number>,
+  });
+}
+
+// ---- attachments (Tauri-only) ----
+export function useAttachments(movementId: number | null) {
+  return useQuery({
+    queryKey: ["attachments", movementId],
+    enabled: movementId != null,
+    queryFn: async () => (movementId != null ? attachments.listAttachments(await getDb(), movementId) : []),
+  });
+}
+export function useAttachmentCounts() {
+  return useQuery({
+    queryKey: ["attachmentCounts"],
+    queryFn: async () => Object.fromEntries(await attachments.attachmentCounts(await getDb())) as Record<number, number>,
+  });
+}
+export function useAddAttachment() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (v: { movementId: number; file: { name: string; type: string; bytes: Uint8Array } }) =>
+      attachments.addAttachment(await getDb(), v.movementId, v.file),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["attachments"] });
+      void qc.invalidateQueries({ queryKey: ["attachmentCounts"] });
+    },
+  });
+}
+export function useDeleteAttachment() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (att: attachments.AttachmentRow) => attachments.deleteAttachment(await getDb(), att),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["attachments"] });
+      void qc.invalidateQueries({ queryKey: ["attachmentCounts"] });
+    },
   });
 }
 

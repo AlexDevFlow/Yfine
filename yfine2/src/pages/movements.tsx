@@ -1,4 +1,4 @@
-import { ArrowDownLeft, ArrowLeftRight, ArrowUpRight, CalendarDays, ChevronDown, ChevronRight, Layers, ListChecks, Pencil, Plus, Repeat, Search, SlidersHorizontal, Tag as TagIcon, Trash2, X } from "lucide-react";
+import { ArrowDownLeft, ArrowLeftRight, ArrowUpRight, CalendarDays, ChevronDown, ChevronRight, Layers, ListChecks, Paperclip, Pencil, Plus, Repeat, Search, SlidersHorizontal, Tag as TagIcon, Trash2, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -7,8 +7,11 @@ import { Input, Select } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
 import { SplitForm } from "@/components/split-form";
 import { MovementsCalendar } from "./movements-calendar";
+import { AttachmentsModal } from "./movements-attachments";
 import { isPreviewDb } from "@/db/connection";
+import { isTauri } from "@/lib/tauri";
 import {
+  useAttachmentCounts,
   useBulkDelete,
   useBulkSetSource,
   useBulkSetTags,
@@ -47,6 +50,8 @@ function MovementRow({
   onEdit,
   onDelete,
   onMakeRecurring,
+  onAttach,
+  attachCount,
   selected,
   onToggleSelect,
 }: {
@@ -55,6 +60,8 @@ function MovementRow({
   onEdit: () => void;
   onDelete: () => void;
   onMakeRecurring?: () => void;
+  onAttach?: () => void;
+  attachCount?: number;
   selected?: boolean;
   onToggleSelect?: () => void;
 }) {
@@ -105,6 +112,12 @@ function MovementRow({
         <span className={cn("num mr-1 text-sm font-semibold", transfer ? "text-muted" : m.direction === "in" ? "text-positive" : "text-foreground")}>
           {amountText}
         </span>
+        {onAttach && (
+          <button onClick={onAttach} aria-label={t("attachments", { defaultValue: "Attachments" })} className={cn("relative rounded-md p-1.5 transition-opacity hover:bg-surface-2 hover:text-foreground", attachCount ? "text-primary opacity-100" : "text-muted opacity-0 group-hover:opacity-100")}>
+            <Paperclip className="h-4 w-4" />
+            {!!attachCount && <span className="absolute -right-0.5 -top-0.5 grid h-3.5 min-w-3.5 place-items-center rounded-full bg-primary px-0.5 text-[9px] text-primary-foreground">{attachCount}</span>}
+          </button>
+        )}
         {onMakeRecurring && !transfer && (
           <button onClick={onMakeRecurring} aria-label={t("make_recurring", { defaultValue: "Make recurring" })} className="rounded-md p-1.5 text-muted opacity-0 transition-opacity hover:bg-surface-2 hover:text-foreground group-hover:opacity-100">
             <Repeat className="h-4 w-4" />
@@ -176,6 +189,9 @@ export function MovementsPage() {
   const [deleting, setDeleting] = useState<EnrichedMovement>();
   const [recurringFrom, setRecurringFrom] = useState<EnrichedMovement>();
   const [recFreq, setRecFreq] = useState("monthly");
+  const [attachFor, setAttachFor] = useState<EnrichedMovement>();
+  const tauri = isTauri();
+  const { data: attachCounts } = useAttachmentCounts();
   const [formError, setFormError] = useState<string>();
   const [splitOpen, setSplitOpen] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
@@ -436,6 +452,8 @@ export function MovementsPage() {
                                   onEdit={() => openEdit(m)}
                                   onDelete={() => setDeleting(m)}
                                   onMakeRecurring={() => { setRecFreq("monthly"); setRecurringFrom(m); }}
+                                  onAttach={tauri ? () => setAttachFor(m) : undefined}
+                                  attachCount={attachCounts?.[m.id] ?? 0}
                                   selected={selectMode ? selected.has(m.id) : undefined}
                                   onToggleSelect={selectMode ? () => toggleSel(m.id) : undefined}
                                 />
@@ -550,6 +568,7 @@ export function MovementsPage() {
       )}
 
       {calendarOpen && <MovementsCalendar onClose={() => setCalendarOpen(false)} locale={locale} />}
+      {attachFor && <AttachmentsModal movementId={attachFor.id} onClose={() => setAttachFor(undefined)} />}
 
       {recurringFrom && (
         <Modal
