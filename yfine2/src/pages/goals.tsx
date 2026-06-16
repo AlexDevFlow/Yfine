@@ -1,4 +1,4 @@
-import { Flag, Pencil, Plus, Trash2, Wallet } from "lucide-react";
+import { Flag, History, Pencil, Plus, Trash2, Wallet } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
@@ -11,12 +11,15 @@ import {
   useAllocate,
   useCloseGoal,
   useCreateGoal,
+  useDeleteAllocation,
   useDeleteGoal,
+  useGoalAllocations,
   useGoals,
   useSources,
   useUpdateGoal,
   type SourceWithBalance,
 } from "@/db/queries";
+import { dayLabel } from "@/lib/date";
 import type { EnrichedGoal, NewGoal } from "@/db/repo/goals";
 import { cn } from "@/lib/cn";
 import { todayISO } from "@/lib/date";
@@ -86,6 +89,36 @@ function MoveDialog({ goal, sources, title, label, exclude, onClose, onConfirm, 
   );
 }
 
+function AllocationHistory({ goal, onClose }: { goal: EnrichedGoal; onClose: () => void }) {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.resolvedLanguage;
+  const { data, isLoading } = useGoalAllocations(goal.id);
+  const del = useDeleteAllocation();
+  return (
+    <Modal open onClose={onClose} title={`${t("allocation_history", { defaultValue: "Allocation history" })} · ${goal.name}`}>
+      {isLoading ? (
+        <p className="text-sm text-muted">{t("loading", { defaultValue: "Loading…" })}</p>
+      ) : (data?.length ?? 0) === 0 ? (
+        <p className="text-sm text-muted">{t("no_allocations", { defaultValue: "No allocations yet." })}</p>
+      ) : (
+        <ul className="divide-y divide-border">
+          {data!.map((a) => (
+            <li key={a.id} className="flex items-center justify-between gap-3 py-2.5">
+              <div className="min-w-0">
+                <p className="num text-sm font-medium text-foreground">{formatMoney(a.amount, goal.currency, locale)}</p>
+                <p className="text-xs text-muted">{dayLabel(a.date, locale)}{a.from_source_name ? ` · ${a.from_source_name}` : ""}</p>
+              </div>
+              <button onClick={() => del.mutate(a.id)} disabled={del.isPending} className="rounded-md p-1.5 text-muted hover:bg-negative-soft hover:text-negative" aria-label={t("delete", { defaultValue: "Delete" })}>
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Modal>
+  );
+}
+
 export function GoalsPage() {
   const { t, i18n } = useTranslation();
   const locale = i18n.resolvedLanguage;
@@ -101,6 +134,7 @@ export function GoalsPage() {
   const [form, setForm] = useState<{ open: boolean; editing?: EnrichedGoal }>({ open: false });
   const [allocating, setAllocating] = useState<EnrichedGoal>();
   const [closing, setClosing] = useState<EnrichedGoal>();
+  const [history, setHistory] = useState<EnrichedGoal>();
   const [formError, setFormError] = useState<string>();
   const [dialogError, setDialogError] = useState<string>();
 
@@ -136,6 +170,9 @@ export function GoalsPage() {
                 </div>
               </div>
               <div className="flex shrink-0 items-center gap-1">
+                {g.allocated > 0 && (
+                  <button onClick={() => setHistory(g)} aria-label={t("allocation_history", { defaultValue: "Allocation history" })} className="rounded-md p-1.5 text-muted hover:bg-surface-2 hover:text-foreground"><History className="h-4 w-4" /></button>
+                )}
                 <button onClick={() => { setFormError(undefined); setForm({ open: true, editing: g }); }} className="rounded-md p-1.5 text-muted hover:bg-surface-2 hover:text-foreground"><Pencil className="h-4 w-4" /></button>
                 <button onClick={() => del.mutate(g.id)} className="rounded-md p-1.5 text-muted hover:bg-negative-soft hover:text-negative"><Trash2 className="h-4 w-4" /></button>
               </div>
@@ -173,6 +210,7 @@ export function GoalsPage() {
           onClose={() => setClosing(undefined)}
           onConfirm={(sourceId, _a, date) => close.mutate({ id: closing.id, toSourceId: sourceId, date }, { onSuccess: () => setClosing(undefined), onError: (e) => setDialogError(errText(e)) })} />
       )}
+      {history && <AllocationHistory goal={history} onClose={() => setHistory(undefined)} />}
     </div>
   );
 }

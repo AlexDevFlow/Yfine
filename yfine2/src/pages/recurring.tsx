@@ -154,8 +154,16 @@ export function RecurringPage() {
 
   const [modal, setModal] = useState<{ open: boolean; editing?: EnrichedRecurring }>({ open: false });
   const [formError, setFormError] = useState<string>();
+  const [dirFilter, setDirFilter] = useState<"all" | "in" | "out">("all");
+  const [freqFilter, setFreqFilter] = useState<string>("all");
 
   const summaryChips = useMemo(() => Object.entries(data?.summary.byCurrency ?? {}), [data]);
+  const items = useMemo(() => {
+    let list = data?.items ?? [];
+    if (dirFilter !== "all") list = list.filter((r) => r.direction === dirFilter);
+    if (freqFilter !== "all") list = list.filter((r) => r.frequency === freqFilter);
+    return list;
+  }, [data, dirFilter, freqFilter]);
 
   const submit = (v: NewRecurring) => {
     setFormError(undefined);
@@ -195,13 +203,32 @@ export function RecurringPage() {
         </Button>
       </div>
 
+      {data && data.items.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex gap-1.5">
+            {(["all", "in", "out"] as const).map((d) => (
+              <button key={d} onClick={() => setDirFilter(d)} className={cn("rounded-full px-3 py-1 text-xs font-medium transition-colors", dirFilter === d ? "bg-accent-soft text-primary" : "text-muted hover:bg-surface-2 hover:text-foreground")}>
+                {d === "all" ? t("all", { defaultValue: "All" }) : d === "in" ? t("income", { defaultValue: "Income" }) : t("expense", { defaultValue: "Expense" })}
+              </button>
+            ))}
+          </div>
+          <Select value={freqFilter} onChange={(e) => setFreqFilter(e.target.value)} className="w-auto">
+            <option value="all">{t("all_frequencies", { defaultValue: "All frequencies" })}</option>
+            {FREQUENCIES.map((f) => <option key={f} value={f}>{t(`freq_${f}`, { defaultValue: f })}</option>)}
+          </Select>
+        </div>
+      )}
+
       {isLoading && <Card className="p-8 text-center text-sm text-muted">{t("loading", { defaultValue: "Loading…" })}</Card>}
       {data && data.items.length === 0 && (
         <Card className="p-10 text-center text-sm text-muted">{t("no_recurring", { defaultValue: "No recurring items yet." })}</Card>
       )}
+      {data && data.items.length > 0 && items.length === 0 && (
+        <Card className="p-8 text-center text-sm text-muted">{t("no_match", { defaultValue: "Nothing matches these filters." })}</Card>
+      )}
 
       <div className="space-y-3">
-        {(data?.items ?? []).map((r) => {
+        {items.map((r) => {
           const due = r.days_until <= 0;
           return (
             <Card key={r.id} className="flex items-center justify-between gap-4 p-4">

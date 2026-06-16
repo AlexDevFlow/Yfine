@@ -1,6 +1,7 @@
-import { PiggyBank, Plus, Trash2 } from "lucide-react";
-import { useState, type FormEvent } from "react";
+import { LineChart as LineChartIcon, PiggyBank, Plus, Trash2 } from "lucide-react";
+import { useMemo, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
+import { BalanceHistoryChart } from "@/components/ui/balance-history-chart";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Field, Input, Select } from "@/components/ui/input";
@@ -15,12 +16,45 @@ import {
   useTags,
   type SourceWithBalance,
 } from "@/db/queries";
-import type { NewSaving } from "@/db/repo/savings";
+import type { EnrichedSaving, NewSaving } from "@/db/repo/savings";
 import type { TagRow } from "@/db/schema-types";
+import { round2 } from "@/domain/money";
 import { cn } from "@/lib/cn";
-import { dayLabel, todayISO } from "@/lib/date";
+import { dayLabel, monthLabel, todayISO } from "@/lib/date";
 import { formatMoney } from "@/lib/format";
 import { useErrorText } from "@/lib/use-error-text";
+
+/** Fund balance card with an expandable balance-over-time chart. */
+function FundCard({ fund, locale }: { fund: SourceWithBalance; locale?: string }) {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+  return (
+    <Card className="overflow-hidden">
+      <div className="flex items-center gap-3 p-4">
+        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[var(--radius-control)] bg-accent-soft text-primary">
+          <PiggyBank className="h-5 w-5" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-xs text-muted">{fund.name} · {fund.currency}</p>
+          <SlotMoney value={fund.balance} text={formatMoney(fund.balance, fund.currency, locale)} className="num text-xl font-semibold text-foreground" />
+        </div>
+        <button
+          onClick={() => setOpen((o) => !o)}
+          aria-label={t("history", { defaultValue: "History" })}
+          aria-expanded={open}
+          className={cn("rounded-md p-2 hover:bg-surface-2 hover:text-foreground", open ? "text-primary" : "text-muted")}
+        >
+          <LineChartIcon className="h-4 w-4" />
+        </button>
+      </div>
+      {open && (
+        <div className="border-t border-border pt-2">
+          <BalanceHistoryChart sourceId={fund.id} currency={fund.currency} locale={locale} />
+        </div>
+      )}
+    </Card>
+  );
+}
 
 function TagChips({ tags, selected, onChange }: { tags: TagRow[]; selected: number[]; onChange: (ids: number[]) => void }) {
   if (tags.length === 0) return null;
@@ -117,6 +151,22 @@ export function SavingsPage() {
 
   const funds = (sources ?? []).filter((s) => s.is_savings_fund === 1 && s.balance !== 0);
 
+  // Group deposits by month (newest first) with per-currency month totals.
+  const months = useMemo(() => {
+    const out: { ym: string; items: EnrichedSaving[]; totals: Map<string, number> }[] = [];
+    for (const s of savings ?? []) {
+      const ym = s.date.slice(0, 7);
+      let g = out[out.length - 1];
+      if (!g || g.ym !== ym) {
+        g = { ym, items: [], totals: new Map() };
+        out.push(g);
+      }
+      g.items.push(s);
+      g.totals.set(s.currency, round2((g.totals.get(s.currency) ?? 0) + s.amount));
+    }
+    return out;
+  }, [savings]);
+
   const submit = (v: NewSaving) => {
     setFormError(undefined);
     create.mutate(v, { onSuccess: () => setForm(false), onError: (e) => setFormError(errText(e)) });
@@ -145,15 +195,7 @@ export function SavingsPage() {
       {funds.length > 0 && (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {funds.map((f) => (
-            <Card key={f.id} className="flex items-center gap-3 p-4">
-              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[var(--radius-control)] bg-accent-soft text-primary">
-                <PiggyBank className="h-5 w-5" />
-              </span>
-              <div className="min-w-0">
-                <p className="truncate text-xs text-muted">{f.name} · {f.currency}</p>
-                <SlotMoney value={f.balance} text={formatMoney(f.balance, f.currency, locale)} className="num text-xl font-semibold text-foreground" />
-              </div>
-            </Card>
+            <FundCard key={f.id} fund={f} locale={locale} />
           ))}
         </div>
       )}
@@ -163,36 +205,48 @@ export function SavingsPage() {
         <Card className="p-10 text-center text-sm text-muted">{t("no_savings", { defaultValue: "No savings logged yet. Start tracking what you save!" })}</Card>
       )}
 
-      {savings && savings.length > 0 && (
-        <Card className="overflow-hidden">
-          <ul className="divide-y divide-border">
-            {savings.map((s) => (
-              <li key={s.id} className="flex items-center justify-between gap-3 px-4 py-3">
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-foreground">
-                    {s.from_source_name ?? t("deleted", { defaultValue: "Deleted" })}
-                    {s.note && <span className="text-muted"> · {s.note}</span>}
-                  </p>
-                  <div className="mt-0.5 flex items-center gap-2 text-xs text-muted">
-                    <span>{dayLabel(s.date, locale)}</span>
-                    {s.tags.map((tag) => (
-                      <span key={tag.id} className="inline-flex items-center">
-                        <span className="mr-0.5 inline-block h-1.5 w-1.5 rounded-full align-middle" style={{ background: tag.color ?? "var(--muted-2)" }} />
-                        {tag.name}
-                      </span>
-                    ))}
-                  </div>
+      {months.length > 0 && (
+        <div className="space-y-3">
+          {months.map((g) => (
+            <Card key={g.ym} className="overflow-hidden">
+              <div className="flex items-center justify-between border-b border-border bg-surface-2/40 px-4 py-2.5">
+                <h3 className="text-sm font-semibold text-foreground">{monthLabel(g.ym, locale)}</h3>
+                <div className="flex items-center gap-2 text-xs">
+                  {[...g.totals.entries()].map(([ccy, total]) => (
+                    <span key={ccy} className="num text-positive">+{formatMoney(total, ccy, locale)}</span>
+                  ))}
                 </div>
-                <div className="flex shrink-0 items-center gap-2">
-                  <span className="num text-sm font-semibold text-positive">{formatMoney(s.amount, s.currency, locale)}</span>
-                  <button onClick={() => remove(s.id)} className="rounded-md p-1.5 text-muted hover:bg-negative-soft hover:text-negative" aria-label={t("delete", { defaultValue: "Delete" })}>
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </Card>
+              </div>
+              <ul className="divide-y divide-border">
+                {g.items.map((s) => (
+                  <li key={s.id} className="flex items-center justify-between gap-3 px-4 py-3">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium text-foreground">
+                        {s.from_source_name ?? t("deleted", { defaultValue: "Deleted" })}
+                        {s.note && <span className="text-muted"> · {s.note}</span>}
+                      </p>
+                      <div className="mt-0.5 flex items-center gap-2 text-xs text-muted">
+                        <span>{dayLabel(s.date, locale)}</span>
+                        {s.tags.map((tag) => (
+                          <span key={tag.id} className="inline-flex items-center">
+                            <span className="mr-0.5 inline-block h-1.5 w-1.5 rounded-full align-middle" style={{ background: tag.color ?? "var(--muted-2)" }} />
+                            {tag.name}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-2">
+                      <span className="num text-sm font-semibold text-positive">{formatMoney(s.amount, s.currency, locale)}</span>
+                      <button onClick={() => remove(s.id)} className="rounded-md p-1.5 text-muted hover:bg-negative-soft hover:text-negative" aria-label={t("delete", { defaultValue: "Delete" })}>
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          ))}
+        </div>
       )}
 
       <Modal open={form} onClose={() => setForm(false)} title={t("new_saving", { defaultValue: "New Saving" })}>

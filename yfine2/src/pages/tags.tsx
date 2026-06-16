@@ -1,15 +1,50 @@
-import { Pencil, Plus, Tag as TagIcon, Trash2 } from "lucide-react";
+import { GitMerge, Pencil, Plus, Tag as TagIcon, Trash2 } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Field, Input } from "@/components/ui/input";
+import { Field, Input, Select } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
 import { isPreviewDb } from "@/db/connection";
-import { useCreateTag, useDeleteTag, useTagsWithUsage, useUpdateTag } from "@/db/queries";
+import { useCreateTag, useDeleteTag, useMergeTags, useTagsWithUsage, useUpdateTag } from "@/db/queries";
 import type { TagWithUsage } from "@/db/repo/tags";
 import { cn } from "@/lib/cn";
 import { useErrorText } from "@/lib/use-error-text";
+
+function MergeDialog({ tag, others, onClose }: { tag: TagWithUsage; others: TagWithUsage[]; onClose: () => void }) {
+  const { t } = useTranslation();
+  const errText = useErrorText();
+  const merge = useMergeTags();
+  const [intoId, setIntoId] = useState(String(others[0]?.id ?? ""));
+  const [error, setError] = useState<string>();
+  return (
+    <Modal
+      open
+      onClose={onClose}
+      title={`${t("merge_tag", { defaultValue: "Merge tag" })}: ${tag.name}`}
+      footer={
+        <>
+          <Button variant="ghost" onClick={onClose}>{t("cancel", { defaultValue: "Cancel" })}</Button>
+          <Button variant="danger" disabled={merge.isPending || !intoId} onClick={() => merge.mutate({ fromId: tag.id, intoId: Number(intoId) }, { onSuccess: onClose, onError: (e) => setError(errText(e)) })}>
+            {t("merge", { defaultValue: "Merge" })}
+          </Button>
+        </>
+      }
+    >
+      <div className="space-y-3">
+        <p className="text-sm text-muted">
+          {t("merge_tag_hint", { defaultValue: "Move all {{n}} movements onto the target tag, then delete \"{{name}}\". This can't be undone.", n: tag.movement_count, name: tag.name })}
+        </p>
+        <Field label={t("merge_into", { defaultValue: "Merge into" })} htmlFor="merge-target">
+          <Select id="merge-target" value={intoId} onChange={(e) => setIntoId(e.target.value)}>
+            {others.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
+          </Select>
+        </Field>
+        {error ? <p className="text-sm text-negative">{error}</p> : null}
+      </div>
+    </Modal>
+  );
+}
 
 // A compact, opinionated palette so tags look consistent without a full picker.
 const PRESETS = ["#6366f1", "#0ea5e9", "#10b981", "#f59e0b", "#ef4444", "#ec4899", "#8b5cf6", "#64748b"];
@@ -86,6 +121,7 @@ export function TagsPage() {
 
   const [form, setForm] = useState<{ open: boolean; editing?: TagWithUsage }>({ open: false });
   const [formError, setFormError] = useState<string>();
+  const [merging, setMerging] = useState<TagWithUsage>();
 
   const submit = (v: { name: string; color: string | null }) => {
     setFormError(undefined);
@@ -147,6 +183,11 @@ export function TagsPage() {
               </div>
             </div>
             <div className="flex shrink-0 items-center gap-1">
+              {(tags?.length ?? 0) > 1 && (
+                <button onClick={() => setMerging(tag)} className="rounded-md p-1.5 text-muted hover:bg-surface-2 hover:text-foreground" aria-label={t("merge", { defaultValue: "Merge" })}>
+                  <GitMerge className="h-4 w-4" />
+                </button>
+              )}
               <button onClick={() => { setFormError(undefined); setForm({ open: true, editing: tag }); }} className="rounded-md p-1.5 text-muted hover:bg-surface-2 hover:text-foreground" aria-label={t("edit", { defaultValue: "Edit" })}>
                 <Pencil className="h-4 w-4" />
               </button>
@@ -161,6 +202,10 @@ export function TagsPage() {
       <Modal open={form.open} onClose={() => setForm({ open: false })} title={form.editing ? t("edit_tag", { defaultValue: "Edit Tag" }) : t("new_tag", { defaultValue: "New Tag" })}>
         <TagForm initial={form.editing} pending={create.isPending || update.isPending} error={formError} onCancel={() => setForm({ open: false })} onSubmit={submit} />
       </Modal>
+
+      {merging && (
+        <MergeDialog tag={merging} others={(tags ?? []).filter((x) => x.id !== merging.id)} onClose={() => setMerging(undefined)} />
+      )}
     </div>
   );
 }

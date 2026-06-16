@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Field, Input, Select } from "@/components/ui/input";
-import { LineChart } from "@/components/ui/line-chart";
+import { BalanceHistoryChart } from "@/components/ui/balance-history-chart";
 import { Modal } from "@/components/ui/modal";
 import { isPreviewDb } from "@/db/connection";
 import { useErrorText } from "@/lib/use-error-text";
@@ -14,35 +14,13 @@ import {
   useDeleteSource,
   useMovementCounts,
   useSetFundVisibility,
-  useSourceHistory,
   useSources,
   useUpdateSource,
   type SourceWithBalance,
 } from "@/db/queries";
 import type { DeleteAction } from "@/db/repo/sources";
 import { cn } from "@/lib/cn";
-import { dayLabel } from "@/lib/date";
 import { formatMoney } from "@/lib/format";
-
-/** Lazily-loaded balance-over-time chart for one source (rendered when expanded). */
-function SourceHistoryChart({ source, locale }: { source: SourceWithBalance; locale?: string }) {
-  const { t } = useTranslation();
-  const { data, isLoading } = useSourceHistory(source.id);
-  if (isLoading) return <div className="px-4 pb-4 text-xs text-muted">{t("loading", { defaultValue: "Loading…" })}</div>;
-  if (!data || data.length < 2) {
-    return <div className="px-4 pb-4 text-xs text-muted">{t("not_enough_history", { defaultValue: "Not enough history to chart yet." })}</div>;
-  }
-  return (
-    <div className="px-4 pb-3">
-      <LineChart
-        points={data}
-        height={120}
-        format={(n) => formatMoney(n, source.currency, locale)}
-        formatDate={(d) => dayLabel(d, locale)}
-      />
-    </div>
-  );
-}
 
 interface FormValues {
   name: string;
@@ -268,7 +246,7 @@ function SourceCard({
       </div>
       {open && (
         <div className="border-t border-border pt-2">
-          <SourceHistoryChart source={source} locale={locale} />
+          <BalanceHistoryChart sourceId={source.id} currency={source.currency} locale={locale} />
         </div>
       )}
     </Card>

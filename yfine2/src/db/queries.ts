@@ -26,7 +26,7 @@ import { withTx } from "./tx";
 
 // Every money-derived view; mutations that move money invalidate the lot
 // (cheap against the local DB, and avoids stale budgets/forecast/consolidated).
-const MONEY_KEYS = ["movements", "sources", "dashboard", "budgets", "goals", "whims", "recurring", "forecast", "consolidated", "portfolios", "notifications", "savings", "history", "movementCounts"];
+const MONEY_KEYS = ["movements", "sources", "dashboard", "budgets", "goals", "whims", "recurring", "forecast", "consolidated", "portfolios", "notifications", "savings", "history", "movementCounts", "goalAllocations"];
 function invalidateMoney(qc: ReturnType<typeof useQueryClient>) {
   for (const k of MONEY_KEYS) void qc.invalidateQueries({ queryKey: [k] });
 }
@@ -141,6 +141,7 @@ function useTagMutation<TArgs, TResult>(fn: (db: import("./types").SqlExecutor, 
 export const useCreateTag = () => useTagMutation((db, data: tags.NewTag) => tags.createTag(db, data));
 export const useUpdateTag = () => useTagMutation((db, v: { id: number; patch: tags.TagPatch }) => tags.updateTag(db, v.id, v.patch));
 export const useDeleteTag = () => useTagMutation((db, id: number) => tags.deleteTag(db, id));
+export const useMergeTags = () => useTagMutation((db, v: { fromId: number; intoId: number }) => tags.mergeTags(db, v.fromId, v.intoId));
 
 // ---- savings ----
 export function useSavings() {
@@ -314,6 +315,14 @@ export function useGoals() {
 export const useCreateGoal = () => useBroadMutation((db, data: goals.NewGoal) => goals.createGoal(db, data));
 export const useUpdateGoal = () => useBroadMutation((db, v: { id: number; patch: goals.GoalPatch }) => goals.updateGoal(db, v.id, v.patch));
 export const useAllocate = () => useBroadMutation((db, v: { goalId: number; input: goals.AllocateInput }) => goals.allocate(db, v.goalId, v.input));
+export function useGoalAllocations(goalId: number | null) {
+  return useQuery({
+    queryKey: ["goalAllocations", goalId],
+    enabled: goalId != null,
+    queryFn: async () => (goalId != null ? goals.listAllocations(await getDb(), goalId) : []),
+  });
+}
+export const useDeleteAllocation = () => useBroadMutation((db, id: number) => goals.deleteAllocation(db, id));
 export const useCloseGoal = () => useBroadMutation((db, v: { id: number; toSourceId: number; date?: string }) => goals.closeGoal(db, v.id, v.toSourceId, v.date));
 export const useDeleteGoal = () => useBroadMutation((db, id: number) => goals.deleteGoal(db, id));
 

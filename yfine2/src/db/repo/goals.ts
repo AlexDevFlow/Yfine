@@ -140,6 +140,26 @@ export async function allocate(db: SqlExecutor, goalId: number, input: AllocateI
   );
 }
 
+export interface AllocationRow {
+  id: number;
+  amount: number;
+  date: string;
+  created_at: string;
+  from_source_name: string | null;
+}
+
+/** Allocation history for a goal (newest first) with the funding source name. */
+export async function listAllocations(db: SqlExecutor, goalId: number): Promise<AllocationRow[]> {
+  return db.select<AllocationRow>(
+    `SELECT ga.id, ga.amount, ga.date, ga.created_at,
+       (SELECT ps.name FROM movements pm LEFT JOIN sources ps ON pm.source_id = ps.id
+        WHERE pm.id = (SELECT transfer_pair_id FROM movements WHERE id = ga.movement_id)) AS from_source_name
+     FROM goal_allocations ga
+     WHERE ga.goal_id = ? ORDER BY ga.date DESC, ga.id DESC`,
+    [goalId],
+  );
+}
+
 export async function deleteAllocation(db: SqlExecutor, allocationId: number): Promise<void> {
   const r = await db.select<{ movement_id: number }>(`SELECT movement_id FROM goal_allocations WHERE id = ?`, [allocationId]);
   if (!r[0]) return;

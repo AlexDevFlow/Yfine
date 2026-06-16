@@ -99,3 +99,21 @@ export async function deleteTag(db: SqlExecutor, id: number): Promise<void> {
   await db.execute(`DELETE FROM budgets WHERE tag_id = ?`, [id]);
   await db.execute(`DELETE FROM tags WHERE id = ?`, [id]);
 }
+
+/**
+ * Merge `fromId` into `intoId`: re-point every tagged movement to the target tag
+ * (deduping links), drop the source tag's budgets, then delete the source tag.
+ * Run inside a transaction by the caller.
+ */
+export async function mergeTags(db: SqlExecutor, fromId: number, intoId: number): Promise<void> {
+  if (fromId === intoId) throw new DomainError("same_source");
+  const exists = await db.select<{ id: number }>(`SELECT id FROM tags WHERE id IN (?, ?)`, [fromId, intoId]);
+  if (exists.length < 2) throw new DomainError("not_found");
+  await db.execute(
+    `INSERT OR IGNORE INTO movement_tag (movement_id, tag_id) SELECT movement_id, ? FROM movement_tag WHERE tag_id = ?`,
+    [intoId, fromId],
+  );
+  await db.execute(`DELETE FROM movement_tag WHERE tag_id = ?`, [fromId]);
+  await db.execute(`DELETE FROM budgets WHERE tag_id = ?`, [fromId]);
+  await db.execute(`DELETE FROM tags WHERE id = ?`, [fromId]);
+}
