@@ -1,14 +1,40 @@
 # Yfine
 
-## ⚠️ WARNING
+> ## 🚀 Yfine 2 is out — [**AlexDevFlow/yfine2**](https://github.com/AlexDevFlow/yfine2)
+>
+> This repository is **Yfine 1**: a FastAPI + Jinja app you run in your browser. It still
+> works, but active development has moved on.
+>
+> **[Yfine 2](https://github.com/AlexDevFlow/yfine2)** is a ground-up rewrite as a *native
+> desktop app* — **Tauri 2 + React + TypeScript** talking straight to local SQLite. No
+> Python environment, no `uvicorn`, no localhost tab. It adds portfolios (with optional
+> live prices and on-chain balance watching), tag budgets with rollover, CSV bank import
+> (Revolut/N26/YNAB/PayPal/Firefly), Excel/PDF export, and a ⌘K command palette — while
+> keeping the same privacy stance: no cloud, no accounts, no telemetry.
+>
+> **Your data comes with you.** Yfine 2 keeps the *same database schema*, so an existing
+> `yfine.db` (or an encrypted `yfine.db.enc`) opens unchanged.
+>
+> **Get it:** prebuilt installers for macOS, Windows and Linux on the
+> [releases page](https://github.com/AlexDevFlow/yfine2/releases).
+> On macOS (Intel or Apple Silicon) it's one command:
+>
+> ```sh
+> curl -fsSL https://raw.githubusercontent.com/AlexDevFlow/yfine2/main/scripts/install-macos.sh | bash
+> ```
 
-The app is still in early development and evolving quickly. I’m doing my best to ship updates without breaking the database or existing features, but some issues are to be expected.
+---
 
-If you need support or want to contribute, feel free to join the discussions on GitHub, open an issue, or submit a PR.
+## ⚠️ Status of Yfine 1
 
-Another known issue is related to the executables built in the releases which might not always work on all platforms or configurations. If you encounter any problems running the desktop app, please report them so I can investigate and provide fixes, building from source is recommended in the meantime.
+Yfine 1 is now in **maintenance mode** — it receives fixes, not new features. New work
+happens in [yfine2](https://github.com/AlexDevFlow/yfine2). If you hit a problem here,
+please still open an issue or a PR; discussions are welcome.
 
-Stay tuned! A stable release is coming soon!
+Note that the prebuilt desktop executables in this repo's releases don't reliably work on
+every platform and configuration. Running from source (below) is the recommended way to
+use Yfine 1.
+
 ---
 
 A personal finance app that runs on your own machine. Tracks multiple wallets, records movements (with attachments for receipts), handles recurring payments, keeps a real savings fund, plans goals, and manages a wishlist. FastAPI backend, SQLite database, Jinja templates: no cloud, no accounts, no telemetry.
